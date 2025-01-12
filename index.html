@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="googledbf97801702a8aef.html">
+    <title>UR FAV'S</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>UR FAV'S</h1>
+        <div class="search-bar">
+            <input type="text" placeholder="Search for songs, albums, or artists...">
+        </div>
+    </header>
+
+    <button class="add-card-btn" id="openModalBtn">
+        <i class="fas fa-plus"></i> Add New Content
+    </button>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModalBtn">&times;</span>
+            <h2>Add New Content</h2>
+            <input type="text" id="title" placeholder="Title">
+            <textarea id="description" placeholder="Description"></textarea>
+            <input type="text" id="image-url" placeholder="Image URL">
+            <button id="submitBtn">Submit</button>
+        </div>
+    </div>
+
+    <div class="card-container" id="card-container">
+        <!-- Cards will be dynamically added here -->
+    </div>
+
+    <footer>
+        <p>Created with ❤️ by Hakim &copy; 2025 | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
