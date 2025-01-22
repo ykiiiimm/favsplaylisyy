@@ -1,12 +1,12 @@
-// Firebase Configuration
+// Firebase Configuration (replace with your actual Firebase config)
 var firebaseConfig = {
-  apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
-  authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
-  projectId: "ykiiiiiiiiiiiiiiim",
-  storageBucket: "ykiiiiiiiiiiiiiiim.firebasestorage.app",
-  messagingSenderId: "1042062383289",
-  appId: "1:1042062383289:web:a4f43aa710b06a0f38a368",
-  measurementId: "G-KNVLQ0TMB0"
+    apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
+    authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
+    projectId: "ykiiiiiiiiiiiiiiim",
+    storageBucket: "ykiiiiiiiiiiiiiiim.firebasestorage.app",
+    messagingSenderId: "1042062383289",
+    appId: "1:1042062383289:web:a4f43aa710b06a0f38a368",
+    measurementId: "G-KNVLQ0TMB0"
 };
 
 // Initialize Firebase
@@ -23,7 +23,7 @@ function loginWithGoogle() {
             toggleLoginModal();
         })
         .catch((error) => {
-            alert(error.message);
+            alert("Error: " + error.message);
         });
 }
 
@@ -43,7 +43,7 @@ function logout() {
     firebase.auth().signOut().then(() => {
         updateUserStatus();
     }).catch((error) => {
-        alert(error.message);
+        alert("Error: " + error.message);
     });
 }
 
