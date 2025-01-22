@@ -7,7 +7,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <script type="module" src="script.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-auth.js"></script>
+    <script defer src="script.js"></script>
 </head>
 <body>
     <header>
@@ -15,20 +17,21 @@
         <div class="search-bar">
             <input type="text" placeholder="Search for songs, albums, or artists...">
         </div>
+        <div class="user-info">
+            <span id="user-status">Not logged in</span>
+            <button id="loginBtn" onclick="toggleLoginModal()">Login</button>
+            <button id="logoutBtn" onclick="logout()" style="display:none;">Logout</button>
+        </div>
     </header>
 
-    <button class="add-card-btn" id="openModalBtn">
-        <i class="fas fa-plus"></i> Add New Content
-    </button>
-
-    <div class="modal" id="modal">
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
         <div class="modal-content">
-            <span class="close-btn" id="closeModalBtn">&times;</span>
-            <h2>Add New Content</h2>
-            <input type="text" id="title" placeholder="Title">
-            <textarea id="description" placeholder="Description"></textarea>
-            <input type="text" id="image-url" placeholder="Image URL">
-            <button id="submitBtn">Submit</button>
+            <span class="close-btn" id="closeLoginModalBtn">&times;</span>
+            <h2>Login</h2>
+            <input type="email" id="login-email" placeholder="Email">
+            <input type="password" id="login-password" placeholder="Password">
+            <button onclick="login()">Login</button>
         </div>
     </div>
 
