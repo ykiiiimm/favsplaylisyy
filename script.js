@@ -1,8 +1,8 @@
-// Import necessary Firebase modules
+// Import Firebase SDK
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "firebase/auth";
 
-// Your Firebase configuration
+// Your Firebase configuration (use your actual Firebase credentials here)
 const firebaseConfig = {
   apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
   authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
@@ -16,41 +16,29 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-// Toggle Login Modal
-function toggleLoginModal() {
-    const modal = document.getElementById('loginModal');
-    modal.style.display = modal.style.display === "block" ? "none" : "block";
-}
-
-// Close Login Modal
-document.getElementById('closeLoginModalBtn').addEventListener('click', () => {
-    document.getElementById('loginModal').style.display = 'none';
-});
-
-// Login Function
-function login() {
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-
-    signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            const user = userCredential.user;
-            updateUserStatus(user.email);
-            toggleLoginModal();
+// Google Sign-In Function
+function loginWithGoogle() {
+    signInWithPopup(auth, provider)
+        .then((result) => {
+            const user = result.user;
+            updateUserStatus(user.email);  // Update user info
         })
         .catch((error) => {
-            alert("Error: " + error.message);
+            alert("Error: " + error.message);  // Show error if something goes wrong
         });
 }
 
 // Logout Function
 function logout() {
-    signOut(auth).then(() => {
-        updateUserStatus();
-    }).catch((error) => {
-        alert("Error: " + error.message);
-    });
+    signOut(auth)
+        .then(() => {
+            updateUserStatus();  // Update status when logged out
+        })
+        .catch((error) => {
+            alert("Error: " + error.message);  // Show error if something goes wrong
+        });
 }
 
 // Update User Status
@@ -70,7 +58,7 @@ function updateUserStatus(userEmail) {
     }
 }
 
-// Check Authentication State
+// Listen for Auth State Changes
 onAuthStateChanged(auth, (user) => {
     if (user) {
         updateUserStatus(user.email);
