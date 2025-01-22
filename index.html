@@ -1,50 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UR FAV'S</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    
-    <!-- Firebase CDN -->
-    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-auth.js"></script>
-
-    <script defer src="script.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Auth Example</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>UR FAV'S</h1>
-        <div class="search-bar">
-            <input type="text" placeholder="Search for songs, albums, or artists...">
-        </div>
-        <div class="user-info">
-            <span id="user-status">Not logged in</span>
-            <button id="loginBtn" onclick="toggleLoginModal()">Login</button>
-            <button id="logoutBtn" onclick="logout()" style="display:none;">Logout</button>
-        </div>
-    </header>
-
-    <!-- Login Modal -->
-    <div class="modal" id="loginModal">
-        <div class="modal-content">
-            <span class="close-btn" id="closeLoginModalBtn">&times;</span>
-            <h2>Login</h2>
-            <input type="email" id="login-email" placeholder="Email">
-            <input type="password" id="login-password" placeholder="Password">
-            <button onclick="login()">Login</button>
-            <button onclick="loginWithGoogle()">Login with Google</button>
-        </div>
+  <header>
+    <h1>Welcome</h1>
+    <div class="user-info">
+      <span id="user-status">Not logged in</span>
+      <button id="loginBtn" onclick="toggleLoginModal()">Login</button>
+      <button id="logoutBtn" onclick="logout()" style="display:none;">Logout</button>
     </div>
+  </header>
 
-    <div class="card-container" id="card-container">
-        <!-- Cards will be dynamically added here -->
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <span id="closeLoginModalBtn" class="close-btn">&times;</span>
+      <h2>Login</h2>
+      <button onclick="loginWithGoogle()">Login with Google</button>
     </div>
+  </div>
 
-    <footer>
-        <p>Created with ❤️ by Hakim &copy; 2025 | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
-    </footer>
+  <!-- Firebase App and Auth Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js"></script>
+
+  <!-- Firebase Configuration -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
+      authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
+      projectId: "ykiiiiiiiiiiiiiiim",
+      storageBucket: "ykiiiiiiiiiiiiiiim.firebasestorage.app",
+      messagingSenderId: "1042062383289",
+      appId: "1:1042062383289:web:a4f43aa710b06a0f38a368",
+      measurementId: "G-KNVLQ0TMB0"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <!-- Main Script -->
+  <script src="script.js"></script>
 </body>
 </html>
