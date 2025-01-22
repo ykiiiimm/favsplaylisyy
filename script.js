@@ -1,22 +1,20 @@
-// Import Firebase SDKs
+// Import necessary Firebase modules (v9+)
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 
 // Your Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
-    authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
-    projectId: "ykiiiiiiiiiiiiiiim",
-    storageBucket: "ykiiiiiiiiiiiiiiim.firebasestorage.app",
-    messagingSenderId: "1042062383289",
-    appId: "1:1042062383289:web:a4f43aa710b06a0f38a368",
-    measurementId: "G-KNVLQ0TMB0"
+  apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
+  authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
+  projectId: "ykiiiiiiiiiiiiiiim",
+  storageBucket: "ykiiiiiiiiiiiiiiim.firebasestorage.app",
+  messagingSenderId: "1042062383289",
+  appId: "1:1042062383289:web:a4f43aa710b06a0f38a368",
+  measurementId: "G-KNVLQ0TMB0"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const auth = getAuth(app);
 
 // Toggle Login Modal
