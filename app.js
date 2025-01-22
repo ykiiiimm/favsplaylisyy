@@ -1,12 +1,4 @@
-import { 
-  auth, 
-  db, 
-  collection, 
-  addDoc, 
-  getDocs, 
-  deleteDoc, 
-  doc 
-} from './firebase.js';
+import { auth, db, collection, addDoc, getDocs, deleteDoc, doc } from './firebase.js';
 
 const openModalBtn = document.getElementById('openModalBtn');
 const modal = document.getElementById('modal');
@@ -18,7 +10,7 @@ const descriptionInput = document.getElementById('description');
 const imageUrlInput = document.getElementById('image-url');
 const searchInput = document.querySelector('.search-bar input');
 
-// Load cards when user logs in
+// Load cards when the page loads or user logs in
 auth.onAuthStateChanged((user) => {
   if (user) {
     loadCards();
@@ -45,7 +37,7 @@ async function loadCards() {
     const userId = auth.currentUser.uid;
     const querySnapshot = await getDocs(collection(db, "users", userId, "cards"));
     
-    cardContainer.innerHTML = "";
+    cardContainer.innerHTML = ""; // Clear existing cards
     querySnapshot.forEach((doc) => {
       createCardElement(doc.data(), doc.id);
     });
@@ -54,11 +46,11 @@ async function loadCards() {
   }
 }
 
-// Create card element with Firestore ID
+// Create card element
 function createCardElement(cardData, docId) {
   const card = document.createElement('div');
   card.classList.add('card');
-  card.dataset.id = docId;
+  card.dataset.id = docId; // Store Firestore document ID
   card.innerHTML = `
     <img src="${cardData.imageUrl}" alt="Poster">
     <div class="overlay">
@@ -89,15 +81,15 @@ window.deleteCard = async (button) => {
 
 // Submit new card
 submitBtn.addEventListener('click', async (e) => {
-  e.preventDefault();
-  
+  e.preventDefault(); // Prevent page reload
+
   if (titleInput.value && descriptionInput.value && imageUrlInput.value) {
     await saveCard(
       titleInput.value,
       descriptionInput.value,
       imageUrlInput.value
     );
-    await loadCards();
+    await loadCards(); // Refresh the card list
     modal.classList.remove('open');
     titleInput.value = '';
     descriptionInput.value = '';
@@ -105,9 +97,9 @@ submitBtn.addEventListener('click', async (e) => {
   }
 });
 
-// Edit card (to be implemented)
+// Edit card (to implement later)
 window.editCard = (button) => {
-  // Add edit functionality here
+  // Add edit logic here
 };
 
 // Search functionality
