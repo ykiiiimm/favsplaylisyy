@@ -12,18 +12,26 @@ const searchInput = document.querySelector('.search-bar input');
 
 // Load cards on login
 auth.onAuthStateChanged((user) => {
-  if (user) loadCards();
+  if (user) {
+    loadCards();
+  }
 });
 
+// Save card to Firestore
 async function saveCard(title, description, imageUrl) {
   try {
     const userId = auth.currentUser.uid;
-    await addDoc(collection(db, "users", userId, "cards"), { title, description, imageUrl });
+    await addDoc(collection(db, "users", userId, "cards"), {
+      title,
+      description,
+      imageUrl
+    });
   } catch (error) {
     console.error("Error saving card:", error);
   }
 }
 
+// Load cards from Firestore
 async function loadCards() {
   try {
     const userId = auth.currentUser.uid;
@@ -37,6 +45,7 @@ async function loadCards() {
   }
 }
 
+// Create card element
 function createCardElement(cardData, docId) {
   const card = document.createElement('div');
   card.classList.add('card');
@@ -55,6 +64,7 @@ function createCardElement(cardData, docId) {
   cardContainer.appendChild(card);
 }
 
+// Delete card
 window.deleteCard = async (button) => {
   const card = button.closest('.card');
   const docId = card.dataset.id;
@@ -67,6 +77,7 @@ window.deleteCard = async (button) => {
   }
 };
 
+// Submit new card
 submitBtn.addEventListener('click', async (e) => {
   e.preventDefault();
   if (titleInput.value && descriptionInput.value && imageUrlInput.value) {
@@ -78,6 +89,11 @@ submitBtn.addEventListener('click', async (e) => {
     imageUrlInput.value = '';
   }
 });
+
+// Edit card (placeholder)
+window.editCard = (button) => {
+  // To be implemented
+};
 
 // Search functionality
 searchInput.addEventListener('input', () => {
