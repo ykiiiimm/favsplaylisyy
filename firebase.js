@@ -1,12 +1,12 @@
 // Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import { 
-  getAuth, 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  signOut 
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-import { 
+import {
   getFirestore,
   collection,
   addDoc,
