@@ -1,4 +1,4 @@
-// Import necessary Firebase modules (v9+)
+// Import necessary Firebase modules
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 
@@ -40,7 +40,7 @@ function login() {
             toggleLoginModal();
         })
         .catch((error) => {
-            alert(error.message);
+            alert("Error: " + error.message);
         });
 }
 
@@ -49,7 +49,7 @@ function logout() {
     signOut(auth).then(() => {
         updateUserStatus();
     }).catch((error) => {
-        alert(error.message);
+        alert("Error: " + error.message);
     });
 }
 
