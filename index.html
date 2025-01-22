@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Firebase Auth Example</title>
+  <title>Firebase Authentication</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
     <div class="user-info">
       <span id="user-status">Not logged in</span>
       <button id="loginBtn" onclick="toggleLoginModal()">Login</button>
-      <button id="logoutBtn" onclick="logout()" style="display:none;">Logout</button>
+      <button id="logoutBtn" onclick="logout()" style="display: none;">Logout</button>
     </div>
   </header>
 
@@ -21,11 +21,11 @@
     <div class="modal-content">
       <span id="closeLoginModalBtn" class="close-btn">&times;</span>
       <h2>Login</h2>
-      <button onclick="loginWithGoogle()">Login with Google</button>
+      <button id="googleLoginBtn" onclick="loginWithGoogle()">Login with Google</button>
     </div>
   </div>
 
-  <!-- Firebase App and Auth Scripts -->
+  <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js"></script>
 
@@ -45,7 +45,7 @@
     firebase.initializeApp(firebaseConfig);
   </script>
 
-  <!-- Main Script -->
+  <!-- Custom JavaScript -->
   <script src="script.js"></script>
 </body>
 </html>
