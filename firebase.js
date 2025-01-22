@@ -29,6 +29,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
 
+// Export Firebase modules
 export { 
   auth, 
   provider, 
@@ -41,12 +42,13 @@ export {
   signOut 
 };
 
-// Login/Logout Logic
+// DOM elements
 const loginContainer = document.getElementById('loginContainer');
 const mainContent = document.getElementById('mainContent');
 const googleLoginBtn = document.getElementById('googleLoginBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 
+// Login with Google
 googleLoginBtn.addEventListener('click', () => {
   signInWithPopup(auth, provider)
     .then(() => {
@@ -58,6 +60,7 @@ googleLoginBtn.addEventListener('click', () => {
     });
 });
 
+// Logout
 logoutBtn.addEventListener('click', () => {
   signOut(auth)
     .then(() => {
@@ -69,6 +72,7 @@ logoutBtn.addEventListener('click', () => {
     });
 });
 
+// Auth state listener
 auth.onAuthStateChanged((user) => {
   if (user) {
     loginContainer.classList.add('hidden');
