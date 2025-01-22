@@ -19,21 +19,10 @@
         </div>
         <div class="user-info">
             <span id="user-status">Not logged in</span>
-            <button id="loginBtn" onclick="toggleLoginModal()">Login</button>
+            <button id="loginBtn" onclick="loginWithGoogle()">Login with Google</button>
             <button id="logoutBtn" onclick="logout()" style="display:none;">Logout</button>
         </div>
     </header>
-
-    <!-- Login Modal -->
-    <div class="modal" id="loginModal">
-        <div class="modal-content">
-            <span class="close-btn" id="closeLoginModalBtn">&times;</span>
-            <h2>Login</h2>
-            <input type="email" id="login-email" placeholder="Email">
-            <input type="password" id="login-password" placeholder="Password">
-            <button onclick="login()">Login</button>
-        </div>
-    </div>
 
     <div class="card-container" id="card-container">
         <!-- Cards will be dynamically added here -->
