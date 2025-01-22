@@ -20,18 +20,18 @@ function loginWithGoogle() {
       toggleLoginModal();
     })
     .catch((error) => {
-      alert(`Error: ${error.message}`);
+      alert(`Login Failed: ${error.message}`);
     });
 }
 
-// Logout
+// Logout Function
 function logout() {
   firebase.auth().signOut()
     .then(() => {
       updateUserStatus(null);
     })
     .catch((error) => {
-      alert(`Error: ${error.message}`);
+      alert(`Logout Failed: ${error.message}`);
     });
 }
 
@@ -52,7 +52,7 @@ function updateUserStatus(email) {
   }
 }
 
-// Check Authentication State
+// Check Firebase Authentication State
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
     updateUserStatus(user.email);
