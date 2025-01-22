@@ -1,4 +1,8 @@
-// Firebase Configuration
+// Import necessary Firebase modules
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
+
+// Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
     authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
@@ -10,12 +14,12 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 const app = initializeApp(firebaseConfig);
+
+// Initialize Firebase Auth
 const auth = getAuth(app);
 
-// Google Auth Provider
+// Set up Google Auth Provider
 const provider = new GoogleAuthProvider();
 
 // Login with Google
@@ -26,7 +30,7 @@ function loginWithGoogle() {
             updateUserStatus(user.email);
         })
         .catch((error) => {
-            console.log(error.message);
+            console.error("Login failed: ", error.message);
             alert("Login failed. Please try again.");
         });
 }
@@ -38,12 +42,12 @@ function logout() {
             updateUserStatus();
         })
         .catch((error) => {
-            console.log(error.message);
+            console.error("Logout failed: ", error.message);
             alert("Logout failed. Please try again.");
         });
 }
 
-// Update user status on login/logout
+// Update user status
 function updateUserStatus(userEmail) {
     const userStatus = document.getElementById('user-status');
     const loginBtn = document.getElementById('loginBtn');
@@ -60,7 +64,7 @@ function updateUserStatus(userEmail) {
     }
 }
 
-// Firebase Auth state change
+// Firebase Auth state change listener
 onAuthStateChanged(auth, (user) => {
     if (user) {
         updateUserStatus(user.email);
