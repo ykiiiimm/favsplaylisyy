@@ -1,12 +1,11 @@
-// Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import {
-  getAuth,
-  signInWithPopup,
-  GoogleAuthProvider,
-  signOut
+import { 
+  getAuth, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  signOut 
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-import {
+import { 
   getFirestore,
   collection,
   addDoc,
@@ -15,7 +14,6 @@ import {
   doc
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
-// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
   authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
@@ -26,13 +24,11 @@ const firebaseConfig = {
   measurementId: "G-KNVLQ0TMB0"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
-const db = getFirestore(app); // Initialize Firestore
+const db = getFirestore(app);
 
-// Export Firestore functions
 export { 
   auth, 
   provider, 
@@ -45,13 +41,12 @@ export {
   signOut 
 };
 
-// DOM Elements
+// Login/Logout Logic
 const loginContainer = document.getElementById('loginContainer');
 const mainContent = document.getElementById('mainContent');
 const googleLoginBtn = document.getElementById('googleLoginBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 
-// Login with Google
 googleLoginBtn.addEventListener('click', () => {
   signInWithPopup(auth, provider)
     .then(() => {
@@ -59,11 +54,10 @@ googleLoginBtn.addEventListener('click', () => {
       mainContent.classList.remove('hidden');
     })
     .catch((error) => {
-      console.error("Login failed", error);
+      console.error("Login failed:", error);
     });
 });
 
-// Logout
 logoutBtn.addEventListener('click', () => {
   signOut(auth)
     .then(() => {
@@ -71,11 +65,10 @@ logoutBtn.addEventListener('click', () => {
       mainContent.classList.add('hidden');
     })
     .catch((error) => {
-      console.error("Logout failed", error);
+      console.error("Logout failed:", error);
     });
 });
 
-// Monitor auth state
 auth.onAuthStateChanged((user) => {
   if (user) {
     loginContainer.classList.add('hidden');
