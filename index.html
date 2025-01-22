@@ -1,50 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Firebase Authentication</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="googledbf97801702a8aef.html">
+    <title>UR FAV'S</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>Welcome</h1>
-    <div class="user-info">
-      <span id="user-status">Not logged in</span>
-      <button id="loginBtn" onclick="toggleLoginModal()">Login</button>
-      <button id="logoutBtn" onclick="logout()" style="display: none;">Logout</button>
+    <!-- Login Page -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <h2>Login to UR FAV'S</h2>
+            <button class="google-btn" id="googleLoginBtn">
+                <i class="fab fa-google"></i> Login with Google
+            </button>
+        </div>
     </div>
-  </header>
 
-  <!-- Login Modal -->
-  <div id="loginModal" class="modal">
-    <div class="modal-content">
-      <span id="closeLoginModalBtn" class="close-btn">&times;</span>
-      <h2>Login</h2>
-      <button id="googleLoginBtn" onclick="loginWithGoogle()">Login with Google</button>
+    <!-- Main Content (Hidden by Default) -->
+    <div class="hidden" id="mainContent">
+        <header>
+            <h1>UR FAV'S</h1>
+            <div class="search-bar">
+                <input type="text" placeholder="Search for songs, albums, or artists...">
+            </div>
+            <button id="logoutBtn" class="logout-btn">Logout</button>
+        </header>
+
+        <button class="add-card-btn" id="openModalBtn">
+            <i class="fas fa-plus"></i> Add New Content
+        </button>
+
+        <div class="modal" id="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeModalBtn">&times;</span>
+                <h2>Add New Content</h2>
+                <input type="text" id="title" placeholder="Title">
+                <textarea id="description" placeholder="Description"></textarea>
+                <input type="text" id="image-url" placeholder="Image URL">
+                <button id="submitBtn">Submit</button>
+            </div>
+        </div>
+
+        <div class="card-container" id="card-container">
+            <!-- Cards will be dynamically added here -->
+        </div>
+
+        <footer>
+            <p>Created with ❤️ by Hakim &copy; 2025 | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+        </footer>
     </div>
-  </div>
 
-  <!-- Firebase Scripts -->
-  <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-auth-compat.js"></script>
-
-  <!-- Firebase Configuration -->
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
-      authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
-      projectId: "ykiiiiiiiiiiiiiiim",
-      storageBucket: "ykiiiiiiiiiiiiiiim.appspot.com",
-      messagingSenderId: "1042062383289",
-      appId: "1:1042062383289:web:a4f43aa710b06a0f38a368",
-      measurementId: "G-KNVLQ0TMB0"
-    };
-
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-  </script>
-
-  <!-- Custom JavaScript -->
-  <script src="script.js"></script>
-</body
+    <!-- Firebase and App Scripts -->
+    <script type="module" src="firebase.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
