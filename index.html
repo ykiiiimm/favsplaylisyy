@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UR FAV'S</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Login Page -->
+    <!-- Login Container -->
     <div class="login-container" id="loginContainer">
         <div class="login-box">
             <h2>Login to UR FAV'S</h2>
@@ -19,7 +21,7 @@
         </div>
     </div>
 
-    <!-- Main Content -->
+    <!-- Main Content (Hidden Initially) -->
     <div class="hidden" id="mainContent">
         <header>
             <h1>UR FAV'S</h1>
@@ -29,10 +31,12 @@
             <button id="logoutBtn" class="logout-btn">Logout</button>
         </header>
 
+        <!-- Add New Content Button -->
         <button class="add-card-btn" id="openModalBtn">
             <i class="fas fa-plus"></i> Add New Content
         </button>
 
+        <!-- Modal -->
         <div class="modal" id="modal">
             <div class="modal-content">
                 <span class="close-btn" id="closeModalBtn">&times;</span>
@@ -44,14 +48,16 @@
             </div>
         </div>
 
+        <!-- Card Container -->
         <div class="card-container" id="card-container"></div>
 
+        <!-- Footer -->
         <footer>
             <p>Created with ❤️ by Hakim &copy; 2025 | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
         </footer>
     </div>
 
-    <!-- Scripts -->
+    <!-- Scripts (Ensure type="module" for Firebase) -->
     <script type="module" src="firebase.js"></script>
     <script type="module" src="app.js"></script>
 </body>
