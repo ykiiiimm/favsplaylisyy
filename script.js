@@ -1,8 +1,4 @@
-// Import necessary Firebase modules
-import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
-
-// Your web app's Firebase configuration
+// Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
     authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
@@ -14,40 +10,60 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 
-// Initialize Firebase Auth
-const auth = getAuth(app);
+// Toggle Login Modal
+function toggleLoginModal() {
+    const modal = document.getElementById('loginModal');
+    modal.style.display = modal.style.display === "block" ? "none" : "block";
+}
 
-// Set up Google Auth Provider
-const provider = new GoogleAuthProvider();
+// Close Login Modal
+document.getElementById('closeLoginModalBtn').addEventListener('click', () => {
+    document.getElementById('loginModal').style.display = 'none';
+});
 
-// Login with Google
+// Login Function (Email/Password)
+function login() {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            updateUserStatus(user.email);
+            toggleLoginModal();
+        })
+        .catch((error) => {
+            alert(error.message);
+        });
+}
+
+// Google Login Function
 function loginWithGoogle() {
-    signInWithPopup(auth, provider)
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
         .then((result) => {
             const user = result.user;
             updateUserStatus(user.email);
+            toggleLoginModal();
         })
         .catch((error) => {
-            console.error("Login failed: ", error.message);
-            alert("Login failed. Please try again.");
+            alert(error.message);
         });
 }
 
-// Logout function
+// Logout Function
 function logout() {
-    signOut(auth)
-        .then(() => {
-            updateUserStatus();
-        })
-        .catch((error) => {
-            console.error("Logout failed: ", error.message);
-            alert("Logout failed. Please try again.");
-        });
+    auth.signOut().then(() => {
+        updateUserStatus();
+    }).catch((error) => {
+        alert(error.message);
+    });
 }
 
-// Update user status
+// Update User Status
 function updateUserStatus(userEmail) {
     const userStatus = document.getElementById('user-status');
     const loginBtn = document.getElementById('loginBtn');
@@ -64,8 +80,8 @@ function updateUserStatus(userEmail) {
     }
 }
 
-// Firebase Auth state change listener
-onAuthStateChanged(auth, (user) => {
+// Check Authentication State
+auth.onAuthStateChanged((user) => {
     if (user) {
         updateUserStatus(user.email);
     } else {
