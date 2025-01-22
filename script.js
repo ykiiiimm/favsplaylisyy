@@ -1,23 +1,21 @@
-// Import the necessary Firebase functions
-import { initializeApp } from "firebase/app";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "firebase/auth";
-
-// Firebase configuration
+// Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
     authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
     projectId: "ykiiiiiiiiiiiiiiim",
-    storageBucket: "ykiiiiiiiiiiiiiiim.appspot.com",
+    storageBucket: "ykiiiiiiiiiiiiiiim.firebasestorage.app",
     messagingSenderId: "1042062383289",
     appId: "1:1042062383289:web:a4f43aa710b06a0f38a368",
     measurementId: "G-KNVLQ0TMB0"
 };
 
 // Initialize Firebase
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Google Auth provider
+// Google Auth Provider
 const provider = new GoogleAuthProvider();
 
 // Login with Google
@@ -28,20 +26,24 @@ function loginWithGoogle() {
             updateUserStatus(user.email);
         })
         .catch((error) => {
-            console.error(error.message);
+            console.log(error.message);
+            alert("Login failed. Please try again.");
         });
 }
 
-// Logout
+// Logout function
 function logout() {
-    signOut(auth).then(() => {
-        updateUserStatus();
-    }).catch((error) => {
-        console.error(error.message);
-    });
+    signOut(auth)
+        .then(() => {
+            updateUserStatus();
+        })
+        .catch((error) => {
+            console.log(error.message);
+            alert("Logout failed. Please try again.");
+        });
 }
 
-// Update user status (logged in or not)
+// Update user status on login/logout
 function updateUserStatus(userEmail) {
     const userStatus = document.getElementById('user-status');
     const loginBtn = document.getElementById('loginBtn');
@@ -58,7 +60,7 @@ function updateUserStatus(userEmail) {
     }
 }
 
-// Monitor authentication state change
+// Firebase Auth state change
 onAuthStateChanged(auth, (user) => {
     if (user) {
         updateUserStatus(user.email);
