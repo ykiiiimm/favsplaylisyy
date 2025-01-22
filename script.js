@@ -1,44 +1,44 @@
-// Import necessary Firebase SDK modules
+// Firebase Configuration
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "firebase/auth";
 
-// Firebase configuration
+// Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID",
-    measurementId: "YOUR_MEASUREMENT_ID"
+    apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
+    authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
+    projectId: "ykiiiiiiiiiiiiiiim",
+    storageBucket: "ykiiiiiiiiiiiiiiim.appspot.com",
+    messagingSenderId: "1042062383289",
+    appId: "1:1042062383289:web:a4f43aa710b06a0f38a368",
+    measurementId: "G-KNVLQ0TMB0"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
 
-// Google Sign-In Function
+// Google Login Function
 function loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider)
         .then((result) => {
             const user = result.user;
-            updateUserStatus(user.email);  // Update user info
+            console.log("User logged in:", user.email);
+            updateUserStatus(user.email);
         })
         .catch((error) => {
-            alert("Error: " + error.message);  // Show error if something goes wrong
+            console.error("Error during login:", error.message);
         });
 }
 
 // Logout Function
 function logout() {
-    signOut(auth)
-        .then(() => {
-            updateUserStatus();  // Update status when logged out
-        })
-        .catch((error) => {
-            alert("Error: " + error.message);  // Show error if something goes wrong
-        });
+    signOut(auth).then(() => {
+        console.log("User logged out");
+        updateUserStatus();
+    }).catch((error) => {
+        console.error("Error during logout:", error.message);
+    });
 }
 
 // Update User Status
@@ -58,7 +58,7 @@ function updateUserStatus(userEmail) {
     }
 }
 
-// Listen for Auth State Changes
+// Check Authentication State
 onAuthStateChanged(auth, (user) => {
     if (user) {
         updateUserStatus(user.email);
