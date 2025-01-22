@@ -45,16 +45,23 @@ button:hover {
 }
 
 .card-container {
-    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
     padding: 20px;
 }
 
 footer {
+    text-align: center;
+    padding: 10px;
     background-color: #222;
     color: white;
-    text-align: center;
-    padding: 10px 0;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
+}
+
+footer a {
+    color: #007bff;
+}
+
+footer a:hover {
+    text-decoration: underline;
 }
