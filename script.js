@@ -1,16 +1,23 @@
-// Firebase Configuration
+// Import Firebase SDKs
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+
+// Your Firebase configuration
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
+    authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
+    projectId: "ykiiiiiiiiiiiiiiim",
+    storageBucket: "ykiiiiiiiiiiiiiiim.firebasestorage.app",
+    messagingSenderId: "1042062383289",
+    appId: "1:1042062383289:web:a4f43aa710b06a0f38a368",
+    measurementId: "G-KNVLQ0TMB0"
 };
 
 // Initialize Firebase
-const app = firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
 
 // Toggle Login Modal
 function toggleLoginModal() {
@@ -28,7 +35,7 @@ function login() {
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
 
-    auth.signInWithEmailAndPassword(email, password)
+    signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             const user = userCredential.user;
             updateUserStatus(user.email);
@@ -41,7 +48,7 @@ function login() {
 
 // Logout Function
 function logout() {
-    auth.signOut().then(() => {
+    signOut(auth).then(() => {
         updateUserStatus();
     }).catch((error) => {
         alert(error.message);
@@ -66,7 +73,7 @@ function updateUserStatus(userEmail) {
 }
 
 // Check Authentication State
-auth.onAuthStateChanged((user) => {
+onAuthStateChanged(auth, (user) => {
     if (user) {
         updateUserStatus(user.email);
     } else {
