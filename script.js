@@ -1,16 +1,16 @@
-// Import Firebase SDK
+// Import necessary Firebase SDK modules
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "firebase/auth";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "firebase/auth";
 
-// Your Firebase configuration (use your actual Firebase credentials here)
+// Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
-  authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
-  projectId: "ykiiiiiiiiiiiiiiim",
-  storageBucket: "ykiiiiiiiiiiiiiiim.firebasestorage.app",
-  messagingSenderId: "1042062383289",
-  appId: "1:1042062383289:web:a4f43aa710b06a0f38a368",
-  measurementId: "G-KNVLQ0TMB0"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID",
+    measurementId: "YOUR_MEASUREMENT_ID"
 };
 
 // Initialize Firebase
