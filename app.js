@@ -1,3 +1,13 @@
+import { 
+  auth, 
+  db, 
+  collection, 
+  addDoc, 
+  getDocs, 
+  deleteDoc, 
+  doc 
+} from './firebase.js';
+
 const openModalBtn = document.getElementById('openModalBtn');
 const modal = document.getElementById('modal');
 const closeModalBtn = document.getElementById('closeModalBtn');
@@ -8,75 +18,107 @@ const descriptionInput = document.getElementById('description');
 const imageUrlInput = document.getElementById('image-url');
 const searchInput = document.querySelector('.search-bar input');
 
-// Modal functionality
-openModalBtn.addEventListener('click', () => modal.classList.add('open'));
-closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
-
-// Add new card
-submitBtn.addEventListener('click', () => {
-    const title = titleInput.value;
-    const description = descriptionInput.value;
-    const imageUrl = imageUrlInput.value;
-
-    if (title && description && imageUrl) {
-        const newCard = document.createElement('div');
-        newCard.classList.add('card');
-        newCard.innerHTML = `
-            <img src="${imageUrl}" alt="Poster">
-            <div class="overlay">
-                <div class="title">${title}</div>
-                <div class="description">${description}</div>
-                <div>
-                    <button class="edit-button" onclick="editCard(this)">Edit</button>
-                    <button class="delete-button" onclick="deleteCard(this)">Delete</button>
-                </div>
-            </div>
-        `;
-
-        cardContainer.appendChild(newCard);
-        modal.classList.remove('open');
-        titleInput.value = '';
-        descriptionInput.value = '';
-        imageUrlInput.value = '';
-    }
+// Load cards when user logs in
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    loadCards();
+  }
 });
 
-// Delete card
-window.deleteCard = (button) => {
-    button.closest('.card').remove();
+// Save card to Firestore
+async function saveCard(title, description, imageUrl) {
+  try {
+    const userId = auth.currentUser.uid;
+    await addDoc(collection(db, "users", userId, "cards"), {
+      title,
+      description,
+      imageUrl
+    });
+  } catch (error) {
+    console.error("Error saving card:", error);
+  }
+}
+
+// Load cards from Firestore
+async function loadCards() {
+  try {
+    const userId = auth.currentUser.uid;
+    const querySnapshot = await getDocs(collection(db, "users", userId, "cards"));
+    
+    cardContainer.innerHTML = "";
+    querySnapshot.forEach((doc) => {
+      createCardElement(doc.data(), doc.id);
+    });
+  } catch (error) {
+    console.error("Error loading cards:", error);
+  }
+}
+
+// Create card element with Firestore ID
+function createCardElement(cardData, docId) {
+  const card = document.createElement('div');
+  card.classList.add('card');
+  card.dataset.id = docId;
+  card.innerHTML = `
+    <img src="${cardData.imageUrl}" alt="Poster">
+    <div class="overlay">
+      <div class="title">${cardData.title}</div>
+      <div class="description">${cardData.description}</div>
+      <div>
+        <button class="edit-button" onclick="editCard(this)">Edit</button>
+        <button class="delete-button" onclick="deleteCard(this)">Delete</button>
+      </div>
+    </div>
+  `;
+  cardContainer.appendChild(card);
+}
+
+// Delete card from Firestore
+window.deleteCard = async (button) => {
+  const cardElement = button.closest('.card');
+  const docId = cardElement.dataset.id;
+  
+  try {
+    const userId = auth.currentUser.uid;
+    await deleteDoc(doc(db, "users", userId, "cards", docId));
+    cardElement.remove();
+  } catch (error) {
+    console.error("Error deleting card:", error);
+  }
 };
 
-// Edit card
+// Submit new card
+submitBtn.addEventListener('click', async (e) => {
+  e.preventDefault();
+  
+  if (titleInput.value && descriptionInput.value && imageUrlInput.value) {
+    await saveCard(
+      titleInput.value,
+      descriptionInput.value,
+      imageUrlInput.value
+    );
+    await loadCards();
+    modal.classList.remove('open');
+    titleInput.value = '';
+    descriptionInput.value = '';
+    imageUrlInput.value = '';
+  }
+});
+
+// Edit card (to be implemented)
 window.editCard = (button) => {
-    const card = button.closest('.card');
-    const title = card.querySelector('.title').innerText;
-    const description = card.querySelector('.description').innerText;
-    const imageUrl = card.querySelector('img').src;
-
-    titleInput.value = title;
-    descriptionInput.value = description;
-    imageUrlInput.value = imageUrl;
-    modal.classList.add('open');
-
-    submitBtn.onclick = () => {
-        card.querySelector('.title').innerText = titleInput.value;
-        card.querySelector('.description').innerText = descriptionInput.value;
-        card.querySelector('img').src = imageUrlInput.value;
-        modal.classList.remove('open');
-    };
+  // Add edit functionality here
 };
 
 // Search functionality
 searchInput.addEventListener('input', () => {
-    const query = searchInput.value.toLowerCase();
-    const cards = document.querySelectorAll('.card');
-
-    cards.forEach(card => {
-        const title = card.querySelector('.title').innerText.toLowerCase();
-        if (title.includes(query)) {
-            card.style.display = 'block';
-        } else {
-            card.style.display = 'none';
-        }
-    });
+  const query = searchInput.value.toLowerCase();
+  document.querySelectorAll('.card').forEach(card => {
+    const title = card.querySelector('.title').textContent.toLowerCase();
+    card.style.display = title.includes(query) ? 'block' : 'none';
+  });
 });
+
+// Modal functionality
+openModalBtn.addEventListener('click', () => modal.classList.add('open'));
+closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
