@@ -1,4 +1,4 @@
-import { auth, db, collection, addDoc, getDocs, deleteDoc, doc } from './firebase.js';
+import { auth, db, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from './firebase.js';
 
 const openModalBtn = document.getElementById('openModalBtn');
 const modal = document.getElementById('modal');
@@ -10,28 +10,26 @@ const descriptionInput = document.getElementById('description');
 const imageUrlInput = document.getElementById('image-url');
 const searchInput = document.querySelector('.search-bar input');
 
-// Load cards on login
+// Load cards
 auth.onAuthStateChanged((user) => {
-  if (user) {
-    loadCards();
-  }
+  if (user) loadCards();
 });
 
-// Save card to Firestore
+// Save new card
 async function saveCard(title, description, imageUrl) {
   try {
     const userId = auth.currentUser.uid;
-    await addDoc(collection(db, "users", userId, "cards"), {
-      title,
-      description,
-      imageUrl
+    await addDoc(collection(db, "users", userId, "cards"), { 
+      title, 
+      description, 
+      imageUrl 
     });
   } catch (error) {
     console.error("Error saving card:", error);
   }
 }
 
-// Load cards from Firestore
+// Load all cards
 async function loadCards() {
   try {
     const userId = auth.currentUser.uid;
@@ -77,7 +75,45 @@ window.deleteCard = async (button) => {
   }
 };
 
-// Submit new card
+// Edit card
+window.editCard = (button) => {
+  const card = button.closest('.card');
+  const docId = card.dataset.id;
+  const currentTitle = card.querySelector('.title').textContent;
+  const currentDescription = card.querySelector('.description').textContent;
+  const currentImageUrl = card.querySelector('img').src;
+
+  // Populate modal
+  titleInput.value = currentTitle;
+  descriptionInput.value = currentDescription;
+  imageUrlInput.value = currentImageUrl;
+  modal.classList.add('open');
+
+  // Update submit handler for edits
+  submitBtn.onclick = async (e) => {
+    e.preventDefault();
+    if (titleInput.value && descriptionInput.value && imageUrlInput.value) {
+      try {
+        const userId = auth.currentUser.uid;
+        await updateDoc(doc(db, "users", userId, "cards", docId), {
+          title: titleInput.value,
+          description: descriptionInput.value,
+          imageUrl: imageUrlInput.value
+        });
+        
+        // Update UI
+        card.querySelector('.title').textContent = titleInput.value;
+        card.querySelector('.description').textContent = descriptionInput.value;
+        card.querySelector('img').src = imageUrlInput.value;
+        modal.classList.remove('open');
+      } catch (error) {
+        console.error("Error updating card:", error);
+      }
+    }
+  };
+};
+
+// Submit new/edited card
 submitBtn.addEventListener('click', async (e) => {
   e.preventDefault();
   if (titleInput.value && descriptionInput.value && imageUrlInput.value) {
@@ -90,12 +126,7 @@ submitBtn.addEventListener('click', async (e) => {
   }
 });
 
-// Edit card (placeholder)
-window.editCard = (button) => {
-  // To be implemented
-};
-
-// Search functionality
+// Search
 searchInput.addEventListener('input', () => {
   const query = searchInput.value.toLowerCase();
   document.querySelectorAll('.card').forEach(card => {
@@ -104,6 +135,6 @@ searchInput.addEventListener('input', () => {
   });
 });
 
-// Modal functionality
+// Modal
 openModalBtn.addEventListener('click', () => modal.classList.add('open'));
 closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
