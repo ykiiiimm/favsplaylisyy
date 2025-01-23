@@ -10,26 +10,28 @@ const descriptionInput = document.getElementById('description');
 const imageUrlInput = document.getElementById('image-url');
 const searchInput = document.querySelector('.search-bar input');
 
-// Load cards
+// Load cards on login
 auth.onAuthStateChanged((user) => {
-  if (user) loadCards();
+  if (user) {
+    loadCards();
+  }
 });
 
-// Save new card
+// Save card to Firestore
 async function saveCard(title, description, imageUrl) {
   try {
     const userId = auth.currentUser.uid;
-    await addDoc(collection(db, "users", userId, "cards"), { 
-      title, 
-      description, 
-      imageUrl 
+    await addDoc(collection(db, "users", userId, "cards"), {
+      title,
+      description,
+      imageUrl
     });
   } catch (error) {
     console.error("Error saving card:", error);
   }
 }
 
-// Load all cards
+// Load cards from Firestore
 async function loadCards() {
   try {
     const userId = auth.currentUser.uid;
@@ -83,13 +85,11 @@ window.editCard = (button) => {
   const currentDescription = card.querySelector('.description').textContent;
   const currentImageUrl = card.querySelector('img').src;
 
-  // Populate modal
   titleInput.value = currentTitle;
   descriptionInput.value = currentDescription;
   imageUrlInput.value = currentImageUrl;
   modal.classList.add('open');
 
-  // Update submit handler for edits
   submitBtn.onclick = async (e) => {
     e.preventDefault();
     if (titleInput.value && descriptionInput.value && imageUrlInput.value) {
@@ -100,8 +100,6 @@ window.editCard = (button) => {
           description: descriptionInput.value,
           imageUrl: imageUrlInput.value
         });
-        
-        // Update UI
         card.querySelector('.title').textContent = titleInput.value;
         card.querySelector('.description').textContent = descriptionInput.value;
         card.querySelector('img').src = imageUrlInput.value;
@@ -113,7 +111,7 @@ window.editCard = (button) => {
   };
 };
 
-// Submit new/edited card
+// Submit new card
 submitBtn.addEventListener('click', async (e) => {
   e.preventDefault();
   if (titleInput.value && descriptionInput.value && imageUrlInput.value) {
@@ -126,7 +124,7 @@ submitBtn.addEventListener('click', async (e) => {
   }
 });
 
-// Search
+// Search functionality
 searchInput.addEventListener('input', () => {
   const query = searchInput.value.toLowerCase();
   document.querySelectorAll('.card').forEach(card => {
@@ -135,6 +133,6 @@ searchInput.addEventListener('input', () => {
   });
 });
 
-// Modal
+// Modal functionality
 openModalBtn.addEventListener('click', () => modal.classList.add('open'));
 closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
