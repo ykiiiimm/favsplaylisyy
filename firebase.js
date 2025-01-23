@@ -12,7 +12,7 @@ import {
   getDocs,
   deleteDoc,
   doc,
-  updateDoc // Added
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -30,6 +30,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
 
+// Export Firestore functions
 export { 
   auth, 
   provider, 
@@ -39,8 +40,47 @@ export {
   getDocs,
   deleteDoc,
   doc,
-  updateDoc, // Added
+  updateDoc,
   signOut 
 };
 
-// Rest of your auth logic...
+// Login/Logout Logic ================
+const loginContainer = document.getElementById('loginContainer');
+const mainContent = document.getElementById('mainContent');
+const googleLoginBtn = document.getElementById('googleLoginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+
+// Google Login
+googleLoginBtn.addEventListener('click', () => {
+  signInWithPopup(auth, provider)
+    .then(() => {
+      loginContainer.classList.add('hidden');
+      mainContent.classList.remove('hidden');
+    })
+    .catch((error) => {
+      console.error("Login error:", error);
+    });
+});
+
+// Logout
+logoutBtn.addEventListener('click', () => {
+  signOut(auth)
+    .then(() => {
+      loginContainer.classList.remove('hidden');
+      mainContent.classList.add('hidden');
+    })
+    .catch((error) => {
+      console.error("Logout error:", error);
+    });
+});
+
+// Auth State Listener
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    loginContainer.classList.add('hidden');
+    mainContent.classList.remove('hidden');
+  } else {
+    loginContainer.classList.remove('hidden');
+    mainContent.classList.add('hidden');
+  }
+});
