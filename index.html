@@ -48,8 +48,15 @@
         <span class="close-btn" id="closeModalBtn">&times;</span>
         <h2>Add New Content</h2>
         <input type="text" id="title" placeholder="Title">
+        <label for="mediaType">Select Media Type:</label>
+        <select id="mediaType">
+          <option value="movie">Movie</option>
+          <option value="tv">TV Show</option>
+        </select>
         <!-- Button to fetch details from TMDb -->
         <button id="fetchDetailsBtn">Fetch Details</button>
+        <label for="seasonSelect" id="seasonLabel" style="display:none;">Select Season (for TV Shows):</label>
+        <select id="seasonSelect" style="display:none;"></select>
         <textarea id="description" placeholder="Description"></textarea>
         <input type="text" id="image-url" placeholder="Image URL">
         <button id="submitBtn">Submit</button>
