@@ -4,11 +4,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const modal = document.getElementById("modal");
   const closeModalBtn = document.getElementById("closeModalBtn");
   const fetchDetailsBtn = document.getElementById("fetchDetailsBtn");
+  const submitBtn = document.getElementById("submitBtn");
   const titleInput = document.getElementById("title");
   const descriptionInput = document.getElementById("description");
   const imageUrlInput = document.getElementById("image-url");
+  const mediaTypeSelect = document.getElementById("mediaType");
   const seasonSelect = document.getElementById("seasonSelect");
   const seasonLabel = document.getElementById("seasonLabel");
+  const cardContainer = document.getElementById("card-container");
 
   // Open the modal when the "Add New Content" button is clicked
   if (openModalBtn && modal) {
@@ -85,5 +88,70 @@ document.addEventListener("DOMContentLoaded", () => {
   // Attach the TMDb fetch function to the "Fetch Details" button
   if (fetchDetailsBtn) {
     fetchDetailsBtn.addEventListener("click", fetchTVDetailsTMDb);
+  }
+
+  // Submit Button: Handle new content submission
+  if (submitBtn) {
+    submitBtn.addEventListener("click", () => {
+      // Collect data from modal inputs
+      const title = titleInput.value.trim();
+      const description = descriptionInput.value.trim();
+      const imageUrl = imageUrlInput.value.trim();
+      const mediaType = mediaTypeSelect.value;
+      const season = seasonSelect ? seasonSelect.value : "";
+
+      // Basic validation (customize as needed)
+      if (!title || !description || !imageUrl) {
+        alert("Please fill in the Title, Description, and Image URL fields.");
+        return;
+      }
+
+      // Create a new card element
+      const card = document.createElement("div");
+      card.className = "card";
+
+      // Create an image element for the card
+      const img = document.createElement("img");
+      img.src = imageUrl;
+      img.alt = title;
+      card.appendChild(img);
+
+      // Create overlay for card title and description
+      const overlay = document.createElement("div");
+      overlay.className = "overlay";
+
+      const cardTitle = document.createElement("div");
+      cardTitle.className = "title";
+      cardTitle.textContent = title;
+      overlay.appendChild(cardTitle);
+
+      const cardDescription = document.createElement("div");
+      cardDescription.className = "description";
+      // Append media type and season info for TV shows if available
+      cardDescription.textContent =
+        description + (mediaType === "tv" && season ? ` (Season ${season})` : "");
+      overlay.appendChild(cardDescription);
+
+      card.appendChild(overlay);
+
+      // Append the new card to the card container
+      if (cardContainer) {
+        cardContainer.appendChild(card);
+      }
+
+      // Clear the form inputs after submission
+      titleInput.value = "";
+      descriptionInput.value = "";
+      imageUrlInput.value = "";
+      if (seasonSelect) {
+        seasonSelect.innerHTML = "";
+        seasonSelect.style.display = "none";
+      }
+      if (seasonLabel) {
+        seasonLabel.style.display = "none";
+      }
+      // Close the modal
+      modal.classList.remove("open");
+    });
   }
 });
