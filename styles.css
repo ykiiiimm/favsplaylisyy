@@ -1,13 +1,14 @@
 :root {
-  --primary-color: #FF4B4B;
+  --primary-color: #ff4b4b;
   --secondary-color: #333333;
-  --accent-color: #FFFFFF;
-  --background-color: #F1F1F1;
-  --card-background: #FFF;
+  --accent-color: #ffffff;
+  --background-color: #f1f1f1;
+  --card-background: #fff;
   --text-color: #333;
   --hover-color: rgba(0, 0, 0, 0.1);
 }
 
+/* Global Styles */
 body {
   font-family: 'Roboto', sans-serif;
   background-color: var(--background-color);
@@ -32,13 +33,13 @@ body {
   background: var(--card-background);
   padding: 40px;
   border-radius: 10px;
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 
 .google-btn {
-  background-color: #4285F4;
-  color: white;
+  background-color: #4285f4;
+  color: #fff;
   border: none;
   padding: 10px 20px;
   border-radius: 5px;
@@ -97,7 +98,7 @@ header {
   font-size: 1rem;
   background-color: var(--secondary-color);
   color: var(--accent-color);
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Add New Content Button */
@@ -116,7 +117,7 @@ header {
 }
 
 .add-card-btn:hover {
-  background-color: #E94E00;
+  background-color: #e94e00;
   transform: scale(1.05);
 }
 
@@ -138,14 +139,14 @@ header {
   position: relative;
   border-radius: 15px;
   background-color: var(--card-background);
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card:hover {
   transform: scale(1.05);
-  box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
 }
 
 .card img {
@@ -190,7 +191,8 @@ header {
 }
 
 /* Edit/Delete Buttons */
-.edit-button, .delete-button {
+.edit-button,
+.delete-button {
   display: inline-block;
   margin: 10px 5px 0;
   background-color: var(--primary-color);
@@ -203,8 +205,9 @@ header {
   transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
 }
 
-.edit-button:hover, .delete-button:hover {
-  background-color: #E94E00;
+.edit-button:hover,
+.delete-button:hover {
+  background-color: #e94e00;
   transform: scale(1.05);
 }
 
@@ -265,7 +268,7 @@ footer a:hover {
   color: var(--accent-color);
 }
 
-/* ===== Legal Pages ===== */
+/* Legal Pages */
 .legal-page {
   max-width: 800px;
   margin: 50px auto;
@@ -296,5 +299,5 @@ footer a:hover {
 }
 
 .back-home:hover {
-  color: #E94E00;
+  color: #e94e00;
 }
