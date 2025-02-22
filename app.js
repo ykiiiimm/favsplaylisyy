@@ -9,6 +9,7 @@ const titleInput = document.getElementById('title');
 const descriptionInput = document.getElementById('description');
 const imageUrlInput = document.getElementById('image-url');
 const searchInput = document.querySelector('.search-bar input');
+const fetchDetailsBtn = document.getElementById('fetchDetailsBtn'); // Button to fetch TMDb details
 
 // Load cards on login
 auth.onAuthStateChanged((user) => {
@@ -37,8 +38,8 @@ async function loadCards() {
     const userId = auth.currentUser.uid;
     const querySnapshot = await getDocs(collection(db, "users", userId, "cards"));
     cardContainer.innerHTML = "";
-    querySnapshot.forEach((doc) => {
-      createCardElement(doc.data(), doc.id);
+    querySnapshot.forEach((docSnap) => {
+      createCardElement(docSnap.data(), docSnap.id);
     });
   } catch (error) {
     console.error("Error loading cards:", error);
@@ -90,6 +91,7 @@ window.editCard = (button) => {
   imageUrlInput.value = currentImageUrl;
   modal.classList.add('open');
 
+  // Replace any previous click handlers on submitBtn
   submitBtn.onclick = async (e) => {
     e.preventDefault();
     if (titleInput.value && descriptionInput.value && imageUrlInput.value) {
@@ -136,3 +138,36 @@ searchInput.addEventListener('input', () => {
 // Modal functionality
 openModalBtn.addEventListener('click', () => modal.classList.add('open'));
 closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
+
+// TMDb API: Fetch movie details based on title
+async function fetchMovieDetailsTMDb() {
+  const title = titleInput.value;
+  if (!title) {
+    alert("Please enter a title first.");
+    return;
+  }
+  const apiKey = "0b1121a7a8eda7a6ecc7fdfa631ad27a"; // Your TMDb API key
+  const searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(title)}`;
+  
+  try {
+    const response = await fetch(searchUrl);
+    const data = await response.json();
+    if (!data.results || data.results.length === 0) {
+      alert("Movie not found!");
+      return;
+    }
+    // Use the first result from TMDb
+    const movie = data.results[0];
+    descriptionInput.value = movie.overview || "";
+    if (movie.poster_path) {
+      imageUrlInput.value = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
+    } else {
+      imageUrlInput.value = "";
+    }
+  } catch (error) {
+    console.error("Error fetching movie details from TMDb:", error);
+    alert("Failed to fetch details. Try again later.");
+  }
+}
+
+fetchDetailsBtn.addEventListener('click', fetchMovieDetailsTMDb);
