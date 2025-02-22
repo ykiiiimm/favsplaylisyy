@@ -10,6 +10,20 @@ const descriptionInput = document.getElementById('description');
 const imageUrlInput = document.getElementById('image-url');
 const searchInput = document.querySelector('.search-bar input');
 const fetchDetailsBtn = document.getElementById('fetchDetailsBtn'); // Button to fetch TMDb details
+const mediaTypeSelect = document.getElementById('mediaType');
+const seasonSelect = document.getElementById('seasonSelect');
+const seasonLabel = document.getElementById('seasonLabel');
+
+// Toggle season dropdown based on media type selection
+mediaTypeSelect.addEventListener('change', () => {
+  if (mediaTypeSelect.value === 'tv') {
+    seasonSelect.style.display = 'block';
+    seasonLabel.style.display = 'block';
+  } else {
+    seasonSelect.style.display = 'none';
+    seasonLabel.style.display = 'none';
+  }
+});
 
 // Load cards on login
 auth.onAuthStateChanged((user) => {
@@ -170,4 +184,60 @@ async function fetchMovieDetailsTMDb() {
   }
 }
 
-fetchDetailsBtn.addEventListener('click', fetchMovieDetailsTMDb);
+// TMDb API: Fetch TV show details and seasons based on title
+async function fetchTVDetailsTMDb() {
+  const title = titleInput.value;
+  if (!title) {
+    alert("Please enter a title first.");
+    return;
+  }
+  const apiKey = "0b1121a7a8eda7a6ecc7fdfa631ad27a"; // Your TMDb API key
+  const searchUrl = `https://api.themoviedb.org/3/search/tv?api_key=${apiKey}&query=${encodeURIComponent(title)}`;
+  
+  try {
+    const response = await fetch(searchUrl);
+    const data = await response.json();
+    if (!data.results || data.results.length === 0) {
+      alert("TV Show not found!");
+      return;
+    }
+    // Use the first result from TMDb
+    const tvShow = data.results[0];
+    descriptionInput.value = tvShow.overview || "";
+    if (tvShow.poster_path) {
+      imageUrlInput.value = `https://image.tmdb.org/t/p/w500${tvShow.poster_path}`;
+    } else {
+      imageUrlInput.value = "";
+    }
+    
+    // Fetch TV show details to get seasons
+    const tvDetailsUrl = `https://api.themoviedb.org/3/tv/${tvShow.id}?api_key=${apiKey}`;
+    const detailsResponse = await fetch(tvDetailsUrl);
+    const detailsData = await detailsResponse.json();
+    
+    // Populate season dropdown
+    if (seasonSelect) {
+      seasonSelect.innerHTML = ""; // Clear previous options
+      detailsData.seasons.forEach(season => {
+         const option = document.createElement('option');
+         option.value = season.season_number;
+         option.textContent = season.name;
+         seasonSelect.appendChild(option);
+      });
+      seasonSelect.style.display = 'block';
+      seasonLabel.style.display = 'block';
+    }
+  } catch (error) {
+    console.error("Error fetching TV show details from TMDb:", error);
+    alert("Failed to fetch TV show details. Try again later.");
+  }
+}
+
+// Determine which TMDb function to call based on media type selection
+fetchDetailsBtn.addEventListener('click', () => {
+  if (mediaTypeSelect.value === 'movie') {
+    fetchMovieDetailsTMDb();
+  } else if (mediaTypeSelect.value === 'tv') {
+    fetchTVDetailsTMDb();
+  }
+});
