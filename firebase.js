@@ -31,48 +31,50 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
 
-// Get DOM elements for login/logout (these are in index.html)
-const loginContainer = document.getElementById('loginContainer');
-const mainContent = document.getElementById('mainContent');
-const googleLoginBtn = document.getElementById('googleLoginBtn');
-const logoutBtn = document.getElementById('logoutBtn');
+document.addEventListener("DOMContentLoaded", () => {
+  const loginContainer = document.getElementById("loginContainer");
+  const mainContent = document.getElementById("mainContent");
+  const googleLoginBtn = document.getElementById("googleLoginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
 
-// Google Login
-googleLoginBtn.addEventListener('click', () => {
-  signInWithPopup(auth, provider)
-    .then(() => {
-      loginContainer.classList.add('hidden');
-      mainContent.classList.remove('hidden');
-    })
-    .catch((error) => {
-      console.error("Login error:", error);
+  if (googleLoginBtn) {
+    googleLoginBtn.addEventListener("click", () => {
+      signInWithPopup(auth, provider)
+        .then(() => {
+          loginContainer.classList.add("hidden");
+          mainContent.classList.remove("hidden");
+        })
+        .catch((error) => {
+          console.error("Login error:", error);
+        });
     });
-});
-
-// Logout
-logoutBtn.addEventListener('click', () => {
-  signOut(auth)
-    .then(() => {
-      loginContainer.classList.remove('hidden');
-      mainContent.classList.add('hidden');
-    })
-    .catch((error) => {
-      console.error("Logout error:", error);
-    });
-});
-
-// Auth State Listener
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    loginContainer.classList.add('hidden');
-    mainContent.classList.remove('hidden');
-  } else {
-    loginContainer.classList.remove('hidden');
-    mainContent.classList.add('hidden');
   }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      signOut(auth)
+        .then(() => {
+          loginContainer.classList.remove("hidden");
+          mainContent.classList.add("hidden");
+        })
+        .catch((error) => {
+          console.error("Logout error:", error);
+        });
+    });
+  }
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      loginContainer.classList.add("hidden");
+      mainContent.classList.remove("hidden");
+    } else {
+      loginContainer.classList.remove("hidden");
+      mainContent.classList.add("hidden");
+    }
+  });
 });
 
-// Export Firestore functions if needed elsewhere
+// Export Firestore functions for use elsewhere if needed
 export { 
   auth, 
   provider, 
