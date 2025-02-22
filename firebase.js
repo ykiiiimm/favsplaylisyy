@@ -44,7 +44,7 @@ export {
   signOut 
 };
 
-// Login/Logout Logic ================
+// Login/Logout Logic
 const loginContainer = document.getElementById('loginContainer');
 const mainContent = document.getElementById('mainContent');
 const googleLoginBtn = document.getElementById('googleLoginBtn');
