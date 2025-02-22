@@ -11,14 +11,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const seasonLabel = document.getElementById("seasonLabel");
 
   // Open the modal when the "Add New Content" button is clicked
-  openModalBtn.addEventListener("click", () => {
-    modal.classList.add("open");
-  });
+  if (openModalBtn && modal) {
+    openModalBtn.addEventListener("click", () => {
+      modal.classList.add("open");
+    });
+  }
 
   // Close the modal when the close button (×) is clicked
-  closeModalBtn.addEventListener("click", () => {
-    modal.classList.remove("open");
-  });
+  if (closeModalBtn && modal) {
+    closeModalBtn.addEventListener("click", () => {
+      modal.classList.remove("open");
+    });
+  }
 
   // TMDb API: Fetch TV show details and populate form fields
   async function fetchTVDetailsTMDb() {
@@ -55,27 +59,22 @@ document.addEventListener("DOMContentLoaded", () => {
       // Populate season dropdown
       if (seasonSelect) {
         seasonSelect.innerHTML = ""; // Clear previous options
-        detailsData.seasons.forEach(season => {
+        detailsData.seasons.forEach((season) => {
           const option = document.createElement("option");
           option.value = season.season_number;
           option.textContent = season.name;
           // Store the season poster URL if available
-          if (season.poster_path) {
-            option.setAttribute("data-poster", `https://image.tmdb.org/t/p/w500${season.poster_path}`);
-          } else {
-            option.setAttribute("data-poster", "");
-          }
+          option.setAttribute("data-poster", season.poster_path ? `https://image.tmdb.org/t/p/w500${season.poster_path}` : "");
           seasonSelect.appendChild(option);
         });
         seasonSelect.style.display = "block";
         seasonLabel.style.display = "block";
         
         // Update image when a different season is selected
-        seasonSelect.onchange = function() {
+        seasonSelect.addEventListener("change", function() {
           const selectedOption = seasonSelect.options[seasonSelect.selectedIndex];
-          const seasonPoster = selectedOption.getAttribute("data-poster");
-          imageUrlInput.value = seasonPoster ? seasonPoster : "";
-        };
+          imageUrlInput.value = selectedOption.getAttribute("data-poster") || "";
+        });
       }
     } catch (error) {
       console.error("Error fetching TV show details from TMDb:", error);
@@ -84,5 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Attach the TMDb fetch function to the "Fetch Details" button
-  fetchDetailsBtn.addEventListener("click", fetchTVDetailsTMDb);
+  if (fetchDetailsBtn) {
+    fetchDetailsBtn.addEventListener("click", fetchTVDetailsTMDb);
+  }
 });
