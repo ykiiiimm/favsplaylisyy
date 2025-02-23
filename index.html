@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>UR FAV'S - Discover Your Favorites</title>
-  <meta name="description" content="Discover and organize your favorite movies and TV shows with a modern design." />
+  <meta name="description" content="Discover and organize your favorite movies and TV shows with a modern, dynamic design." />
   <link rel="stylesheet" href="styles.css" />
   <!-- Using Montserrat for a modern look -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet" />
@@ -14,8 +14,8 @@
   <!-- Login Page -->
   <div class="login-container" id="loginContainer">
     <div class="login-card">
-      <h2>Welcome to UR FAV'S</h2>
-      <p>Discover and organize your favorite movies and TV shows.</p>
+      <h1 class="login-title">UR FAV'S</h1>
+      <p class="login-subtitle">Discover & Organize Your Favorites</p>
       <button id="googleLoginBtn" class="btn btn-google">
         <i class="fab fa-google"></i> Sign in with Google
       </button>
@@ -25,30 +25,32 @@
   <!-- Main Content -->
   <div class="main-content hidden" id="mainContent">
     <header>
-      <nav>
+      <nav class="navbar">
         <div class="logo">UR FAV'S</div>
         <ul class="nav-links">
-          <li><button id="homeBtn">Home</button></li>
-          <li><button id="profileBtn">Profile</button></li>
-          <li><button id="logoutBtn" class="btn btn-logout">Logout</button></li>
+          <li><button id="homeBtn" class="nav-btn">Home</button></li>
+          <li><button id="profileBtn" class="nav-btn">Profile</button></li>
+          <li><button id="logoutBtn" class="btn btn-logout nav-btn">Logout</button></li>
         </ul>
       </nav>
       <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Search for movies, TV shows, etc...">
+        <input type="text" id="searchInput" placeholder="Search for movies, TV shows, etc..." />
       </div>
     </header>
 
     <main>
       <div class="action-bar">
-        <button id="openModalBtn" class="btn btn-add"><i class="fas fa-plus"></i> Add New Content</button>
+        <button id="openModalBtn" class="btn btn-add">
+          <i class="fas fa-plus"></i> Add New Content
+        </button>
       </div>
       <section class="cards-container" id="card-container">
-        <!-- Cards will be dynamically loaded here -->
+        <!-- Cards will be dynamically injected here -->
       </section>
     </main>
 
     <footer>
-      <p>Created by itshakimouuuu © 2025 | <a href="privacy-policy.html">Privacy Policy</a> | <a href="terms-of-service.html">Terms of Service</a></p>
+      <p>Created with ❤️ by Hakim © 2025 | <a href="privacy-policy.html">Privacy Policy</a> | <a href="terms-of-service.html">Terms of Service</a></p>
     </footer>
   </div>
 
@@ -57,14 +59,14 @@
     <div class="modal-content">
       <span class="close-btn" id="closeModalBtn">&times;</span>
       <h2>Add New Content</h2>
-      <input type="text" id="title" placeholder="Title">
+      <input type="text" id="title" placeholder="Title" />
       <select id="content-type">
         <option value="movie">Movie</option>
         <option value="tv">TV Show</option>
       </select>
-      <input type="number" id="season" placeholder="Season (if TV Show)" min="1" style="display:none;">
+      <input type="number" id="season" placeholder="Season (if TV Show)" min="1" style="display:none;" />
       <button id="fetchTmdbBtn" class="btn">Fetch Info from TMDB</button>
-      <!-- TMDB Preview / Selection Area (horizontal scroll) -->
+      <!-- TMDB Preview / Selection Area (Horizontal Scroll) -->
       <div id="tmdbPreview" class="tmdb-preview"></div>
       <button id="clearPreviewBtn" class="btn btn-clear">Clear Preview</button>
       <button id="submitBtn" class="btn btn-submit">Submit</button>
@@ -76,7 +78,7 @@
     <div class="modal-content detail-content">
       <span class="close-btn" id="closeDetailModal">&times;</span>
       <div class="detail-img">
-        <img id="detailPoster" src="" alt="Poster">
+        <img id="detailPoster" src="" alt="Poster" />
       </div>
       <div class="detail-info">
         <h2 id="detailTitle"></h2>
@@ -87,16 +89,24 @@
     </div>
   </div>
 
-  <!-- Profile Modal -->
+  <!-- Profile Modal (Advanced Layout) -->
   <div class="modal" id="profileModal">
     <div class="modal-content profile-content">
       <span class="close-btn" id="closeProfileModal">&times;</span>
       <div class="profile-info">
-        <img id="profilePhoto" src="" alt="Profile Photo">
+        <img id="profilePhoto" src="" alt="Profile Photo" />
         <h2 id="profileName"></h2>
         <p id="profileEmail"></p>
+        <div class="profile-contacts">
+          <a href="https://discord.com/invite/6SfgHHJQUD?fbclid=PAY2xjawIoQsJleHRuA2FlbQIxMQABpuqjPkxGry7gHHOPzK9RwkdiqUo2Ho2Zcb1YR8CBiyj501haecXENK16DQ_aem_3n6jk7DhhIRPLA08HcCe-A" target="_blank">
+            <i class="fab fa-discord"></i> Discord
+          </a>
+          <a href="https://www.instagram.com/itshakimouuuuu?igsh=MWI1MHNsOG9tOHJjdQ==" target="_blank">
+            <i class="fab fa-instagram"></i> Instagram
+          </a>
+        </div>
       </div>
-      <button id="updateProfileBtn" class="btn">Update Profile</button>
+      <button id="updateProfileBtn" class="btn btn-update">Update Profile</button>
     </div>
   </div>
 
