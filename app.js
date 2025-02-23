@@ -1,98 +1,253 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+import { auth, db, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, signOut } from './firebase.js';
+
+const TMDB_API_KEY = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
+const TMDB_BASE_URL = "https://api.themoviedb.org/3";
+const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500";
+
+// DOM Elements
+const openModalBtn = document.getElementById('openModalBtn');
+const modal = document.getElementById('modal');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const submitBtn = document.getElementById('submitBtn');
+const cardContainer = document.getElementById('card-container');
+const titleInput = document.getElementById('title');
+const contentTypeSelect = document.getElementById('content-type');
+const seasonInput = document.getElementById('season');
+const fetchTmdbBtn = document.getElementById('fetchTmdbBtn');
+const tmdbPreview = document.getElementById('tmdbPreview');
+const searchInput = document.querySelector('.search-bar input');
+
+// Detail Modal Elements
+const detailModal = document.getElementById('detailModal');
+const closeDetailModal = document.getElementById('closeDetailModal');
+const detailPoster = document.getElementById('detailPoster');
+const detailTitle = document.getElementById('detailTitle');
+const detailOverview = document.getElementById('detailOverview');
+const detailRating = document.getElementById('detailRating');
+const detailRelease = document.getElementById('detailRelease');
+
+// Show/hide season input based on content type selection
+contentTypeSelect.addEventListener('change', () => {
+  seasonInput.style.display = contentTypeSelect.value === 'tv' ? 'block' : 'none';
+});
+
+// When user is logged in, load cards
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    loadCards();
+  }
+});
+
+// Function to fetch data from TMDB based on title and type
+async function fetchTMDBData(title, type, season = null) {
+  try {
+    let searchUrl = "";
+    if (type === "movie") {
+      searchUrl = `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
+    } else {
+      searchUrl = `${TMDB_BASE_URL}/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
+    }
+    const searchRes = await fetch(searchUrl);
+    const searchData = await searchRes.json();
+    if (searchData.results && searchData.results.length > 0) {
+      const result = searchData.results[0]; // Take the first result
+      let posterPath = result.poster_path;
+      let overview = result.overview;
+      let rating = result.vote_average;
+      let releaseDate = type === "movie" ? result.release_date : result.first_air_date;
+      
+      // If TV and season provided, fetch season details
+      if (type === "tv" && season) {
+        const tvId = result.id;
+        const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${tvId}/season/${season}?api_key=${TMDB_API_KEY}`);
+        const seasonData = await seasonRes.json();
+        if (seasonData.poster_path) {
+          posterPath = seasonData.poster_path; // Use season poster if available
+        }
+        // Optionally, update overview and release date with season details
+        overview = seasonData.overview || overview;
+        releaseDate = seasonData.air_date || releaseDate;
+      }
+      
+      return {
+        title: result.title || result.name,
+        overview,
+        rating,
+        releaseDate,
+        posterUrl: posterPath ? TMDB_IMG_BASE + posterPath : ""
+      };
+    } else {
+      throw new Error("No results found in TMDB");
+    }
+  } catch (error) {
+    console.error("Error fetching TMDB data:", error);
+    return null;
+  }
+}
+
+// Save card to Firestore
+async function saveCard(cardData) {
+  try {
+    const userId = auth.currentUser.uid;
+    await addDoc(collection(db, "users", userId, "cards"), cardData);
+  } catch (error) {
+    console.error("Error saving card:", error);
+  }
+}
+
+// Load cards from Firestore
+async function loadCards() {
+  try {
+    const userId = auth.currentUser.uid;
+    const querySnapshot = await getDocs(collection(db, "users", userId, "cards"));
+    cardContainer.innerHTML = "";
+    querySnapshot.forEach((docSnap) => {
+      createCardElement(docSnap.data(), docSnap.id);
+    });
+  } catch (error) {
+    console.error("Error loading cards:", error);
+  }
+}
+
+// Create card element with info, edit, delete, and detail buttons
+function createCardElement(cardData, docId) {
+  const card = document.createElement('div');
+  card.classList.add('card');
+  card.dataset.id = docId;
+  card.innerHTML = `
+    <img src="${cardData.posterUrl}" alt="Poster" />
+    <div class="overlay">
+      <div class="title">${cardData.title}</div>
+      <div class="action-buttons">
+        <button class="info-button" onclick="openDetailModalHandler(event, '${docId}')">Info</button>
+        <button class="edit-button" onclick="editCard(this)">Edit</button>
+        <button class="delete-button" onclick="deleteCard(this)">Delete</button>
+      </div>
+    </div>
+  `;
+  cardContainer.appendChild(card);
+}
+
+// Delete card
+window.deleteCard = async (button) => {
+  const card = button.closest('.card');
+  const docId = card.dataset.id;
+  try {
+    const userId = auth.currentUser.uid;
+    await deleteDoc(doc(db, "users", userId, "cards", docId));
+    card.remove();
+  } catch (error) {
+    console.error("Error deleting card:", error);
+  }
+};
+
+// Edit card (similar to delete, pre-fill the modal for editing)
+window.editCard = (button) => {
+  const card = button.closest('.card');
+  const docId = card.dataset.id;
+  const currentTitle = card.querySelector('.title').textContent;
+  // For simplicity, assume you want to re-fetch from TMDB when editing
+  titleInput.value = currentTitle;
+  modal.classList.add('open');
   
-  <!-- Google Search Console Verification -->
-  <meta name="google-site-verification" content="bK4H_h0gQz9YBc08N0XAoZk6x4hesxaDLArOXNcXixw" />
-  
-  <!-- SEO Metadata -->
-  <title>UR FAV'S | Organize & Discover Movies & TV Shows</title>
-  <meta name="description" content="Discover, organize, and share your favorite movies and TV shows. Get posters, details and more automatically from TMDB!" />
-  <meta name="keywords" content="movies, tv shows, TMDB, poster, Firebase, Google Login, modern design" />
+  submitBtn.onclick = async (e) => {
+    e.preventDefault();
+    const type = contentTypeSelect.value;
+    const season = type === 'tv' ? seasonInput.value : null;
+    const tmdbData = await fetchTMDBData(titleInput.value, type, season);
+    if (tmdbData) {
+      try {
+        const userId = auth.currentUser.uid;
+        await updateDoc(doc(db, "users", userId, "cards", docId), tmdbData);
+        // Update card element with new data
+        const cardImg = card.querySelector('img');
+        cardImg.src = tmdbData.posterUrl;
+        card.querySelector('.title').textContent = tmdbData.title;
+        modal.classList.remove('open');
+      } catch (error) {
+        console.error("Error updating card:", error);
+      }
+    }
+  };
+};
 
-  <!-- Styles & Fonts -->
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Poppins:wght@300;600&display=swap" />
-</head>
-<body>
-  <!-- Login Container -->
-  <div class="login-container" id="loginContainer">
-    <div class="login-box">
-      <h2>Login to UR FAV'S</h2>
-      <button class="google-btn" id="googleLoginBtn">
-        <i class="fab fa-google"></i> Login with Google
-      </button>
-    </div>
-  </div>
+// Fetch TMDB info button click in modal (preview before submitting)
+fetchTmdbBtn.addEventListener('click', async (e) => {
+  e.preventDefault();
+  const title = titleInput.value;
+  const type = contentTypeSelect.value;
+  const season = type === 'tv' ? seasonInput.value : null;
+  if (title) {
+    const tmdbData = await fetchTMDBData(title, type, season);
+    if (tmdbData) {
+      tmdbPreview.innerHTML = `
+        <img src="${tmdbData.posterUrl}" alt="Poster Preview" />
+        <h3>${tmdbData.title}</h3>
+        <p>${tmdbData.overview.substring(0, 100)}...</p>
+      `;
+    } else {
+      tmdbPreview.textContent = "No data found.";
+    }
+  }
+});
 
-  <!-- Main Content -->
-  <div class="hidden" id="mainContent">
-    <header>
-      <h1>UR FAV'S</h1>
-      <div class="search-bar">
-        <input type="text" placeholder="Search for movies, TV shows, etc..." />
-      </div>
-      <button id="logoutBtn" class="logout-btn">Logout</button>
-    </header>
+// Submit new card
+submitBtn.addEventListener('click', async (e) => {
+  e.preventDefault();
+  const title = titleInput.value;
+  const type = contentTypeSelect.value;
+  const season = type === 'tv' ? seasonInput.value : null;
+  if (title) {
+    const tmdbData = await fetchTMDBData(title, type, season);
+    if (tmdbData) {
+      await saveCard(tmdbData);
+      await loadCards();
+      modal.classList.remove('open');
+      titleInput.value = '';
+      seasonInput.value = '';
+      tmdbPreview.innerHTML = '';
+    }
+  }
+});
 
-    <button class="add-card-btn" id="openModalBtn">
-      <i class="fas fa-plus"></i> Add New Content
-    </button>
+// Open Add Modal
+openModalBtn.addEventListener('click', () => modal.classList.add('open'));
+// Close Add Modal
+closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
 
-    <!-- Add/Edit Modal -->
-    <div class="modal" id="modal">
-      <div class="modal-content">
-        <span class="close-btn" id="closeModalBtn">&times;</span>
-        <h2>Add New Content</h2>
-        <input type="text" id="title" placeholder="Title" />
-        <!-- New selection for content type -->
-        <select id="content-type">
-          <option value="movie">Movie</option>
-          <option value="tv">TV Show</option>
-        </select>
-        <!-- Season input, visible only for TV Shows -->
-        <input type="number" id="season" placeholder="Season (if TV Show)" min="1" style="display:none;" />
-        <button id="fetchTmdbBtn">Fetch Info from TMDB</button>
-        <!-- Display fetched info preview (optional) -->
-        <div id="tmdbPreview" class="tmdb-preview"></div>
-        <button id="submitBtn">Submit</button>
-      </div>
-    </div>
+// Open detail modal to show full info
+window.openDetailModalHandler = async (e, docId) => {
+  e.stopPropagation(); // prevent propagation from card container
+  try {
+    const userId = auth.currentUser.uid;
+    const querySnapshot = await getDocs(collection(db, "users", userId, "cards"));
+    let cardData;
+    querySnapshot.forEach((docSnap) => {
+      if (docSnap.id === docId) {
+        cardData = docSnap.data();
+      }
+    });
+    if (cardData) {
+      detailPoster.src = cardData.posterUrl;
+      detailTitle.textContent = cardData.title;
+      detailOverview.textContent = cardData.overview;
+      detailRating.textContent = `Rating: ${cardData.rating}`;
+      detailRelease.textContent = `Release: ${cardData.releaseDate}`;
+      detailModal.classList.add('open');
+    }
+  } catch (error) {
+    console.error("Error opening detail modal:", error);
+  }
+};
 
-    <!-- Detail Popup Modal -->
-    <div class="modal" id="detailModal">
-      <div class="modal-content detail-content">
-        <span class="close-btn" id="closeDetailModal">&times;</span>
-        <div class="detail-img">
-          <img id="detailPoster" src="" alt="Poster" />
-        </div>
-        <div class="detail-info">
-          <h2 id="detailTitle"></h2>
-          <p id="detailOverview"></p>
-          <p id="detailRating"></p>
-          <p id="detailRelease"></p>
-        </div>
-      </div>
-    </div>
+// Close detail modal
+closeDetailModal.addEventListener('click', () => detailModal.classList.remove('open'));
 
-    <!-- Card Container -->
-    <div class="card-container" id="card-container"></div>
-
-    <!-- Footer -->
-    <footer>
-      <p>
-        Created with ❤️ by Hakim &copy; 2025 | 
-        <a href="privacy-policy.html">Privacy Policy</a> | 
-        <a href="terms-of-service.html">Terms of Service</a>
-      </p>
-    </footer>
-  </div>
-
-  <!-- Scripts -->
-  <script type="module" src="firebase.js"></script>
-  <script type="module" src="app.js"></script>
-</body>
-</html>
+// Search functionality
+searchInput.addEventListener('input', () => {
+  const query = searchInput.value.toLowerCase();
+  document.querySelectorAll('.card').forEach(card => {
+    const title = card.querySelector('.title').textContent.toLowerCase();
+    card.style.display = title.includes(query) ? 'block' : 'none';
+  });
+});
