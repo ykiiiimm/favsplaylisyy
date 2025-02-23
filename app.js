@@ -4,7 +4,7 @@ const TMDB_API_KEY = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500";
 
-// DOM Elements (Content & TMDB)
+// DOM Elements – Content & TMDB
 const openModalBtn = document.getElementById('openModalBtn');
 const modal = document.getElementById('modal');
 const closeModalBtn = document.getElementById('closeModalBtn');
@@ -18,7 +18,7 @@ const tmdbPreview = document.getElementById('tmdbPreview');
 const clearPreviewBtn = document.getElementById('clearPreviewBtn');
 const searchInput = document.getElementById('searchInput');
 
-// DOM Elements (Detail Modal)
+// DOM Elements – Detail Modal
 const detailModal = document.getElementById('detailModal');
 const closeDetailModal = document.getElementById('closeDetailModal');
 const detailPoster = document.getElementById('detailPoster');
@@ -27,7 +27,7 @@ const detailOverview = document.getElementById('detailOverview');
 const detailRating = document.getElementById('detailRating');
 const detailRelease = document.getElementById('detailRelease');
 
-// DOM Elements (Profile Modal)
+// DOM Elements – Profile Modal
 const profileBtn = document.getElementById('profileBtn');
 const profileModal = document.getElementById('profileModal');
 const closeProfileModal = document.getElementById('closeProfileModal');
@@ -43,40 +43,34 @@ const saveProfileBtn = document.getElementById('saveProfileBtn');
 const toggleContactBtn = document.getElementById('toggleContactBtn');
 const contactInfo = document.getElementById('contactInfo');
 
-// Global variable to store the selected TMDB result
+// Global variable to store selected TMDB result
 let selectedTMDBData = null;
 
-// Show/hide season input based on content type selection
+// Show/hide season input based on content type
 contentTypeSelect.addEventListener('change', () => {
   seasonInput.style.display = contentTypeSelect.value === 'tv' ? 'block' : 'none';
 });
 
-// Profile Modal: Open and populate from Firebase Auth and Firestore
+// Profile Modal: Open and populate profile info
 profileBtn.addEventListener('click', async () => {
   const user = auth.currentUser;
   if (user) {
-    // Set basic auth info
     profilePhoto.src = user.photoURL || 'default-profile.png';
-    // For extra profile info, attempt to load from Firestore (if exists)
-    const profileDoc = await getDocs(collection(db, "users", user.uid, "profile"));
-    let profileData;
-    profileDoc.forEach(docSnap => {
-      profileData = docSnap.data();
-    });
-    profileNicknameDisplay.textContent = (profileData && profileData.nickname) || user.displayName || "Anonymous";
-    profileTaglineDisplay.textContent = (profileData && profileData.tagline) || "Your tagline here";
-    profileBioDisplay.textContent = (profileData && profileData.bio) || "Write something about yourself...";
+    // For extended profile data, you could load from Firestore here
+    profileNicknameDisplay.textContent = user.displayName || "Anonymous";
+    profileTaglineDisplay.textContent = "Your tagline here";
+    profileBioDisplay.textContent = "Write a short bio about yourself...";
     profileModal.classList.add('open');
   }
 });
 closeProfileModal.addEventListener('click', () => profileModal.classList.remove('open'));
 
-// Toggle Contact Info in Profile Modal
+// Toggle contact info in profile modal
 toggleContactBtn.addEventListener('click', () => {
   contactInfo.classList.toggle('hidden');
 });
 
-// Auth State Listener
+// Auth state listener
 auth.onAuthStateChanged(user => {
   if (user) {
     document.getElementById('loginContainer').classList.add('hidden');
@@ -88,7 +82,7 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-// TMDB Functions
+// TMDB functions
 async function fetchTMDBResults(title, type) {
   const searchUrl = type === 'movie'
     ? `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`
@@ -151,7 +145,7 @@ function displayTMDBOptions(results) {
   tmdbPreview.appendChild(container);
 }
 
-// Firestore Card Functions
+// Firestore card functions
 async function saveCard(cardData) {
   try {
     const userId = auth.currentUser.uid;
@@ -317,7 +311,7 @@ searchInput.addEventListener('input', () => {
   });
 });
 
-// Profile Picture Preview on File Input
+// Profile Picture Preview
 profilePicInput.addEventListener('change', () => {
   const file = profilePicInput.files[0];
   if (file) {
@@ -337,14 +331,10 @@ saveProfileBtn.addEventListener('click', async () => {
     nickname: profileNickname.value || user.displayName || "Anonymous",
     tagline: profileTagline.value || "Your tagline here",
     bio: profileBio.value || "Write something about yourself..."
-    // You might add a field for profilePic if you implement file upload to storage.
   };
   try {
-    // Save/update profile data in a subcollection "profile" for the user
     const profileRef = collection(db, "users", user.uid, "profile");
-    // For simplicity, add a new doc (in production you might want to overwrite a fixed doc)
     await addDoc(profileRef, profileData);
-    // Update display fields
     profileNicknameDisplay.textContent = profileData.nickname;
     profileTaglineDisplay.textContent = profileData.tagline;
     profileBioDisplay.textContent = profileData.bio;
