@@ -12,7 +12,8 @@ import {
   getDocs,
   deleteDoc,
   doc,
-  updateDoc
+  updateDoc,
+  setDoc
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -30,7 +31,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
 
-// Export Firestore functions
+// Export Firestore functions (including setDoc)
 export { 
   auth, 
   provider, 
@@ -41,10 +42,11 @@ export {
   deleteDoc,
   doc,
   updateDoc,
+  setDoc,
   signOut 
 };
 
-// Login/Logout Logic ================
+// Login/Logout Logic
 const loginContainer = document.getElementById('loginContainer');
 const mainContent = document.getElementById('mainContent');
 const googleLoginBtn = document.getElementById('googleLoginBtn');
