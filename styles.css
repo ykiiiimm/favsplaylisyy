@@ -169,30 +169,25 @@ header {
   cursor: pointer;
 }
 
-/* TMDB Preview & Options */
+/* TMDB Preview & Options (Horizontal Layout) */
 .tmdb-preview {
   margin: 10px 0;
   text-align: center;
 }
-.tmdb-preview img {
-  max-width: 100%;
-  max-height: 300px;
-  object-fit: contain;
-  border-radius: 5px;
-}
 .tmdb-options {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  overflow-x: auto;
   gap: 10px;
+  padding: 5px;
 }
 .tmdb-option {
+  flex: 0 0 auto;
+  width: 150px;
   cursor: pointer;
   background: var(--secondary-color);
   padding: 5px;
   border-radius: 5px;
   text-align: center;
-  max-width: 120px;
 }
 .tmdb-option img {
   width: 100%;
@@ -273,22 +268,26 @@ header {
   transform: scale(1.1);
 }
 
-/* Detail Modal Specific Styles (Vertical Layout) */
+/* Detail Modal Specific Styles (Horizontal Layout) */
 .detail-content {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  max-width: 400px;
+  max-width: 800px;
   width: 90%;
   margin: auto;
+}
+.detail-img {
+  flex: 1;
 }
 .detail-img img {
   width: 100%;
   border-radius: 10px;
 }
 .detail-info {
-  margin-top: 20px;
-  text-align: center;
+  flex: 1;
+  margin-left: 20px;
+  text-align: left;
 }
 .detail-info h2 {
   margin-bottom: 10px;
