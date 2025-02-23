@@ -1,138 +1,98 @@
-import { auth, db, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from './firebase.js';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Google Search Console Verification -->
+  <meta name="google-site-verification" content="bK4H_h0gQz9YBc08N0XAoZk6x4hesxaDLArOXNcXixw" />
+  
+  <!-- SEO Metadata -->
+  <title>UR FAV'S | Organize & Discover Movies & TV Shows</title>
+  <meta name="description" content="Discover, organize, and share your favorite movies and TV shows. Get posters, details and more automatically from TMDB!" />
+  <meta name="keywords" content="movies, tv shows, TMDB, poster, Firebase, Google Login, modern design" />
 
-const openModalBtn = document.getElementById('openModalBtn');
-const modal = document.getElementById('modal');
-const closeModalBtn = document.getElementById('closeModalBtn');
-const submitBtn = document.getElementById('submitBtn');
-const cardContainer = document.getElementById('card-container');
-const titleInput = document.getElementById('title');
-const descriptionInput = document.getElementById('description');
-const imageUrlInput = document.getElementById('image-url');
-const searchInput = document.querySelector('.search-bar input');
+  <!-- Styles & Fonts -->
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Poppins:wght@300;600&display=swap" />
+</head>
+<body>
+  <!-- Login Container -->
+  <div class="login-container" id="loginContainer">
+    <div class="login-box">
+      <h2>Login to UR FAV'S</h2>
+      <button class="google-btn" id="googleLoginBtn">
+        <i class="fab fa-google"></i> Login with Google
+      </button>
+    </div>
+  </div>
 
-// Load cards on login
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    loadCards();
-  }
-});
+  <!-- Main Content -->
+  <div class="hidden" id="mainContent">
+    <header>
+      <h1>UR FAV'S</h1>
+      <div class="search-bar">
+        <input type="text" placeholder="Search for movies, TV shows, etc..." />
+      </div>
+      <button id="logoutBtn" class="logout-btn">Logout</button>
+    </header>
 
-// Save card to Firestore
-async function saveCard(title, description, imageUrl) {
-  try {
-    const userId = auth.currentUser.uid;
-    await addDoc(collection(db, "users", userId, "cards"), {
-      title,
-      description,
-      imageUrl
-    });
-  } catch (error) {
-    console.error("Error saving card:", error);
-  }
-}
+    <button class="add-card-btn" id="openModalBtn">
+      <i class="fas fa-plus"></i> Add New Content
+    </button>
 
-// Load cards from Firestore
-async function loadCards() {
-  try {
-    const userId = auth.currentUser.uid;
-    const querySnapshot = await getDocs(collection(db, "users", userId, "cards"));
-    cardContainer.innerHTML = "";
-    querySnapshot.forEach((doc) => {
-      createCardElement(doc.data(), doc.id);
-    });
-  } catch (error) {
-    console.error("Error loading cards:", error);
-  }
-}
-
-// Create card element
-function createCardElement(cardData, docId) {
-  const card = document.createElement('div');
-  card.classList.add('card');
-  card.dataset.id = docId;
-  card.innerHTML = `
-    <img src="${cardData.imageUrl}" alt="Poster">
-    <div class="overlay">
-      <div class="title">${cardData.title}</div>
-      <div class="description">${cardData.description}</div>
-      <div>
-        <button class="edit-button" onclick="editCard(this)">Edit</button>
-        <button class="delete-button" onclick="deleteCard(this)">Delete</button>
+    <!-- Add/Edit Modal -->
+    <div class="modal" id="modal">
+      <div class="modal-content">
+        <span class="close-btn" id="closeModalBtn">&times;</span>
+        <h2>Add New Content</h2>
+        <input type="text" id="title" placeholder="Title" />
+        <!-- New selection for content type -->
+        <select id="content-type">
+          <option value="movie">Movie</option>
+          <option value="tv">TV Show</option>
+        </select>
+        <!-- Season input, visible only for TV Shows -->
+        <input type="number" id="season" placeholder="Season (if TV Show)" min="1" style="display:none;" />
+        <button id="fetchTmdbBtn">Fetch Info from TMDB</button>
+        <!-- Display fetched info preview (optional) -->
+        <div id="tmdbPreview" class="tmdb-preview"></div>
+        <button id="submitBtn">Submit</button>
       </div>
     </div>
-  `;
-  cardContainer.appendChild(card);
-}
 
-// Delete card
-window.deleteCard = async (button) => {
-  const card = button.closest('.card');
-  const docId = card.dataset.id;
-  try {
-    const userId = auth.currentUser.uid;
-    await deleteDoc(doc(db, "users", userId, "cards", docId));
-    card.remove();
-  } catch (error) {
-    console.error("Error deleting card:", error);
-  }
-};
+    <!-- Detail Popup Modal -->
+    <div class="modal" id="detailModal">
+      <div class="modal-content detail-content">
+        <span class="close-btn" id="closeDetailModal">&times;</span>
+        <div class="detail-img">
+          <img id="detailPoster" src="" alt="Poster" />
+        </div>
+        <div class="detail-info">
+          <h2 id="detailTitle"></h2>
+          <p id="detailOverview"></p>
+          <p id="detailRating"></p>
+          <p id="detailRelease"></p>
+        </div>
+      </div>
+    </div>
 
-// Edit card
-window.editCard = (button) => {
-  const card = button.closest('.card');
-  const docId = card.dataset.id;
-  const currentTitle = card.querySelector('.title').textContent;
-  const currentDescription = card.querySelector('.description').textContent;
-  const currentImageUrl = card.querySelector('img').src;
+    <!-- Card Container -->
+    <div class="card-container" id="card-container"></div>
 
-  titleInput.value = currentTitle;
-  descriptionInput.value = currentDescription;
-  imageUrlInput.value = currentImageUrl;
-  modal.classList.add('open');
+    <!-- Footer -->
+    <footer>
+      <p>
+        Created with ❤️ by Hakim &copy; 2025 | 
+        <a href="privacy-policy.html">Privacy Policy</a> | 
+        <a href="terms-of-service.html">Terms of Service</a>
+      </p>
+    </footer>
+  </div>
 
-  submitBtn.onclick = async (e) => {
-    e.preventDefault();
-    if (titleInput.value && descriptionInput.value && imageUrlInput.value) {
-      try {
-        const userId = auth.currentUser.uid;
-        await updateDoc(doc(db, "users", userId, "cards", docId), {
-          title: titleInput.value,
-          description: descriptionInput.value,
-          imageUrl: imageUrlInput.value
-        });
-        card.querySelector('.title').textContent = titleInput.value;
-        card.querySelector('.description').textContent = descriptionInput.value;
-        card.querySelector('img').src = imageUrlInput.value;
-        modal.classList.remove('open');
-      } catch (error) {
-        console.error("Error updating card:", error);
-      }
-    }
-  };
-};
-
-// Submit new card
-submitBtn.addEventListener('click', async (e) => {
-  e.preventDefault();
-  if (titleInput.value && descriptionInput.value && imageUrlInput.value) {
-    await saveCard(titleInput.value, descriptionInput.value, imageUrlInput.value);
-    await loadCards();
-    modal.classList.remove('open');
-    titleInput.value = '';
-    descriptionInput.value = '';
-    imageUrlInput.value = '';
-  }
-});
-
-// Search functionality
-searchInput.addEventListener('input', () => {
-  const query = searchInput.value.toLowerCase();
-  document.querySelectorAll('.card').forEach(card => {
-    const title = card.querySelector('.title').textContent.toLowerCase();
-    card.style.display = title.includes(query) ? 'block' : 'none';
-  });
-});
-
-// Modal functionality
-openModalBtn.addEventListener('click', () => modal.classList.add('open'));
-closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
+  <!-- Scripts -->
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
