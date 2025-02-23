@@ -1,33 +1,88 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
 import { 
-  getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged 
+  getAuth, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  signOut,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 import { 
-  getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc 
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
-// 🔒 Firebase config (replace with yours)
 const firebaseConfig = {
   apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
   authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
   projectId: "ykiiiiiiiiiiiiiiim",
   storageBucket: "ykiiiiiiiiiiiiiiim.appspot.com",
   messagingSenderId: "1042062383289",
-  appId: "1:1042062383289:web:a4f43aa710b06a0f38a368"
+  appId: "1:1042062383289:web:a4f43aa710b06a0f38a368",
+  measurementId: "G-KNVLQ0TMB0"
 };
 
-// 🔑 TMDb API key (exposed securely)
-const tmdbApiKey = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
-
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
 
-// Export everything
+document.addEventListener("DOMContentLoaded", () => {
+  const loginContainer = document.getElementById("loginContainer");
+  const mainContent = document.getElementById("mainContent");
+  const googleLoginBtn = document.getElementById("googleLoginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  if (googleLoginBtn) {
+    googleLoginBtn.addEventListener("click", () => {
+      signInWithPopup(auth, provider)
+        .then(() => {
+          loginContainer.classList.add("hidden");
+          mainContent.classList.remove("hidden");
+        })
+        .catch((error) => {
+          console.error("Login error:", error);
+        });
+    });
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      signOut(auth)
+        .then(() => {
+          loginContainer.classList.remove("hidden");
+          mainContent.classList.add("hidden");
+        })
+        .catch((error) => {
+          console.error("Logout error:", error);
+        });
+    });
+  }
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      loginContainer.classList.add("hidden");
+      mainContent.classList.remove("hidden");
+    } else {
+      loginContainer.classList.remove("hidden");
+      mainContent.classList.add("hidden");
+    }
+  });
+});
+
 export { 
-  auth, provider, db, tmdbApiKey,
-  collection, addDoc, getDocs, deleteDoc, doc, updateDoc,
-  signOut 
+  auth, 
+  provider, 
+  db,
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc,
+  signOut
 };
