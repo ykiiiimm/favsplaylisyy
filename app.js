@@ -16,7 +16,7 @@ const seasonInput = document.getElementById('season');
 const fetchTmdbBtn = document.getElementById('fetchTmdbBtn');
 const tmdbPreview = document.getElementById('tmdbPreview');
 const clearPreviewBtn = document.getElementById('clearPreviewBtn');
-const searchInput = document.querySelector('.search-bar input');
+const searchInput = document.getElementById('searchInput');
 
 // Detail Modal Elements
 const detailModal = document.getElementById('detailModal');
@@ -34,7 +34,6 @@ const closeProfileModal = document.getElementById('closeProfileModal');
 const profilePhoto = document.getElementById('profilePhoto');
 const profileName = document.getElementById('profileName');
 const profileEmail = document.getElementById('profileEmail');
-// Optionally, updateProfileBtn can be used for profile update functionality
 const updateProfileBtn = document.getElementById('updateProfileBtn');
 
 // Global variable to store the selected TMDB result
@@ -50,29 +49,31 @@ profileBtn.addEventListener('click', () => {
   const user = auth.currentUser;
   if (user) {
     profilePhoto.src = user.photoURL || 'default-profile.png';
-    profileName.textContent = user.displayName || "No Name";
+    profileName.textContent = user.displayName || "Anonymous";
     profileEmail.textContent = user.email || "No Email";
     profileModal.classList.add('open');
   }
 });
 closeProfileModal.addEventListener('click', () => profileModal.classList.remove('open'));
 
-// When user is logged in, load cards
-auth.onAuthStateChanged((user) => {
+// Auth state listener
+auth.onAuthStateChanged(user => {
   if (user) {
+    document.getElementById('loginContainer').classList.add('hidden');
+    document.getElementById('mainContent').classList.remove('hidden');
     loadCards();
+  } else {
+    document.getElementById('loginContainer').classList.remove('hidden');
+    document.getElementById('mainContent').classList.add('hidden');
   }
 });
 
-// Fetch a list of TMDB results (without season details)
+// Fetch TMDB results (list of options)
 async function fetchTMDBResults(title, type) {
+  let searchUrl = type === 'movie'
+    ? `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`
+    : `${TMDB_BASE_URL}/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
   try {
-    let searchUrl = "";
-    if (type === "movie") {
-      searchUrl = `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
-    } else {
-      searchUrl = `${TMDB_BASE_URL}/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
-    }
     const res = await fetch(searchUrl);
     const data = await res.json();
     return data.results || [];
@@ -82,56 +83,56 @@ async function fetchTMDBResults(title, type) {
   }
 }
 
-// Display a list of selectable TMDB options in a horizontal layout
+// Display selectable TMDB options (horizontal scroll)
 function displayTMDBOptions(results) {
   tmdbPreview.innerHTML = "";
   if (results.length === 0) {
     tmdbPreview.textContent = "No results found.";
     return;
   }
-  const list = document.createElement('div');
-  list.classList.add('tmdb-options');
+  const container = document.createElement('div');
+  container.classList.add('tmdb-options');
   results.forEach(result => {
-    const item = document.createElement('div');
-    item.classList.add('tmdb-option');
-    item.innerHTML = `
-      <img src="${result.poster_path ? TMDB_IMG_BASE + result.poster_path : ''}" alt="${result.title || result.name}" />
+    const option = document.createElement('div');
+    option.classList.add('tmdb-option');
+    option.innerHTML = `
+      <img src="${result.poster_path ? TMDB_IMG_BASE + result.poster_path : ''}" alt="${result.title || result.name}">
       <p>${result.title || result.name} (${(result.release_date || result.first_air_date || '').substring(0,4)})</p>
     `;
-    item.addEventListener('click', async () => {
-      let tmdbData = {
+    option.addEventListener('click', async () => {
+      let data = {
         title: result.title || result.name,
         overview: result.overview,
         rating: result.vote_average,
-        releaseDate: contentTypeSelect.value === "movie" ? result.release_date : result.first_air_date,
+        releaseDate: contentTypeSelect.value === 'movie' ? result.release_date : result.first_air_date,
         posterUrl: result.poster_path ? TMDB_IMG_BASE + result.poster_path : ""
       };
-      if (contentTypeSelect.value === "tv" && seasonInput.value) {
+      if (contentTypeSelect.value === 'tv' && seasonInput.value) {
         try {
           const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${seasonInput.value}?api_key=${TMDB_API_KEY}`);
           const seasonData = await seasonRes.json();
           if (seasonData.poster_path) {
-            tmdbData.posterUrl = TMDB_IMG_BASE + seasonData.poster_path;
+            data.posterUrl = TMDB_IMG_BASE + seasonData.poster_path;
           }
-          tmdbData.overview = seasonData.overview || tmdbData.overview;
-          tmdbData.releaseDate = seasonData.air_date || tmdbData.releaseDate;
+          data.overview = seasonData.overview || data.overview;
+          data.releaseDate = seasonData.air_date || data.releaseDate;
         } catch (error) {
           console.error("Error fetching season data:", error);
         }
       }
-      selectedTMDBData = tmdbData;
+      selectedTMDBData = data;
       tmdbPreview.innerHTML = `
-        <img src="${selectedTMDBData.posterUrl}" alt="Poster Preview" />
+        <img src="${selectedTMDBData.posterUrl}" alt="Poster Preview">
         <h3>${selectedTMDBData.title}</h3>
         <p>${selectedTMDBData.overview.substring(0, 100)}...</p>
       `;
     });
-    list.appendChild(item);
+    container.appendChild(option);
   });
-  tmdbPreview.appendChild(list);
+  tmdbPreview.appendChild(container);
 }
 
-// Save card to Firestore
+// Save a card to Firestore
 async function saveCard(cardData) {
   try {
     const userId = auth.currentUser.uid;
@@ -145,9 +146,9 @@ async function saveCard(cardData) {
 async function loadCards() {
   try {
     const userId = auth.currentUser.uid;
-    const querySnapshot = await getDocs(collection(db, "users", userId, "cards"));
+    const snapshot = await getDocs(collection(db, "users", userId, "cards"));
     cardContainer.innerHTML = "";
-    querySnapshot.forEach((docSnap) => {
+    snapshot.forEach(docSnap => {
       createCardElement(docSnap.data(), docSnap.id);
     });
   } catch (error) {
@@ -155,26 +156,25 @@ async function loadCards() {
   }
 }
 
-// Create card element with info, edit, delete, and detail buttons
+// Create a card element for display
 function createCardElement(cardData, docId) {
   const card = document.createElement('div');
   card.classList.add('card');
   card.dataset.id = docId;
   card.innerHTML = `
-    <img src="${cardData.posterUrl}" alt="Poster" />
+    <img src="${cardData.posterUrl}" alt="Poster">
     <div class="overlay">
       <div class="title">${cardData.title}</div>
       <div class="action-buttons">
-        <button class="info-button" onclick="openDetailModalHandler(event, '${docId}')">Info</button>
-        <button class="edit-button" onclick="editCard(this)">Edit</button>
-        <button class="delete-button" onclick="deleteCard(this)">Delete</button>
+        <button class="btn btn-info" onclick="openDetailModalHandler(event, '${docId}')">Info</button>
+        <button class="btn btn-edit" onclick="editCard(this)">Edit</button>
+        <button class="btn btn-delete" onclick="deleteCard(this)">Delete</button>
       </div>
     </div>
   `;
   cardContainer.appendChild(card);
 }
 
-// Delete card
 window.deleteCard = async (button) => {
   const card = button.closest('.card');
   const docId = card.dataset.id;
@@ -187,14 +187,11 @@ window.deleteCard = async (button) => {
   }
 };
 
-// Edit card (pre-fill the modal for editing)
 window.editCard = (button) => {
   const card = button.closest('.card');
   const docId = card.dataset.id;
-  const currentTitle = card.querySelector('.title').textContent;
-  titleInput.value = currentTitle;
+  titleInput.value = card.querySelector('.title').textContent;
   modal.classList.add('open');
-  
   submitBtn.onclick = async (e) => {
     e.preventDefault();
     const type = contentTypeSelect.value;
@@ -202,32 +199,31 @@ window.editCard = (button) => {
     const results = await fetchTMDBResults(titleInput.value, type);
     if (results.length > 0) {
       let result = results[0];
-      let tmdbData = {
+      let data = {
         title: result.title || result.name,
         overview: result.overview,
         rating: result.vote_average,
-        releaseDate: type === "movie" ? result.release_date : result.first_air_date,
+        releaseDate: type === 'movie' ? result.release_date : result.first_air_date,
         posterUrl: result.poster_path ? TMDB_IMG_BASE + result.poster_path : ""
       };
-      if (type === "tv" && season) {
+      if (type === 'tv' && season) {
         try {
           const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${season}?api_key=${TMDB_API_KEY}`);
           const seasonData = await seasonRes.json();
           if (seasonData.poster_path) {
-            tmdbData.posterUrl = TMDB_IMG_BASE + seasonData.poster_path;
+            data.posterUrl = TMDB_IMG_BASE + seasonData.poster_path;
           }
-          tmdbData.overview = seasonData.overview || tmdbData.overview;
-          tmdbData.releaseDate = seasonData.air_date || tmdbData.releaseDate;
+          data.overview = seasonData.overview || data.overview;
+          data.releaseDate = seasonData.air_date || data.releaseDate;
         } catch (error) {
           console.error("Error fetching season data:", error);
         }
       }
       try {
         const userId = auth.currentUser.uid;
-        await updateDoc(doc(db, "users", userId, "cards", docId), tmdbData);
-        const cardImg = card.querySelector('img');
-        cardImg.src = tmdbData.posterUrl;
-        card.querySelector('.title').textContent = tmdbData.title;
+        await updateDoc(doc(db, "users", userId, "cards", docId), data);
+        card.querySelector('img').src = data.posterUrl;
+        card.querySelector('.title').textContent = data.title;
         modal.classList.remove('open');
       } catch (error) {
         console.error("Error updating card:", error);
@@ -236,7 +232,6 @@ window.editCard = (button) => {
   };
 };
 
-// Fetch TMDB info button click (display selection options)
 fetchTmdbBtn.addEventListener('click', async (e) => {
   e.preventDefault();
   const title = titleInput.value;
@@ -247,14 +242,12 @@ fetchTmdbBtn.addEventListener('click', async (e) => {
   }
 });
 
-// Clear TMDB preview
 clearPreviewBtn.addEventListener('click', (e) => {
   e.preventDefault();
   tmdbPreview.innerHTML = "";
   selectedTMDBData = null;
 });
 
-// Submit new card using the selected TMDB data
 submitBtn.addEventListener('click', async (e) => {
   e.preventDefault();
   if (!selectedTMDBData) {
@@ -270,18 +263,16 @@ submitBtn.addEventListener('click', async (e) => {
   selectedTMDBData = null;
 });
 
-// Open and close Add Modal
 openModalBtn.addEventListener('click', () => modal.classList.add('open'));
 closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
 
-// Open detail modal to show full info (horizontal layout)
 window.openDetailModalHandler = async (e, docId) => {
   e.stopPropagation();
   try {
     const userId = auth.currentUser.uid;
-    const querySnapshot = await getDocs(collection(db, "users", userId, "cards"));
+    const snapshot = await getDocs(collection(db, "users", userId, "cards"));
     let cardData;
-    querySnapshot.forEach((docSnap) => {
+    snapshot.forEach(docSnap => {
       if (docSnap.id === docId) {
         cardData = docSnap.data();
       }
@@ -298,9 +289,9 @@ window.openDetailModalHandler = async (e, docId) => {
     console.error("Error opening detail modal:", error);
   }
 };
+
 closeDetailModal.addEventListener('click', () => detailModal.classList.remove('open'));
 
-// Search functionality
 searchInput.addEventListener('input', () => {
   const query = searchInput.value.toLowerCase();
   document.querySelectorAll('.card').forEach(card => {
