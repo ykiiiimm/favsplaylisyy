@@ -1,11 +1,11 @@
-/* Base Variables & Reset */
+/* Base & Variables */
 :root {
-  --primary-color: #e91e63;
-  --secondary-color: #3f51b5;
-  --accent-color: #f8f8f8;
-  --background-color: #121212;
-  --card-background: #1e1e1e;
-  --nav-background: linear-gradient(90deg, #e91e63, #3f51b5);
+  --primary-color: #2196f3;       /* Blue */
+  --secondary-color: #f44336;     /* Red */
+  --accent-color: #ffffff;        /* White */
+  --background-color: #121212;    
+  --card-background: #1e1e1e;     
+  --nav-background: linear-gradient(90deg, #2196f3, #f44336);
   --modal-background: #1e1e1e;
   --font-family: 'Montserrat', sans-serif;
 }
@@ -38,7 +38,7 @@ a {
   background: url('https://source.unsplash.com/1600x900/?cinema,night') no-repeat center center/cover;
 }
 .login-card {
-  background: rgba(30, 30, 30, 0.9);
+  background: rgba(30,30,30,0.9);
   padding: 40px;
   border-radius: 10px;
   text-align: center;
@@ -138,7 +138,7 @@ header {
 }
 .btn-add:hover {
   transform: scale(1.05);
-  box-shadow: 0 8px 16px rgba(233, 30, 99, 0.4);
+  box-shadow: 0 8px 16px rgba(33,150,243,0.4);
 }
 
 /* Cards Grid */
@@ -389,6 +389,18 @@ footer {
 }
 footer a:hover {
   text-decoration: underline;
+}
+.social-links {
+  margin-left: 10px;
+}
+.social-links a {
+  margin: 0 5px;
+  font-size: 1.2rem;
+  color: var(--accent-color);
+  transition: color 0.3s;
+}
+.social-links a:hover {
+  color: var(--primary-color);
 }
 
 /* Animations */
