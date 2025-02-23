@@ -227,7 +227,8 @@ header {
 }
 .modal-content input,
 .modal-content select,
-.modal-content button {
+.modal-content button,
+.modal-content textarea {
   width: 100%;
   margin: 10px 0;
   padding: 12px;
@@ -242,7 +243,7 @@ header {
   transition: background 0.3s ease;
 }
 .modal-content button:hover {
-  background: darken(var(--primary-color), 10%);
+  opacity: 0.9;
 }
 .close-btn {
   position: absolute;
@@ -321,39 +322,62 @@ header {
   padding: 20px;
   border-radius: 10px;
   width: 90%;
-  max-width: 400px;
-  text-align: center;
+  max-width: 450px;
   position: relative;
   box-shadow: 0 10px 30px rgba(0,0,0,0.8);
   animation: slideUp 0.5s ease;
 }
-.profile-content img {
+.profile-display {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.profile-display img {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
-.profile-content h2 {
+.profile-display h2 {
   font-size: 1.8rem;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
 }
-.profile-content p {
+.profile-display p {
   font-size: 1rem;
-  margin: 5px 0;
+  margin-bottom: 5px;
 }
-.profile-contacts {
+.profile-edit {
+  border-top: 1px solid var(--secondary-color);
+  padding-top: 15px;
   margin-top: 15px;
+}
+.profile-edit h3 {
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.profile-edit input,
+.profile-edit textarea {
+  margin-bottom: 10px;
+}
+.btn-contact {
+  margin-top: 15px;
+}
+.contact-info {
   display: flex;
   justify-content: center;
   gap: 20px;
+  margin-top: 10px;
 }
-.profile-contacts a {
+.contact-info a {
+  font-size: 1.4rem;
   color: var(--accent-color);
-  font-size: 1.1rem;
   transition: color 0.3s;
 }
-.profile-contacts a:hover {
+.contact-info a:hover {
   color: var(--primary-color);
+}
+.hidden {
+  display: none;
 }
 
 /* Footer */
