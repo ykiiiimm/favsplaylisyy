@@ -1,12 +1,12 @@
 /* Base Variables & Reset */
 :root {
-  --primary-color: #1abc9c;
-  --secondary-color: #34495e;
-  --accent-color: #ecf0f1;
-  --background-color: #2c3e50;
-  --card-background: #34495e;
-  --nav-background: #1abc9c;
-  --modal-background: #2c3e50;
+  --primary-color: #e91e63;
+  --secondary-color: #3f51b5;
+  --accent-color: #f8f8f8;
+  --background-color: #121212;
+  --card-background: #1e1e1e;
+  --nav-background: linear-gradient(90deg, #e91e63, #3f51b5);
+  --modal-background: #1e1e1e;
   --font-family: 'Montserrat', sans-serif;
 }
 
@@ -35,23 +35,27 @@ a {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background: url('https://source.unsplash.com/1600x900/?cinema') no-repeat center center/cover;
+  background: url('https://source.unsplash.com/1600x900/?cinema,night') no-repeat center center/cover;
 }
 .login-card {
-  background: rgba(52,73,94,0.85);
-  padding: 30px;
+  background: rgba(30, 30, 30, 0.9);
+  padding: 40px;
   border-radius: 10px;
   text-align: center;
   max-width: 400px;
   width: 90%;
+  animation: fadeIn 1s ease-out;
 }
-.login-card h2 {
-  font-size: 2rem;
+.login-title {
+  font-size: 3rem;
+  font-weight: 700;
   margin-bottom: 10px;
+  letter-spacing: 2px;
 }
-.login-card p {
-  font-size: 1rem;
+.login-subtitle {
+  font-size: 1.2rem;
   margin-bottom: 20px;
+  opacity: 0.9;
 }
 .btn-google {
   background-color: #db4437;
@@ -59,11 +63,15 @@ a {
   padding: 12px 20px;
   border-radius: 5px;
   color: #fff;
-  font-size: 1rem;
+  font-size: 1.1rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  transition: transform 0.3s ease;
+}
+.btn-google:hover {
+  transform: scale(1.05);
 }
 
 /* Main Content */
@@ -74,30 +82,32 @@ a {
 header {
   background: var(--nav-background);
   padding: 10px 20px;
+  animation: slideDown 0.5s ease-out;
 }
-nav {
+.navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 .logo {
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 700;
 }
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 15px;
+  gap: 20px;
 }
 .nav-links li button {
   background: none;
   border: none;
   color: var(--accent-color);
-  font-size: 1rem;
+  font-size: 1.1rem;
   cursor: pointer;
+  transition: color 0.3s;
 }
 .nav-links li button:hover {
-  text-decoration: underline;
+  color: var(--primary-color);
 }
 .search-container {
   margin-top: 10px;
@@ -105,10 +115,10 @@ nav {
 }
 .search-container input {
   width: 80%;
-  padding: 10px;
-  border-radius: 25px;
+  padding: 12px;
+  border-radius: 30px;
   border: none;
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
 /* Action Bar */
@@ -122,15 +132,16 @@ nav {
   padding: 15px 30px;
   border-radius: 50px;
   color: var(--accent-color);
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   cursor: pointer;
-  transition: transform 0.3s;
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 .btn-add:hover {
   transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(233, 30, 99, 0.4);
 }
 
-/* Cards Container */
+/* Cards Grid */
 .cards-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -142,7 +153,12 @@ nav {
   border-radius: 10px;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.8);
 }
 .card img {
   width: 100%;
@@ -152,15 +168,16 @@ nav {
 .overlay {
   position: absolute;
   bottom: 0;
-  background: rgba(0,0,0,0.6);
   width: 100%;
+  background: rgba(0,0,0,0.7);
   padding: 10px;
   text-align: center;
+  animation: fadeIn 0.5s ease;
 }
 .overlay .title {
-  font-size: 1.2rem;
-  margin-bottom: 5px;
+  font-size: 1.3rem;
   font-weight: 500;
+  margin-bottom: 8px;
 }
 .action-buttons {
   display: flex;
@@ -173,9 +190,9 @@ nav {
   padding: 8px 12px;
   border-radius: 5px;
   color: var(--accent-color);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.3s ease;
 }
 .btn:hover {
   opacity: 0.9;
@@ -189,10 +206,11 @@ nav {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.8);
+  background: rgba(0,0,0,0.85);
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  animation: fadeIn 0.5s ease;
 }
 .modal.open {
   display: flex;
@@ -205,13 +223,14 @@ nav {
   max-width: 500px;
   position: relative;
   box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  animation: slideUp 0.5s ease;
 }
 .modal-content input,
 .modal-content select,
 .modal-content button {
   width: 100%;
   margin: 10px 0;
-  padding: 10px;
+  padding: 12px;
   border-radius: 5px;
   border: none;
   font-size: 1rem;
@@ -220,12 +239,16 @@ nav {
   background: var(--primary-color);
   color: var(--accent-color);
   cursor: pointer;
+  transition: background 0.3s ease;
+}
+.modal-content button:hover {
+  background: darken(var(--primary-color), 10%);
 }
 .close-btn {
   position: absolute;
   top: 10px;
   right: 15px;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   cursor: pointer;
 }
 
@@ -247,15 +270,18 @@ nav {
   padding: 5px;
   border-radius: 5px;
   text-align: center;
+  transition: transform 0.3s ease;
+}
+.tmdb-option:hover {
+  transform: scale(1.05);
 }
 .tmdb-option img {
   width: 100%;
-  height: auto;
   border-radius: 3px;
 }
 .tmdb-option p {
-  font-size: 0.8rem;
-  margin: 5px 0 0;
+  font-size: 0.85rem;
+  margin-top: 5px;
 }
 
 /* Detail Modal (Horizontal Layout) */
@@ -272,7 +298,8 @@ nav {
 }
 .detail-img img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
 }
 .detail-info {
   flex: 1;
@@ -280,15 +307,15 @@ nav {
   text-align: left;
 }
 .detail-info h2 {
-  margin-bottom: 10px;
-  font-size: 1.8rem;
+  margin-bottom: 12px;
+  font-size: 2rem;
 }
 .detail-info p {
   margin-bottom: 10px;
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
-/* Profile Modal */
+/* Profile Modal (Advanced Layout) */
 .profile-content {
   background: var(--modal-background);
   padding: 20px;
@@ -298,6 +325,7 @@ nav {
   text-align: center;
   position: relative;
   box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  animation: slideUp 0.5s ease;
 }
 .profile-content img {
   width: 120px;
@@ -306,12 +334,26 @@ nav {
   margin-bottom: 15px;
 }
 .profile-content h2 {
-  margin: 10px 0;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
+  margin-bottom: 8px;
 }
 .profile-content p {
   font-size: 1rem;
   margin: 5px 0;
+}
+.profile-contacts {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+.profile-contacts a {
+  color: var(--accent-color);
+  font-size: 1.1rem;
+  transition: color 0.3s;
+}
+.profile-contacts a:hover {
+  color: var(--primary-color);
 }
 
 /* Footer */
@@ -321,9 +363,20 @@ footer {
   padding: 15px;
   font-size: 0.9rem;
 }
-footer a {
-  color: var(--primary-color);
-}
 footer a:hover {
   text-decoration: underline;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
