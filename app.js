@@ -27,6 +27,16 @@ const detailOverview = document.getElementById('detailOverview');
 const detailRating = document.getElementById('detailRating');
 const detailRelease = document.getElementById('detailRelease');
 
+// Profile Modal Elements
+const profileBtn = document.getElementById('profileBtn');
+const profileModal = document.getElementById('profileModal');
+const closeProfileModal = document.getElementById('closeProfileModal');
+const profilePhoto = document.getElementById('profilePhoto');
+const profileName = document.getElementById('profileName');
+const profileEmail = document.getElementById('profileEmail');
+// Optionally, updateProfileBtn can be used for profile update functionality
+const updateProfileBtn = document.getElementById('updateProfileBtn');
+
 // Global variable to store the selected TMDB result
 let selectedTMDBData = null;
 
@@ -34,6 +44,18 @@ let selectedTMDBData = null;
 contentTypeSelect.addEventListener('change', () => {
   seasonInput.style.display = contentTypeSelect.value === 'tv' ? 'block' : 'none';
 });
+
+// Profile modal events
+profileBtn.addEventListener('click', () => {
+  const user = auth.currentUser;
+  if (user) {
+    profilePhoto.src = user.photoURL || 'default-profile.png';
+    profileName.textContent = user.displayName || "No Name";
+    profileEmail.textContent = user.email || "No Email";
+    profileModal.classList.add('open');
+  }
+});
+closeProfileModal.addEventListener('click', () => profileModal.classList.remove('open'));
 
 // When user is logged in, load cards
 auth.onAuthStateChanged((user) => {
@@ -77,8 +99,6 @@ function displayTMDBOptions(results) {
       <p>${result.title || result.name} (${(result.release_date || result.first_air_date || '').substring(0,4)})</p>
     `;
     item.addEventListener('click', async () => {
-      // When a result is clicked, set it as selected
-      // If it's a TV show and season is specified, fetch season details
       let tmdbData = {
         title: result.title || result.name,
         overview: result.overview,
@@ -100,7 +120,6 @@ function displayTMDBOptions(results) {
         }
       }
       selectedTMDBData = tmdbData;
-      // Show the chosen option in the preview area
       tmdbPreview.innerHTML = `
         <img src="${selectedTMDBData.posterUrl}" alt="Poster Preview" />
         <h3>${selectedTMDBData.title}</h3>
@@ -173,7 +192,6 @@ window.editCard = (button) => {
   const card = button.closest('.card');
   const docId = card.dataset.id;
   const currentTitle = card.querySelector('.title').textContent;
-  // For simplicity, re-fetch from TMDB when editing
   titleInput.value = currentTitle;
   modal.classList.add('open');
   
@@ -181,10 +199,8 @@ window.editCard = (button) => {
     e.preventDefault();
     const type = contentTypeSelect.value;
     const season = type === 'tv' ? seasonInput.value : null;
-    // Here, re-run the selection process for editing
     const results = await fetchTMDBResults(titleInput.value, type);
     if (results.length > 0) {
-      // Automatically select the first result for editing
       let result = results[0];
       let tmdbData = {
         title: result.title || result.name,
@@ -209,7 +225,6 @@ window.editCard = (button) => {
       try {
         const userId = auth.currentUser.uid;
         await updateDoc(doc(db, "users", userId, "cards", docId), tmdbData);
-        // Update card element with new data
         const cardImg = card.querySelector('img');
         cardImg.src = tmdbData.posterUrl;
         card.querySelector('.title').textContent = tmdbData.title;
@@ -221,7 +236,7 @@ window.editCard = (button) => {
   };
 };
 
-// Fetch TMDB info button click in modal (display options for selection)
+// Fetch TMDB info button click (display selection options)
 fetchTmdbBtn.addEventListener('click', async (e) => {
   e.preventDefault();
   const title = titleInput.value;
@@ -232,7 +247,7 @@ fetchTmdbBtn.addEventListener('click', async (e) => {
   }
 });
 
-// Clear TMDB preview button click
+// Clear TMDB preview
 clearPreviewBtn.addEventListener('click', (e) => {
   e.preventDefault();
   tmdbPreview.innerHTML = "";
@@ -255,12 +270,11 @@ submitBtn.addEventListener('click', async (e) => {
   selectedTMDBData = null;
 });
 
-// Open Add Modal
+// Open and close Add Modal
 openModalBtn.addEventListener('click', () => modal.classList.add('open'));
-// Close Add Modal
 closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
 
-// Open detail modal to show full info in a horizontal layout
+// Open detail modal to show full info (horizontal layout)
 window.openDetailModalHandler = async (e, docId) => {
   e.stopPropagation();
   try {
@@ -284,8 +298,6 @@ window.openDetailModalHandler = async (e, docId) => {
     console.error("Error opening detail modal:", error);
   }
 };
-
-// Close detail modal
 closeDetailModal.addEventListener('click', () => detailModal.classList.remove('open'));
 
 // Search functionality
