@@ -169,7 +169,7 @@ header {
   cursor: pointer;
 }
 
-/* TMDB Preview */
+/* TMDB Preview & Options */
 .tmdb-preview {
   margin: 10px 0;
   text-align: center;
@@ -179,6 +179,29 @@ header {
   max-height: 300px;
   object-fit: contain;
   border-radius: 5px;
+}
+.tmdb-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.tmdb-option {
+  cursor: pointer;
+  background: var(--secondary-color);
+  padding: 5px;
+  border-radius: 5px;
+  text-align: center;
+  max-width: 120px;
+}
+.tmdb-option img {
+  width: 100%;
+  height: auto;
+  border-radius: 3px;
+}
+.tmdb-option p {
+  font-size: 0.8rem;
+  margin: 5px 0 0;
 }
 
 /* Card Container & Card Styles */
@@ -250,12 +273,12 @@ header {
   transform: scale(1.1);
 }
 
-/* Detail Modal Specific Styles */
+/* Detail Modal Specific Styles (Vertical Layout) */
 .detail-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 400px; /* Restrict the modal's width */
+  max-width: 400px;
   width: 90%;
   margin: auto;
 }
