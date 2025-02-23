@@ -1,14 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Google Search Console Verification -->
+  <meta name="google-site-verification" content="bK4H_h0gQz9YBc08N0XAoZk6x4hesxaDLArOXNcXixw" />
+  
+  <!-- SEO Metadata -->
   <title>UR FAV'S | Organize & Share YouTube Playlists</title>
-  <meta name="description" content="Organize, save, and share your favorite YouTube playlists">
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <meta name="description" content="Organize, save, and share your favorite YouTube playlists for free with UR FAV'S. Simple playlist management for music lovers!" />
+  <meta name="keywords" content="YouTube playlists, music organizer, free playlist manager, UR FAV'S, save playlists" />
+
+  <!-- Styles & Fonts -->
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Poppins:wght@300;600&display=swap" />
 </head>
 <body>
+  <!-- Login Container -->
   <div class="login-container" id="loginContainer">
     <div class="login-box">
       <h2>Login to UR FAV'S</h2>
@@ -18,48 +28,57 @@
     </div>
   </div>
 
+  <!-- Main Content -->
   <div class="hidden" id="mainContent">
     <header>
       <h1>UR FAV'S</h1>
       <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Search content...">
+        <input type="text" placeholder="Search for songs, albums, or artists..." />
       </div>
       <button id="logoutBtn" class="logout-btn">Logout</button>
     </header>
 
     <button class="add-card-btn" id="openModalBtn">
-      <i class="fas fa-plus"></i> Add New
+      <i class="fas fa-plus"></i> Add New Content
     </button>
 
+    <!-- Modal -->
     <div class="modal" id="modal">
       <div class="modal-content">
         <span class="close-btn" id="closeModalBtn">&times;</span>
-        <h2>Add Content</h2>
-        <input type="text" id="title" placeholder="Title" required>
+        <h2>Add New Content</h2>
+        <input type="text" id="title" placeholder="Title" />
+        <label for="mediaType">Select Media Type:</label>
         <select id="mediaType">
           <option value="movie">Movie</option>
           <option value="tv">TV Show</option>
         </select>
+        <!-- Button to fetch details from TMDb -->
         <button id="fetchDetailsBtn">Fetch Details</button>
+        <label for="seasonSelect" id="seasonLabel" style="display:none;">Select Season (for TV Shows):</label>
         <select id="seasonSelect" style="display:none;"></select>
         <textarea id="description" placeholder="Description"></textarea>
-        <input type="text" id="image-url" placeholder="Image URL" required>
+        <input type="text" id="image-url" placeholder="Image URL" />
         <button id="submitBtn">Submit</button>
       </div>
     </div>
 
+    <!-- Card Container -->
     <div class="card-container" id="card-container"></div>
 
+    <!-- Footer -->
     <footer>
       <p>
         Created with ❤️ by Hakim &copy; 2025 | 
-        <a href="privacy-policy.html">Privacy</a> | 
-        <a href="terms-of-service.html">Terms</a>
+        <a href="privacy-policy.html">Privacy Policy</a> | 
+        <a href="terms-of-service.html">Terms of Service</a>
       </p>
     </footer>
   </div>
 
+  <!-- Scripts -->
   <script type="module" src="firebase.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>
+
