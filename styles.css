@@ -255,6 +255,9 @@ header {
   display: flex;
   flex-direction: column;
   align-items: center;
+  max-width: 400px; /* Restrict the modal's width */
+  width: 90%;
+  margin: auto;
 }
 .detail-img img {
   width: 100%;
