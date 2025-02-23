@@ -15,6 +15,7 @@ const contentTypeSelect = document.getElementById('content-type');
 const seasonInput = document.getElementById('season');
 const fetchTmdbBtn = document.getElementById('fetchTmdbBtn');
 const tmdbPreview = document.getElementById('tmdbPreview');
+const clearPreviewBtn = document.getElementById('clearPreviewBtn');
 const searchInput = document.querySelector('.search-bar input');
 
 // Detail Modal Elements
@@ -141,12 +142,12 @@ window.deleteCard = async (button) => {
   }
 };
 
-// Edit card (similar to delete, pre-fill the modal for editing)
+// Edit card (pre-fill the modal for editing)
 window.editCard = (button) => {
   const card = button.closest('.card');
   const docId = card.dataset.id;
   const currentTitle = card.querySelector('.title').textContent;
-  // For simplicity, assume you want to re-fetch from TMDB when editing
+  // For simplicity, re-fetch from TMDB when editing
   titleInput.value = currentTitle;
   modal.classList.add('open');
   
@@ -191,6 +192,12 @@ fetchTmdbBtn.addEventListener('click', async (e) => {
   }
 });
 
+// Clear TMDB preview button click
+clearPreviewBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  tmdbPreview.innerHTML = "";
+});
+
 // Submit new card
 submitBtn.addEventListener('click', async (e) => {
   e.preventDefault();
@@ -217,7 +224,7 @@ closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
 
 // Open detail modal to show full info
 window.openDetailModalHandler = async (e, docId) => {
-  e.stopPropagation(); // prevent propagation from card container
+  e.stopPropagation();
   try {
     const userId = auth.currentUser.uid;
     const querySnapshot = await getDocs(collection(db, "users", userId, "cards"));
