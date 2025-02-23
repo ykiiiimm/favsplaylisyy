@@ -3,8 +3,7 @@ import {
   getAuth, 
   signInWithPopup, 
   GoogleAuthProvider, 
-  signOut,
-  onAuthStateChanged
+  signOut 
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 import { 
   getFirestore,
@@ -31,49 +30,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
 
-document.addEventListener("DOMContentLoaded", () => {
-  const loginContainer = document.getElementById("loginContainer");
-  const mainContent = document.getElementById("mainContent");
-  const googleLoginBtn = document.getElementById("googleLoginBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
-
-  if (googleLoginBtn) {
-    googleLoginBtn.addEventListener("click", () => {
-      signInWithPopup(auth, provider)
-        .then(() => {
-          loginContainer.classList.add("hidden");
-          mainContent.classList.remove("hidden");
-        })
-        .catch((error) => {
-          console.error("Login error:", error);
-        });
-    });
-  }
-
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      signOut(auth)
-        .then(() => {
-          loginContainer.classList.remove("hidden");
-          mainContent.classList.add("hidden");
-        })
-        .catch((error) => {
-          console.error("Logout error:", error);
-        });
-    });
-  }
-
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      loginContainer.classList.add("hidden");
-      mainContent.classList.remove("hidden");
-    } else {
-      loginContainer.classList.remove("hidden");
-      mainContent.classList.add("hidden");
-    }
-  });
-});
-
+// Export Firestore functions
 export { 
   auth, 
   provider, 
@@ -84,5 +41,46 @@ export {
   deleteDoc,
   doc,
   updateDoc,
-  signOut
+  signOut 
 };
+
+// Login/Logout Logic ================
+const loginContainer = document.getElementById('loginContainer');
+const mainContent = document.getElementById('mainContent');
+const googleLoginBtn = document.getElementById('googleLoginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+
+// Google Login
+googleLoginBtn.addEventListener('click', () => {
+  signInWithPopup(auth, provider)
+    .then(() => {
+      loginContainer.classList.add('hidden');
+      mainContent.classList.remove('hidden');
+    })
+    .catch((error) => {
+      console.error("Login error:", error);
+    });
+});
+
+// Logout
+logoutBtn.addEventListener('click', () => {
+  signOut(auth)
+    .then(() => {
+      loginContainer.classList.remove('hidden');
+      mainContent.classList.add('hidden');
+    })
+    .catch((error) => {
+      console.error("Logout error:", error);
+    });
+});
+
+// Auth State Listener
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    loginContainer.classList.add('hidden');
+    mainContent.classList.remove('hidden');
+  } else {
+    loginContainer.classList.remove('hidden');
+    mainContent.classList.add('hidden');
+  }
+});
