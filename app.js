@@ -1,4 +1,3 @@
-// Make sure firebase.js exports setDoc along with the other functions.
 import { auth, db, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc, signOut } from './firebase.js';
 
 const TMDB_API_KEY = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
@@ -57,8 +56,8 @@ profileBtn.addEventListener('click', async () => {
   const user = auth.currentUser;
   if (user) {
     profilePhoto.src = user.photoURL || 'default-profile.png';
-    // For extended profile data, load from Firestore (if exists)
-    const profileRef = doc(db, "users", user.uid, "profile", "profile");
+    // Attempt to load extended profile data from Firestore
+    const profileDocRef = doc(db, "users", user.uid, "profile", "profile");
     const profileSnap = await getDocs(collection(db, "users", user.uid, "profile"));
     let profileData;
     profileSnap.forEach(docSnap => {
@@ -330,7 +329,7 @@ profilePicInput.addEventListener('change', () => {
   }
 });
 
-// Save Profile Data using setDoc to overwrite profile doc
+// Save Profile Data using setDoc to overwrite the profile document
 saveProfileBtn.addEventListener('click', async () => {
   const user = auth.currentUser;
   if (!user) return;
