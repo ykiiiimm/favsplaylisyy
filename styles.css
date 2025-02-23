@@ -1,120 +1,111 @@
 :root {
-  --primary-color: #e50914; /* Netflix red */
-  --secondary-color: #141414; /* Dark background */
+  --primary-color: #ff4c4c;
+  --secondary-color: #1c1c1c;
   --accent-color: #ffffff;
   --background-color: #121212;
   --card-background: #1f1f1f;
-  --text-color: #ffffff;
-  --hover-color: rgba(255, 255, 255, 0.1);
+  --nav-background: linear-gradient(90deg, #ff4c4c, #ff8c42);
+  --font-family: 'Roboto', sans-serif;
 }
 
 body {
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--font-family);
   background-color: var(--background-color);
+  color: var(--accent-color);
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  color: var(--text-color);
 }
 
-/* Login Page Styles */
+/* Login Styles */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: var(--background-color);
+  background: url('https://source.unsplash.com/1600x900/?cinema') no-repeat center center/cover;
 }
-
 .login-box {
-  background: var(--card-background);
+  background: rgba(31,31,31,0.9);
   padding: 40px;
   border-radius: 10px;
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
   text-align: center;
+  box-shadow: 0px 8px 20px rgba(0,0,0,0.7);
 }
-
+.login-box h2 {
+  margin-bottom: 10px;
+}
 .google-btn {
   background-color: #4285F4;
   color: white;
   border: none;
-  padding: 10px 20px;
+  padding: 12px 20px;
   border-radius: 5px;
-  cursor: pointer;
   font-size: 1rem;
-  display: flex;
+  cursor: pointer;
+  display: inline-flex;
   align-items: center;
   gap: 10px;
 }
 
-.google-btn i {
-  font-size: 1.2rem;
-}
-
+/* Main Content */
 .hidden {
   display: none;
 }
 
-/* Header Styles */
+/* Nav Bar */
 header {
-  background-color: var(--primary-color);
-  color: var(--accent-color);
-  padding: 20px;
-  text-align: center;
-  font-size: 2rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  position: relative;
+  background: var(--nav-background);
+  padding: 10px 20px;
 }
-
-.search-bar {
+.nav-bar {
   display: flex;
-  justify-content: center;
-  padding: 15px 0;
+  justify-content: space-between;
+  align-items: center;
 }
-
+.nav-bar h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+.nav-links button {
+  background: transparent;
+  border: none;
+  color: var(--accent-color);
+  margin-left: 15px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.nav-links button:hover {
+  text-decoration: underline;
+}
+.search-bar {
+  margin-top: 10px;
+  text-align: center;
+}
 .search-bar input {
   width: 80%;
-  padding: 12px;
+  padding: 10px;
+  border-radius: 25px;
   border: none;
-  border-radius: 50px;
   font-size: 1rem;
-  background-color: var(--secondary-color);
-  color: var(--accent-color);
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
-}
-
-.logout-btn {
-  position: absolute;
-  right: 20px;
-  top: 20px;
-  background: transparent;
-  border: 2px solid var(--accent-color);
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent-color);
-  cursor: pointer;
 }
 
 /* Add New Content Button */
 .add-card-btn {
   display: block;
-  margin: 30px auto;
-  padding: 15px;
-  background-color: var(--primary-color);
+  margin: 20px auto;
+  padding: 15px 25px;
+  background: var(--primary-color);
   color: var(--accent-color);
   border: none;
   border-radius: 50px;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.1rem;
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
+  transition: transform 0.3s;
 }
-
 .add-card-btn:hover {
-  background-color: #f40612;
   transform: scale(1.05);
 }
 
@@ -126,41 +117,38 @@ header {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
+  background: rgba(0,0,0,0.8);
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
-
 .modal.open {
   display: flex;
 }
-
 .modal-content {
-  background-color: var(--card-background);
-  padding: 30px;
+  background: var(--card-background);
+  padding: 20px;
   border-radius: 10px;
-  max-width: 500px;
   width: 90%;
+  max-width: 500px;
   position: relative;
+  box-shadow: 0px 10px 30px rgba(0,0,0,0.8);
 }
-
 .modal-content input,
 .modal-content select,
 .modal-content button {
   width: 100%;
   margin: 10px 0;
   padding: 10px;
-  border: none;
   border-radius: 5px;
+  border: none;
+  font-size: 1rem;
 }
-
 .modal-content button {
-  background-color: var(--primary-color);
+  background: var(--primary-color);
   color: var(--accent-color);
   cursor: pointer;
 }
-
 .close-btn {
   position: absolute;
   top: 10px;
@@ -172,7 +160,6 @@ header {
 /* TMDB Preview & Options (Horizontal Layout) */
 .tmdb-preview {
   margin: 10px 0;
-  text-align: center;
 }
 .tmdb-options {
   display: flex;
@@ -206,76 +193,65 @@ header {
   gap: 20px;
   justify-content: center;
   padding: 20px;
-  overflow-y: auto;
   flex-grow: 1;
 }
-
 .card {
   width: 280px;
   height: 400px;
   position: relative;
   border-radius: 15px;
-  background-color: var(--card-background);
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
+  background: var(--card-background);
+  box-shadow: 0px 10px 30px rgba(0,0,0,0.7);
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s;
 }
-
 .card:hover {
   transform: scale(1.05);
-  box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.7);
 }
-
 .card img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-
-.card .overlay {
+.overlay {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  background: rgba(20, 20, 20, 0.8);
+  background: rgba(20,20,20,0.8);
   padding: 10px;
   text-align: center;
-  transition: transform 0.3s ease;
 }
-
-.card:hover .overlay {
-  transform: translateY(0);
-}
-
 .overlay .title {
-  font-size: 1.2rem;
   font-family: 'Poppins', sans-serif;
+  font-size: 1.2rem;
   margin-bottom: 10px;
 }
-
 .action-buttons button {
   margin: 0 5px;
   padding: 5px 10px;
+  background: var(--primary-color);
   border: none;
   border-radius: 20px;
-  background-color: var(--primary-color);
   color: var(--accent-color);
   cursor: pointer;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s;
 }
-
 .action-buttons button:hover {
   transform: scale(1.1);
 }
 
-/* Detail Modal Specific Styles (Horizontal Layout) */
+/* Detail Modal (Horizontal Layout) */
 .detail-content {
   display: flex;
   flex-direction: row;
   align-items: center;
-  max-width: 800px;
   width: 90%;
+  max-width: 800px;
   margin: auto;
+  background: var(--card-background);
+  border-radius: 10px;
+  padding: 20px;
 }
 .detail-img {
   flex: 1;
@@ -293,45 +269,64 @@ header {
   margin-bottom: 10px;
 }
 
-/* Footer Styles */
-footer {
-  text-align: center;
+/* Profile Modal */
+.profile-content {
+  background: var(--card-background);
   padding: 20px;
-  background-color: var(--secondary-color);
-  color: var(--accent-color);
-  margin-top: auto;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+  text-align: center;
+  box-shadow: 0px 10px 30px rgba(0,0,0,0.8);
+}
+.profile-content img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin-bottom: 15px;
+}
+.profile-content h2 {
+  margin: 10px 0;
+}
+.profile-content p {
+  font-size: 1rem;
+  margin: 5px 0;
 }
 
+/* Footer */
+footer {
+  background: var(--secondary-color);
+  text-align: center;
+  padding: 15px;
+  font-size: 0.9rem;
+}
 footer a {
   color: var(--primary-color);
   text-decoration: none;
 }
-
 footer a:hover {
-  color: var(--accent-color);
+  text-decoration: underline;
 }
 
-/* Legal Pages (privacy & terms) */
+/* Legal Pages (unchanged) */
 .legal-page {
   max-width: 800px;
   margin: 50px auto;
   padding: 20px;
   line-height: 1.6;
 }
-
 .legal-page h1 {
   color: var(--primary-color);
   text-align: center;
   margin-bottom: 30px;
 }
-
 .legal-page h2 {
   color: var(--accent-color);
   margin-top: 30px;
   border-bottom: 2px solid var(--primary-color);
   padding-bottom: 5px;
 }
-
 .back-home {
   display: block;
   margin-top: 40px;
@@ -340,7 +335,6 @@ footer a:hover {
   font-weight: bold;
   text-align: center;
 }
-
 .back-home:hover {
-  color: var(--accent-color);
+  text-decoration: underline;
 }
