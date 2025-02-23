@@ -60,7 +60,7 @@ async function fetchTMDBResults(title, type) {
   }
 }
 
-// Display a list of selectable TMDB options
+// Display a list of selectable TMDB options in a horizontal layout
 function displayTMDBOptions(results) {
   tmdbPreview.innerHTML = "";
   if (results.length === 0) {
@@ -185,7 +185,6 @@ window.editCard = (button) => {
     const results = await fetchTMDBResults(titleInput.value, type);
     if (results.length > 0) {
       // Automatically select the first result for editing
-      // (Alternatively, you could implement selection for editing as well)
       let result = results[0];
       let tmdbData = {
         title: result.title || result.name,
@@ -261,7 +260,7 @@ openModalBtn.addEventListener('click', () => modal.classList.add('open'));
 // Close Add Modal
 closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
 
-// Open detail modal to show full info
+// Open detail modal to show full info in a horizontal layout
 window.openDetailModalHandler = async (e, docId) => {
   e.stopPropagation();
   try {
