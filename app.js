@@ -70,7 +70,7 @@ auth.onAuthStateChanged(user => {
 
 // Fetch TMDB results (list of options)
 async function fetchTMDBResults(title, type) {
-  let searchUrl = type === 'movie'
+  const searchUrl = type === 'movie'
     ? `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`
     : `${TMDB_BASE_URL}/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
   try {
@@ -83,7 +83,7 @@ async function fetchTMDBResults(title, type) {
   }
 }
 
-// Display selectable TMDB options (horizontal scroll)
+// Display selectable TMDB options (horizontal layout)
 function displayTMDBOptions(results) {
   tmdbPreview.innerHTML = "";
   if (results.length === 0) {
@@ -132,7 +132,7 @@ function displayTMDBOptions(results) {
   tmdbPreview.appendChild(container);
 }
 
-// Save a card to Firestore
+// Save card to Firestore
 async function saveCard(cardData) {
   try {
     const userId = auth.currentUser.uid;
@@ -156,7 +156,7 @@ async function loadCards() {
   }
 }
 
-// Create a card element for display
+// Create a card element
 function createCardElement(cardData, docId) {
   const card = document.createElement('div');
   card.classList.add('card');
