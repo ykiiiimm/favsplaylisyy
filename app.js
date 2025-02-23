@@ -1,4 +1,5 @@
-import { auth, db, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, signOut } from './firebase.js';
+// Make sure firebase.js exports setDoc along with the other functions.
+import { auth, db, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc, signOut } from './firebase.js';
 
 const TMDB_API_KEY = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
@@ -56,10 +57,16 @@ profileBtn.addEventListener('click', async () => {
   const user = auth.currentUser;
   if (user) {
     profilePhoto.src = user.photoURL || 'default-profile.png';
-    // For extended profile data, you could load from Firestore here
-    profileNicknameDisplay.textContent = user.displayName || "Anonymous";
-    profileTaglineDisplay.textContent = "Your tagline here";
-    profileBioDisplay.textContent = "Write a short bio about yourself...";
+    // For extended profile data, load from Firestore (if exists)
+    const profileRef = doc(db, "users", user.uid, "profile", "profile");
+    const profileSnap = await getDocs(collection(db, "users", user.uid, "profile"));
+    let profileData;
+    profileSnap.forEach(docSnap => {
+      profileData = docSnap.data();
+    });
+    profileNicknameDisplay.textContent = (profileData && profileData.nickname) || user.displayName || "Anonymous";
+    profileTaglineDisplay.textContent = (profileData && profileData.tagline) || "Your tagline here";
+    profileBioDisplay.textContent = (profileData && profileData.bio) || "Write a short bio about yourself...";
     profileModal.classList.add('open');
   }
 });
@@ -220,126 +227,4 @@ window.editCard = (button) => {
       if (type === 'tv' && season) {
         try {
           const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${season}?api_key=${TMDB_API_KEY}`);
-          const seasonData = await seasonRes.json();
-          if (seasonData.poster_path) {
-            data.posterUrl = TMDB_IMG_BASE + seasonData.poster_path;
-          }
-          data.overview = seasonData.overview || data.overview;
-          data.releaseDate = seasonData.air_date || data.releaseDate;
-        } catch (error) {
-          console.error("Error fetching season data:", error);
-        }
-      }
-      try {
-        const userId = auth.currentUser.uid;
-        await updateDoc(doc(db, "users", userId, "cards", docId), data);
-        card.querySelector('img').src = data.posterUrl;
-        card.querySelector('.title').textContent = data.title;
-        modal.classList.remove('open');
-      } catch (error) {
-        console.error("Error updating card:", error);
-      }
-    }
-  };
-};
-
-fetchTmdbBtn.addEventListener('click', async (e) => {
-  e.preventDefault();
-  const title = titleInput.value;
-  const type = contentTypeSelect.value;
-  if (title) {
-    const results = await fetchTMDBResults(title, type);
-    displayTMDBOptions(results);
-  }
-});
-
-clearPreviewBtn.addEventListener('click', (e) => {
-  e.preventDefault();
-  tmdbPreview.innerHTML = "";
-  selectedTMDBData = null;
-});
-
-submitBtn.addEventListener('click', async (e) => {
-  e.preventDefault();
-  if (!selectedTMDBData) {
-    alert("Please fetch and select a TMDB result before submitting.");
-    return;
-  }
-  await saveCard(selectedTMDBData);
-  await loadCards();
-  modal.classList.remove('open');
-  titleInput.value = '';
-  seasonInput.value = '';
-  tmdbPreview.innerHTML = "";
-  selectedTMDBData = null;
-});
-
-openModalBtn.addEventListener('click', () => modal.classList.add('open'));
-closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
-
-window.openDetailModalHandler = async (e, docId) => {
-  e.stopPropagation();
-  try {
-    const userId = auth.currentUser.uid;
-    const snapshot = await getDocs(collection(db, "users", userId, "cards"));
-    let cardData;
-    snapshot.forEach(docSnap => {
-      if (docSnap.id === docId) {
-        cardData = docSnap.data();
-      }
-    });
-    if (cardData) {
-      detailPoster.src = cardData.posterUrl;
-      detailTitle.textContent = cardData.title;
-      detailOverview.textContent = cardData.overview;
-      detailRating.textContent = `Rating: ${cardData.rating}`;
-      detailRelease.textContent = `Release: ${cardData.releaseDate}`;
-      detailModal.classList.add('open');
-    }
-  } catch (error) {
-    console.error("Error opening detail modal:", error);
-  }
-};
-
-closeDetailModal.addEventListener('click', () => detailModal.classList.remove('open'));
-
-searchInput.addEventListener('input', () => {
-  const query = searchInput.value.toLowerCase();
-  document.querySelectorAll('.card').forEach(card => {
-    const title = card.querySelector('.title').textContent.toLowerCase();
-    card.style.display = title.includes(query) ? 'block' : 'none';
-  });
-});
-
-// Profile Picture Preview
-profilePicInput.addEventListener('change', () => {
-  const file = profilePicInput.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      profilePhoto.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
-});
-
-// Save Profile Data
-saveProfileBtn.addEventListener('click', async () => {
-  const user = auth.currentUser;
-  if (!user) return;
-  const profileData = {
-    nickname: profileNickname.value || user.displayName || "Anonymous",
-    tagline: profileTagline.value || "Your tagline here",
-    bio: profileBio.value || "Write something about yourself..."
-  };
-  try {
-    const profileRef = collection(db, "users", user.uid, "profile");
-    await addDoc(profileRef, profileData);
-    profileNicknameDisplay.textContent = profileData.nickname;
-    profileTaglineDisplay.textContent = profileData.tagline;
-    profileBioDisplay.textContent = profileData.bio;
-    alert("Profile updated successfully!");
-  } catch (error) {
-    console.error("Error updating profile:", error);
-  }
-});
+          const seasonData = await seasonRes.json
