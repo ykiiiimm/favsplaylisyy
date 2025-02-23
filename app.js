@@ -4,7 +4,7 @@ const TMDB_API_KEY = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500";
 
-// DOM Elements
+// DOM Elements (Content & TMDB)
 const openModalBtn = document.getElementById('openModalBtn');
 const modal = document.getElementById('modal');
 const closeModalBtn = document.getElementById('closeModalBtn');
@@ -18,7 +18,7 @@ const tmdbPreview = document.getElementById('tmdbPreview');
 const clearPreviewBtn = document.getElementById('clearPreviewBtn');
 const searchInput = document.getElementById('searchInput');
 
-// Detail Modal Elements
+// DOM Elements (Detail Modal)
 const detailModal = document.getElementById('detailModal');
 const closeDetailModal = document.getElementById('closeDetailModal');
 const detailPoster = document.getElementById('detailPoster');
@@ -27,14 +27,21 @@ const detailOverview = document.getElementById('detailOverview');
 const detailRating = document.getElementById('detailRating');
 const detailRelease = document.getElementById('detailRelease');
 
-// Profile Modal Elements
+// DOM Elements (Profile Modal)
 const profileBtn = document.getElementById('profileBtn');
 const profileModal = document.getElementById('profileModal');
 const closeProfileModal = document.getElementById('closeProfileModal');
 const profilePhoto = document.getElementById('profilePhoto');
-const profileName = document.getElementById('profileName');
-const profileEmail = document.getElementById('profileEmail');
-const updateProfileBtn = document.getElementById('updateProfileBtn');
+const profileNicknameDisplay = document.getElementById('profileNicknameDisplay');
+const profileTaglineDisplay = document.getElementById('profileTaglineDisplay');
+const profileBioDisplay = document.getElementById('profileBioDisplay');
+const profilePicInput = document.getElementById('profilePicInput');
+const profileNickname = document.getElementById('profileNickname');
+const profileTagline = document.getElementById('profileTagline');
+const profileBio = document.getElementById('profileBio');
+const saveProfileBtn = document.getElementById('saveProfileBtn');
+const toggleContactBtn = document.getElementById('toggleContactBtn');
+const contactInfo = document.getElementById('contactInfo');
 
 // Global variable to store the selected TMDB result
 let selectedTMDBData = null;
@@ -44,19 +51,32 @@ contentTypeSelect.addEventListener('change', () => {
   seasonInput.style.display = contentTypeSelect.value === 'tv' ? 'block' : 'none';
 });
 
-// Profile modal events
-profileBtn.addEventListener('click', () => {
+// Profile Modal: Open and populate from Firebase Auth and Firestore
+profileBtn.addEventListener('click', async () => {
   const user = auth.currentUser;
   if (user) {
+    // Set basic auth info
     profilePhoto.src = user.photoURL || 'default-profile.png';
-    profileName.textContent = user.displayName || "Anonymous";
-    profileEmail.textContent = user.email || "No Email";
+    // For extra profile info, attempt to load from Firestore (if exists)
+    const profileDoc = await getDocs(collection(db, "users", user.uid, "profile"));
+    let profileData;
+    profileDoc.forEach(docSnap => {
+      profileData = docSnap.data();
+    });
+    profileNicknameDisplay.textContent = (profileData && profileData.nickname) || user.displayName || "Anonymous";
+    profileTaglineDisplay.textContent = (profileData && profileData.tagline) || "Your tagline here";
+    profileBioDisplay.textContent = (profileData && profileData.bio) || "Write something about yourself...";
     profileModal.classList.add('open');
   }
 });
 closeProfileModal.addEventListener('click', () => profileModal.classList.remove('open'));
 
-// Auth state listener
+// Toggle Contact Info in Profile Modal
+toggleContactBtn.addEventListener('click', () => {
+  contactInfo.classList.toggle('hidden');
+});
+
+// Auth State Listener
 auth.onAuthStateChanged(user => {
   if (user) {
     document.getElementById('loginContainer').classList.add('hidden');
@@ -68,7 +88,7 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-// Fetch TMDB results (list of options)
+// TMDB Functions
 async function fetchTMDBResults(title, type) {
   const searchUrl = type === 'movie'
     ? `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`
@@ -83,7 +103,6 @@ async function fetchTMDBResults(title, type) {
   }
 }
 
-// Display selectable TMDB options (horizontal layout)
 function displayTMDBOptions(results) {
   tmdbPreview.innerHTML = "";
   if (results.length === 0) {
@@ -132,7 +151,7 @@ function displayTMDBOptions(results) {
   tmdbPreview.appendChild(container);
 }
 
-// Save card to Firestore
+// Firestore Card Functions
 async function saveCard(cardData) {
   try {
     const userId = auth.currentUser.uid;
@@ -142,7 +161,6 @@ async function saveCard(cardData) {
   }
 }
 
-// Load cards from Firestore
 async function loadCards() {
   try {
     const userId = auth.currentUser.uid;
@@ -156,7 +174,6 @@ async function loadCards() {
   }
 }
 
-// Create a card element
 function createCardElement(cardData, docId) {
   const card = document.createElement('div');
   card.classList.add('card');
@@ -298,4 +315,41 @@ searchInput.addEventListener('input', () => {
     const title = card.querySelector('.title').textContent.toLowerCase();
     card.style.display = title.includes(query) ? 'block' : 'none';
   });
+});
+
+// Profile Picture Preview on File Input
+profilePicInput.addEventListener('change', () => {
+  const file = profilePicInput.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      profilePhoto.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+// Save Profile Data
+saveProfileBtn.addEventListener('click', async () => {
+  const user = auth.currentUser;
+  if (!user) return;
+  const profileData = {
+    nickname: profileNickname.value || user.displayName || "Anonymous",
+    tagline: profileTagline.value || "Your tagline here",
+    bio: profileBio.value || "Write something about yourself..."
+    // You might add a field for profilePic if you implement file upload to storage.
+  };
+  try {
+    // Save/update profile data in a subcollection "profile" for the user
+    const profileRef = collection(db, "users", user.uid, "profile");
+    // For simplicity, add a new doc (in production you might want to overwrite a fixed doc)
+    await addDoc(profileRef, profileData);
+    // Update display fields
+    profileNicknameDisplay.textContent = profileData.nickname;
+    profileTaglineDisplay.textContent = profileData.tagline;
+    profileBioDisplay.textContent = profileData.bio;
+    alert("Profile updated successfully!");
+  } catch (error) {
+    console.error("Error updating profile:", error);
+  }
 });
