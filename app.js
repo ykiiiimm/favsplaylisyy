@@ -27,6 +27,9 @@ const detailOverview = document.getElementById('detailOverview');
 const detailRating = document.getElementById('detailRating');
 const detailRelease = document.getElementById('detailRelease');
 
+// Global variable to store the selected TMDB result
+let selectedTMDBData = null;
+
 // Show/hide season input based on content type selection
 contentTypeSelect.addEventListener('change', () => {
   seasonInput.style.display = contentTypeSelect.value === 'tv' ? 'block' : 'none';
@@ -39,8 +42,8 @@ auth.onAuthStateChanged((user) => {
   }
 });
 
-// Function to fetch data from TMDB based on title and type
-async function fetchTMDBData(title, type, season = null) {
+// Fetch a list of TMDB results (without season details)
+async function fetchTMDBResults(title, type) {
   try {
     let searchUrl = "";
     if (type === "movie") {
@@ -48,42 +51,65 @@ async function fetchTMDBData(title, type, season = null) {
     } else {
       searchUrl = `${TMDB_BASE_URL}/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
     }
-    const searchRes = await fetch(searchUrl);
-    const searchData = await searchRes.json();
-    if (searchData.results && searchData.results.length > 0) {
-      const result = searchData.results[0]; // Take the first result
-      let posterPath = result.poster_path;
-      let overview = result.overview;
-      let rating = result.vote_average;
-      let releaseDate = type === "movie" ? result.release_date : result.first_air_date;
-      
-      // If TV and season provided, fetch season details
-      if (type === "tv" && season) {
-        const tvId = result.id;
-        const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${tvId}/season/${season}?api_key=${TMDB_API_KEY}`);
-        const seasonData = await seasonRes.json();
-        if (seasonData.poster_path) {
-          posterPath = seasonData.poster_path; // Use season poster if available
-        }
-        // Optionally, update overview and release date with season details
-        overview = seasonData.overview || overview;
-        releaseDate = seasonData.air_date || releaseDate;
-      }
-      
-      return {
-        title: result.title || result.name,
-        overview,
-        rating,
-        releaseDate,
-        posterUrl: posterPath ? TMDB_IMG_BASE + posterPath : ""
-      };
-    } else {
-      throw new Error("No results found in TMDB");
-    }
+    const res = await fetch(searchUrl);
+    const data = await res.json();
+    return data.results || [];
   } catch (error) {
-    console.error("Error fetching TMDB data:", error);
-    return null;
+    console.error("Error fetching TMDB results:", error);
+    return [];
   }
+}
+
+// Display a list of selectable TMDB options
+function displayTMDBOptions(results) {
+  tmdbPreview.innerHTML = "";
+  if (results.length === 0) {
+    tmdbPreview.textContent = "No results found.";
+    return;
+  }
+  const list = document.createElement('div');
+  list.classList.add('tmdb-options');
+  results.forEach(result => {
+    const item = document.createElement('div');
+    item.classList.add('tmdb-option');
+    item.innerHTML = `
+      <img src="${result.poster_path ? TMDB_IMG_BASE + result.poster_path : ''}" alt="${result.title || result.name}" />
+      <p>${result.title || result.name} (${(result.release_date || result.first_air_date || '').substring(0,4)})</p>
+    `;
+    item.addEventListener('click', async () => {
+      // When a result is clicked, set it as selected
+      // If it's a TV show and season is specified, fetch season details
+      let tmdbData = {
+        title: result.title || result.name,
+        overview: result.overview,
+        rating: result.vote_average,
+        releaseDate: contentTypeSelect.value === "movie" ? result.release_date : result.first_air_date,
+        posterUrl: result.poster_path ? TMDB_IMG_BASE + result.poster_path : ""
+      };
+      if (contentTypeSelect.value === "tv" && seasonInput.value) {
+        try {
+          const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${seasonInput.value}?api_key=${TMDB_API_KEY}`);
+          const seasonData = await seasonRes.json();
+          if (seasonData.poster_path) {
+            tmdbData.posterUrl = TMDB_IMG_BASE + seasonData.poster_path;
+          }
+          tmdbData.overview = seasonData.overview || tmdbData.overview;
+          tmdbData.releaseDate = seasonData.air_date || tmdbData.releaseDate;
+        } catch (error) {
+          console.error("Error fetching season data:", error);
+        }
+      }
+      selectedTMDBData = tmdbData;
+      // Show the chosen option in the preview area
+      tmdbPreview.innerHTML = `
+        <img src="${selectedTMDBData.posterUrl}" alt="Poster Preview" />
+        <h3>${selectedTMDBData.title}</h3>
+        <p>${selectedTMDBData.overview.substring(0, 100)}...</p>
+      `;
+    });
+    list.appendChild(item);
+  });
+  tmdbPreview.appendChild(list);
 }
 
 // Save card to Firestore
@@ -155,8 +181,32 @@ window.editCard = (button) => {
     e.preventDefault();
     const type = contentTypeSelect.value;
     const season = type === 'tv' ? seasonInput.value : null;
-    const tmdbData = await fetchTMDBData(titleInput.value, type, season);
-    if (tmdbData) {
+    // Here, re-run the selection process for editing
+    const results = await fetchTMDBResults(titleInput.value, type);
+    if (results.length > 0) {
+      // Automatically select the first result for editing
+      // (Alternatively, you could implement selection for editing as well)
+      let result = results[0];
+      let tmdbData = {
+        title: result.title || result.name,
+        overview: result.overview,
+        rating: result.vote_average,
+        releaseDate: type === "movie" ? result.release_date : result.first_air_date,
+        posterUrl: result.poster_path ? TMDB_IMG_BASE + result.poster_path : ""
+      };
+      if (type === "tv" && season) {
+        try {
+          const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${season}?api_key=${TMDB_API_KEY}`);
+          const seasonData = await seasonRes.json();
+          if (seasonData.poster_path) {
+            tmdbData.posterUrl = TMDB_IMG_BASE + seasonData.poster_path;
+          }
+          tmdbData.overview = seasonData.overview || tmdbData.overview;
+          tmdbData.releaseDate = seasonData.air_date || tmdbData.releaseDate;
+        } catch (error) {
+          console.error("Error fetching season data:", error);
+        }
+      }
       try {
         const userId = auth.currentUser.uid;
         await updateDoc(doc(db, "users", userId, "cards", docId), tmdbData);
@@ -172,23 +222,14 @@ window.editCard = (button) => {
   };
 };
 
-// Fetch TMDB info button click in modal (preview before submitting)
+// Fetch TMDB info button click in modal (display options for selection)
 fetchTmdbBtn.addEventListener('click', async (e) => {
   e.preventDefault();
   const title = titleInput.value;
   const type = contentTypeSelect.value;
-  const season = type === 'tv' ? seasonInput.value : null;
   if (title) {
-    const tmdbData = await fetchTMDBData(title, type, season);
-    if (tmdbData) {
-      tmdbPreview.innerHTML = `
-        <img src="${tmdbData.posterUrl}" alt="Poster Preview" />
-        <h3>${tmdbData.title}</h3>
-        <p>${tmdbData.overview.substring(0, 100)}...</p>
-      `;
-    } else {
-      tmdbPreview.textContent = "No data found.";
-    }
+    const results = await fetchTMDBResults(title, type);
+    displayTMDBOptions(results);
   }
 });
 
@@ -196,25 +237,23 @@ fetchTmdbBtn.addEventListener('click', async (e) => {
 clearPreviewBtn.addEventListener('click', (e) => {
   e.preventDefault();
   tmdbPreview.innerHTML = "";
+  selectedTMDBData = null;
 });
 
-// Submit new card
+// Submit new card using the selected TMDB data
 submitBtn.addEventListener('click', async (e) => {
   e.preventDefault();
-  const title = titleInput.value;
-  const type = contentTypeSelect.value;
-  const season = type === 'tv' ? seasonInput.value : null;
-  if (title) {
-    const tmdbData = await fetchTMDBData(title, type, season);
-    if (tmdbData) {
-      await saveCard(tmdbData);
-      await loadCards();
-      modal.classList.remove('open');
-      titleInput.value = '';
-      seasonInput.value = '';
-      tmdbPreview.innerHTML = '';
-    }
+  if (!selectedTMDBData) {
+    alert("Please fetch and select a TMDB result before submitting.");
+    return;
   }
+  await saveCard(selectedTMDBData);
+  await loadCards();
+  modal.classList.remove('open');
+  titleInput.value = '';
+  seasonInput.value = '';
+  tmdbPreview.innerHTML = "";
+  selectedTMDBData = null;
 });
 
 // Open Add Modal
