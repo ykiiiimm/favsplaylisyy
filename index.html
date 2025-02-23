@@ -93,20 +93,30 @@
   <div class="modal" id="profileModal">
     <div class="modal-content profile-content">
       <span class="close-btn" id="closeProfileModal">&times;</span>
-      <div class="profile-info">
+      <div class="profile-display">
         <img id="profilePhoto" src="" alt="Profile Photo" />
-        <h2 id="profileName"></h2>
-        <p id="profileEmail"></p>
-        <div class="profile-contacts">
-          <a href="https://discord.com/invite/6SfgHHJQUD?fbclid=PAY2xjawIoQsJleHRuA2FlbQIxMQABpuqjPkxGry7gHHOPzK9RwkdiqUo2Ho2Zcb1YR8CBiyj501haecXENK16DQ_aem_3n6jk7DhhIRPLA08HcCe-A" target="_blank">
-            <i class="fab fa-discord"></i> Discord
-          </a>
-          <a href="https://www.instagram.com/itshakimouuuuu?igsh=MWI1MHNsOG9tOHJjdQ==" target="_blank">
-            <i class="fab fa-instagram"></i> Instagram
-          </a>
-        </div>
+        <h2 id="profileNicknameDisplay">Your Nickname</h2>
+        <p id="profileTaglineDisplay">Your Tagline</p>
+        <p id="profileBioDisplay">A short bio about you...</p>
       </div>
-      <button id="updateProfileBtn" class="btn btn-update">Update Profile</button>
+      <div class="profile-edit">
+        <h3>Update Profile</h3>
+        <label for="profilePicInput">Change Profile Picture:</label>
+        <input type="file" id="profilePicInput" accept="image/*" />
+        <input type="text" id="profileNickname" placeholder="Nickname" />
+        <input type="text" id="profileTagline" placeholder="Tagline" />
+        <textarea id="profileBio" placeholder="Write something about you..."></textarea>
+        <button id="saveProfileBtn" class="btn btn-update">Save Profile</button>
+      </div>
+      <button id="toggleContactBtn" class="btn btn-contact">Contact Me</button>
+      <div id="contactInfo" class="contact-info hidden">
+        <a href="https://discord.com/invite/6SfgHHJQUD?fbclid=PAY2xjawIoQsJleHRuA2FlbQIxMQABpuqjPkxGry7gHHOPzK9RwkdiqUo2Ho2Zcb1YR8CBiyj501haecXENK16DQ_aem_3n6jk7DhhIRPLA08HcCe-A" target="_blank">
+          <i class="fab fa-discord"></i>
+        </a>
+        <a href="https://www.instagram.com/itshakimouuuuu?igsh=MWI1MHNsOG9tOHJjdQ==" target="_blank">
+          <i class="fab fa-instagram"></i>
+        </a>
+      </div>
     </div>
   </div>
 
