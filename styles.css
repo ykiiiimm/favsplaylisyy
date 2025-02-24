@@ -1,13 +1,13 @@
 /* Base Variables & Reset */
 :root {
-  --primary-color: #ffffff;       /* Spotify Green */
-  --secondary-color: #a31f14;     /* Dark */
-  --accent-color: #FFFFFF;
-  --background-color: #a11643;
-  --card-background: #000000;
-  --nav-background: #932424;
-  --modal-background: #1e1e1e;
-  --font-family: 'Montserrat', sans-serif;
+    --primary-color: #1DB954;
+    --secondary-color: #191414;
+    --accent-color: #FFFFFF;
+    --background-color: #121212;
+    --card-background: #1e1e1e;
+    --nav-background: #191414;
+    --modal-background: #1e1e1e;
+    --font-family: 'Montserrat', sans-serif;
 }
 
 * {
