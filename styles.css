@@ -1,12 +1,15 @@
 /* ---------------------------------------------
-   Global Variables (Red & White Theme)
+   Global Variables
+   - Header bar: #e50914
+   - Footer bar: #b20707
 --------------------------------------------- */
 :root {
-  --primary-bg-color: #e50914;        /* Main red background for body, headers, etc. */
-  --secondary-color: #b20710;         /* Darker shade of red for nav, overlays, etc. */
-  --accent-color: #ffffff;            /* White text for headings and body text */
-  --button-text-color: #000000;       /* Black text for standard buttons */
-  --overlay-bg-color: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay for card text */
+  --header-bg: #e50914;         /* Bright red for header (top bar) */
+  --footer-bg: #b20707;         /* Darker red for footer (bottom) */
+  --card-bg: #b20707;           /* Also used for cards or login card if desired */
+  --overlay-bg-color: rgba(0, 0, 0, 0.7);
+  --accent-color: #ffffff;      /* White text */
+  --button-text-color: #000000; /* Black text for buttons */
   --font-family: 'Montserrat', sans-serif;
 }
 
@@ -21,14 +24,14 @@
 
 body {
   font-family: var(--font-family);
-  background-color: var(--primary-bg-color);
+  /* Main background behind everything. 
+     If you want it bright red like the header, use var(--header-bg).
+     Otherwise, keep it consistent. */
+  background-color: var(--header-bg);
   color: var(--accent-color);
   line-height: 1.6;
 }
 
-/* ---------------------------------------------
-   Links
---------------------------------------------- */
 a {
   color: var(--accent-color);
   text-decoration: none;
@@ -46,12 +49,13 @@ a:hover {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  /* If you want a solid red background (no image), remove the background image below */
-  /* background: var(--primary-bg-color); */
+  /* If you want the login background to match the body, 
+     you can remove the next line or keep a separate image, etc. */
+  /* background: var(--header-bg); */
 }
 
 .login-card {
-  background: var(--secondary-color);
+  background: var(--card-bg); /* Darker red background for the card */
   padding: 40px;
   border-radius: 10px;
   text-align: center;
@@ -93,14 +97,15 @@ a:hover {
 }
 
 /* ---------------------------------------------
-   Main Content (Shown after login)
+   Main Content
 --------------------------------------------- */
 .hidden {
   display: none;
 }
 
+/* Header (Top Bar) */
 header {
-  background: var(--secondary-color);
+  background: var(--header-bg); /* Bright red */
   padding: 10px 20px;
   animation: slideDown 0.5s ease-out;
 }
@@ -183,7 +188,7 @@ header {
 }
 
 .card {
-  background: var(--secondary-color);
+  background: var(--card-bg); /* Darker red for cards */
   border-radius: 10px;
   overflow: hidden;
   position: relative;
@@ -225,7 +230,7 @@ header {
   gap: 10px;
 }
 
-/* Base button styling shared by all .btn classes */
+/* Base .btn styling */
 .btn {
   background: #ffffff;               /* White background */
   border: none;
@@ -239,10 +244,6 @@ header {
 
 .btn:hover {
   opacity: 0.9;
-}
-
-.btn-logout {
-  /* If you want a custom style for the logout button, do it here */
 }
 
 /* ---------------------------------------------
@@ -267,7 +268,7 @@ header {
 }
 
 .modal-content {
-  background: var(--secondary-color);
+  background: var(--card-bg); /* Darker red for modals */
   padding: 20px;
   border-radius: 10px;
   width: 90%;
@@ -289,8 +290,6 @@ header {
   font-size: 1rem;
 }
 
-/* Because .btn is white background + black text, we keep it consistent inside modals */
-
 .close-btn {
   position: absolute;
   top: 10px;
@@ -300,9 +299,7 @@ header {
   color: var(--accent-color); /* White "X" */
 }
 
-/* ---------------------------------------------
-   TMDB Preview & Options
---------------------------------------------- */
+/* TMDB Preview & Options */
 .tmdb-preview {
   margin: 10px 0;
 }
@@ -318,7 +315,7 @@ header {
   flex: 0 0 auto;
   width: 150px;
   cursor: pointer;
-  background: var(--secondary-color);
+  background: var(--card-bg);
   padding: 5px;
   border-radius: 5px;
   text-align: center;
@@ -337,6 +334,7 @@ header {
 .tmdb-option p {
   font-size: 0.85rem;
   margin-top: 5px;
+  color: var(--accent-color); /* White text */
 }
 
 /* ---------------------------------------------
@@ -383,7 +381,7 @@ header {
    Profile Modal (Advanced Layout)
 --------------------------------------------- */
 .profile-content {
-  background: var(--secondary-color);
+  background: var(--card-bg);
   padding: 20px;
   border-radius: 10px;
   width: 90%;
@@ -418,7 +416,7 @@ header {
 }
 
 .profile-edit {
-  border-top: 1px solid #ffffff55; /* Slightly lighter line */
+  border-top: 1px solid #ffffff55;
   padding-top: 15px;
   margin-top: 15px;
 }
@@ -457,10 +455,10 @@ header {
 }
 
 /* ---------------------------------------------
-   Footer
+   Footer (Bottom Bar)
 --------------------------------------------- */
 footer {
-  background: var(--secondary-color);
+  background: var(--footer-bg); /* Darker red for footer */
   text-align: center;
   padding: 15px;
   font-size: 0.9rem;
