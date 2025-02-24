@@ -4,11 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UR FAV'S - Discover Your Favorites</title>
-    <meta name="description" content="Discover and organize your favorite movies and TV shows with a modern, dynamic design." />
-    <link rel="stylesheet" href="styles.css" />
+    <meta
+      name="description"
+      content="Discover and organize your favorite movies and TV shows with a modern, dynamic design."
+    />
+    <!-- Force cache refresh with ?v=3 or higher anytime you change styles -->
+    <link rel="stylesheet" href="styles.css?v=3" />
+
     <!-- Using Montserrat for a modern look -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
   </head>
   <body>
     <!-- Login Page -->
@@ -36,7 +47,11 @@
           </ul>
         </nav>
         <div class="search-container">
-          <input type="text" id="searchInput" placeholder="Search for movies, TV shows, etc..." />
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search for movies, TV shows, etc..."
+          />
         </div>
       </header>
 
@@ -53,7 +68,7 @@
 
       <footer>
         <p>
-          Created with ❤️ by Hakim
+          Created  by ITSHAKIMOUUUUUUUUUUU 
           <span class="social-links">
             <a href="https://discord.com/invite/6SfgHHJQUD" target="_blank">
               <i class="fab fa-discord"></i>
@@ -76,7 +91,13 @@
           <option value="movie">Movie</option>
           <option value="tv">TV Show</option>
         </select>
-        <input type="number" id="season" placeholder="Season (if TV Show)" min="1" style="display:none;" />
+        <input
+          type="number"
+          id="season"
+          placeholder="Season (if TV Show)"
+          min="1"
+          style="display: none;"
+        />
         <button id="fetchTmdbBtn" class="btn">Fetch Info from TMDB</button>
         <!-- TMDB Preview / Selection Area -->
         <div id="tmdbPreview" class="tmdb-preview"></div>
@@ -132,9 +153,9 @@
       </div>
     </div>
 
-    <!-- firebase.js must be present with the correct Firebase config -->
+    <!-- Your Firebase config & scripts -->
     <script type="module" src="firebase.js"></script>
-    <!-- The main app code -->
+    <!-- Main app logic -->
     <script type="module" src="app.js"></script>
   </body>
 </html>
