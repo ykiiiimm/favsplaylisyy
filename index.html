@@ -8,15 +8,11 @@
       name="description"
       content="Discover and organize your favorite movies and TV shows with a modern, dynamic design."
     />
-    <!-- Force fresh CSS if needed -->
     <link rel="stylesheet" href="styles.css?v=4" />
-
-    <!-- Montserrat font -->
     <link
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap"
       rel="stylesheet"
     />
-    <!-- Font Awesome for icons -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
@@ -43,9 +39,7 @@
             <li><button id="homeBtn" class="nav-btn">Home</button></li>
             <li><button id="profileBtn" class="nav-btn">Profile</button></li>
             <li>
-              <button id="logoutBtn" class="btn btn-logout nav-btn">
-                Logout
-              </button>
+              <button id="logoutBtn" class="btn btn-logout nav-btn">Logout</button>
             </li>
           </ul>
         </nav>
@@ -65,7 +59,7 @@
           </button>
         </div>
         <section class="cards-container" id="card-container">
-          <!-- Cards will be dynamically injected here -->
+          <!-- Cards will be injected dynamically -->
         </section>
       </main>
 
@@ -76,10 +70,7 @@
             <a href="https://discord.com/invite/6SfgHHJQUD" target="_blank">
               <i class="fab fa-discord"></i>
             </a>
-            <a
-              href="https://www.instagram.com/itshakimouuuuu"
-              target="_blank"
-            >
+            <a href="https://www.instagram.com/itshakimouuuuu" target="_blank">
               <i class="fab fa-instagram"></i>
             </a>
           </span>
@@ -110,9 +101,7 @@
         />
         <button id="fetchTmdbBtn" class="btn">Fetch Info from TMDB</button>
         <div id="tmdbPreview" class="tmdb-preview"></div>
-        <button id="clearPreviewBtn" class="btn btn-clear">
-          Clear Preview
-        </button>
+        <button id="clearPreviewBtn" class="btn btn-clear">Clear Preview</button>
         <button id="submitBtn" class="btn btn-submit">Submit</button>
       </div>
     </div>
@@ -153,28 +142,21 @@
             id="profileBio"
             placeholder="Write something about yourself..."
           ></textarea>
-          <button id="saveProfileBtn" class="btn btn-update">
-            Save Profile
-          </button>
+          <button id="saveProfileBtn" class="btn btn-update">Save Profile</button>
         </div>
-        <button id="toggleContactBtn" class="btn btn-contact">
-          Contact Me
-        </button>
+        <button id="toggleContactBtn" class="btn btn-contact">Contact Me</button>
         <div id="contactInfo" class="contact-info hidden">
           <a href="https://discord.com/invite/6SfgHHJQUD" target="_blank">
             <i class="fab fa-discord"></i>
           </a>
-          <a
-            href="https://www.instagram.com/itshakimouuuuu"
-            target="_blank"
-          >
+          <a href="https://www.instagram.com/itshakimouuuuu" target="_blank">
             <i class="fab fa-instagram"></i>
           </a>
         </div>
       </div>
     </div>
 
-    <!-- Firebase & Main App Scripts -->
+    <!-- Load Firebase and App scripts -->
     <script type="module" src="firebase.js"></script>
     <script type="module" src="app.js"></script>
   </body>
