@@ -2,10 +2,10 @@
    Global Variables
 --------------------------------------------- */
 :root {
-  --primary-purple: #C65DB8;        /* Single purple base color */
-  --accent-color: #ffffff;          /* White text */
+  --primary-purple: #9a1b89;       /* Single purple base color */
+  --accent-color: #ffffff;         /* White text */
   --overlay-bg-color: rgba(0, 0, 0, 0.7);
-  --button-text-color: #000000;     /* Black text for buttons */
+  --button-text-color: #000000;    /* Black text for buttons */
   --font-family: 'Montserrat', sans-serif;
 }
 
@@ -20,17 +20,17 @@
 
 body {
   font-family: var(--font-family);
-  /* 
-    Use a single purple base plus large white circles 
-    to replicate your screenshot. 
-  */
   background-color: var(--primary-purple);
+  /* 
+    Large white circles
+    to match a "bubbly" design
+  */
   background-image:
-    radial-gradient(circle 300px at 20% 30%, #fff 15%, transparent 15%),
-    radial-gradient(circle 200px at 80% 20%, #fff 15%, transparent 15%),
-    radial-gradient(circle 250px at 40% 70%, #fff 15%, transparent 15%),
-    radial-gradient(circle 180px at 85% 80%, #fff 15%, transparent 15%),
-    radial-gradient(circle 80px at 15% 80%, #fff 15%, transparent 15%);
+    radial-gradient(circle 450px at 20% 30%, #fff 20%, transparent 20%),
+    radial-gradient(circle 400px at 80% 20%, #fff 20%, transparent 20%),
+    radial-gradient(circle 450px at 40% 70%, #fff 20%, transparent 20%),
+    radial-gradient(circle 400px at 85% 80%, #fff 20%, transparent 20%),
+    radial-gradient(circle 300px at 15% 80%, #fff 20%, transparent 20%);
   background-repeat: no-repeat;
   background-size: cover;
   color: var(--accent-color);
