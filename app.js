@@ -206,7 +206,7 @@ function createCardElement(cardData, docId) {
   cardContainer.appendChild(card);
 }
 
-// Global so we can call from HTML onclick
+// Delete card
 window.deleteCard = async (button) => {
   const card = button.closest('.card');
   const docId = card.dataset.id;
@@ -219,6 +219,7 @@ window.deleteCard = async (button) => {
   }
 };
 
+// Edit card
 window.editCard = (button) => {
   const card = button.closest('.card');
   const docId = card.dataset.id;
