@@ -2,7 +2,7 @@
    Global Variables
 --------------------------------------------- */
 :root {
-  --primary-purple: #9a1b89; /* Single purple base color */
+  --primary-purple: #9a1b89; /* Keep the same purple color you like */
   --accent-color: #ffffff;   /* White text */
   --overlay-bg-color: rgba(0, 0, 0, 0.7);
   --button-text-color: #000000;
@@ -22,22 +22,25 @@ body {
   font-family: var(--font-family);
   color: var(--accent-color);
   line-height: 1.6;
-  /* 
-    Big white circles, some partially offscreen,
-    to mimic half-circles at corners
-  */
   background-color: var(--primary-purple);
+
+  /* 
+    Multiple big + small circles 
+    to mimic your screenshot more closely.
+  */
   background-image:
-    /* Top-left big circle half offscreen */
-    radial-gradient(circle 700px at -100px -100px, #fff 40%, transparent 40%),
-    /* Top-right big circle half offscreen */
-    radial-gradient(circle 700px at calc(100% + 100px) -100px, #fff 40%, transparent 40%),
-    /* Bottom-left big circle half offscreen */
-    radial-gradient(circle 700px at -100px calc(100% + 100px), #fff 40%, transparent 40%),
-    /* Bottom-right big circle half offscreen */
-    radial-gradient(circle 700px at calc(100% + 100px) calc(100% + 100px), #fff 40%, transparent 40%);
+    /* Big circle in center */
+    radial-gradient(circle 250px at 50% 50%, #fff 25%, transparent 25%),
+    /* Medium circle top-left */
+    radial-gradient(circle 120px at 20% 30%, #fff 25%, transparent 25%),
+    /* Small circle top-right */
+    radial-gradient(circle 80px at 80% 25%, #fff 25%, transparent 25%),
+    /* Medium circle bottom-left */
+    radial-gradient(circle 130px at 25% 75%, #fff 25%, transparent 25%),
+    /* Small circle bottom-right */
+    radial-gradient(circle 80px at 75% 80%, #fff 25%, transparent 25%);
   background-repeat: no-repeat;
-  background-attachment: scroll; /* or 'fixed' if you prefer */
+  background-size: cover;
 }
 
 /* Links */
