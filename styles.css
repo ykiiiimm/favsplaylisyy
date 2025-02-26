@@ -2,10 +2,10 @@
    Global Variables
 --------------------------------------------- */
 :root {
-  --primary-purple: #9a1b89;       /* Single purple base color */
-  --accent-color: #ffffff;         /* White text */
+  --primary-purple: #9a1b89;
+  --accent-color: #ffffff;
   --overlay-bg-color: rgba(0, 0, 0, 0.7);
-  --button-text-color: #000000;    /* Black text for buttons */
+  --button-text-color: #000000;
   --font-family: 'Montserrat', sans-serif;
 }
 
@@ -21,10 +21,6 @@
 body {
   font-family: var(--font-family);
   background-color: var(--primary-purple);
-  /* 
-    Large white circles
-    to match a "bubbly" design
-  */
   background-image:
     radial-gradient(circle 450px at 20% 30%, #fff 20%, transparent 20%),
     radial-gradient(circle 400px at 80% 20%, #fff 20%, transparent 20%),
@@ -80,7 +76,7 @@ a:hover {
   opacity: 0.9;
 }
 
-/* Google sign-in button can remain red if desired */
+/* Google sign-in button */
 .btn-google {
   background-color: #db4437;
   border: none;
@@ -234,9 +230,7 @@ header {
   gap: 10px;
 }
 
-/* ---------------------------------------------
-   Base .btn styling
---------------------------------------------- */
+/* Base button styling */
 .btn {
   background: #ffffff;
   border: none;
@@ -505,16 +499,32 @@ footer {
    Animations
 --------------------------------------------- */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to   { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes slideDown {
-  from { transform: translateY(-20px); opacity: 0; }
-  to   { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
