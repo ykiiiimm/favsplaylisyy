@@ -1,4 +1,15 @@
-import { auth, db, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc, signOut } from './firebase.js';
+import {
+  auth,
+  db,
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc,
+  setDoc,
+  signOut,
+} from './firebase.js';
 
 const TMDB_API_KEY = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
@@ -45,7 +56,7 @@ const contactInfo = document.getElementById('contactInfo');
 
 let selectedTMDBData = null;
 
-// Show/hide season input
+// Show/hide season input based on content type
 contentTypeSelect.addEventListener('change', () => {
   seasonInput.style.display = (contentTypeSelect.value === 'tv') ? 'block' : 'none';
 });
@@ -54,9 +65,7 @@ contentTypeSelect.addEventListener('change', () => {
 profileBtn.addEventListener('click', async () => {
   const user = auth.currentUser;
   if (user) {
-    // Basic photo from Firebase Auth
     profilePhoto.src = user.photoURL || 'default-profile.png';
-    // Attempt to load profile data from Firestore
     const profileCollectionRef = collection(db, "users", user.uid, "profile");
     const profileSnap = await getDocs(profileCollectionRef);
     let profileData;
@@ -73,12 +82,12 @@ profileBtn.addEventListener('click', async () => {
 // Close profile modal
 closeProfileModal.addEventListener('click', () => profileModal.classList.remove('open'));
 
-// Toggle contact info
+// Toggle contact info visibility
 toggleContactBtn.addEventListener('click', () => {
   contactInfo.classList.toggle('hidden');
 });
 
-// Auth state
+// Auth state listener
 auth.onAuthStateChanged(user => {
   if (user) {
     document.getElementById('loginContainer').classList.add('hidden');
@@ -90,14 +99,11 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-// TMDB
+// Fetch TMDB results
 async function fetchTMDBResults(title, type) {
-  let searchUrl = '';
-  if (type === 'movie') {
-    searchUrl = `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
-  } else {
-    searchUrl = `${TMDB_BASE_URL}/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
-  }
+  let searchUrl = type === 'movie'
+    ? `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`
+    : `${TMDB_BASE_URL}/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
   try {
     const res = await fetch(searchUrl);
     const data = await res.json();
@@ -134,7 +140,6 @@ function displayTMDBOptions(results) {
         releaseDate: (contentTypeSelect.value === 'movie') ? result.release_date : result.first_air_date,
         posterUrl: posterPath
       };
-      // If TV & season, fetch season details
       if (contentTypeSelect.value === 'tv' && seasonInput.value) {
         try {
           const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${seasonInput.value}?api_key=${TMDB_API_KEY}`);
@@ -160,7 +165,7 @@ function displayTMDBOptions(results) {
   tmdbPreview.appendChild(container);
 }
 
-// Firestore
+// Firestore: Save new card
 async function saveCard(cardData) {
   try {
     const userId = auth.currentUser.uid;
@@ -170,6 +175,7 @@ async function saveCard(cardData) {
   }
 }
 
+// Load cards from Firestore
 async function loadCards() {
   try {
     const userId = auth.currentUser.uid;
@@ -201,7 +207,7 @@ function createCardElement(cardData, docId) {
   cardContainer.appendChild(card);
 }
 
-// Global so we can call from HTML onclick
+// Global functions for card actions
 window.deleteCard = async (button) => {
   const card = button.closest('.card');
   const docId = card.dataset.id;
@@ -233,7 +239,6 @@ window.editCard = (button) => {
         releaseDate: (type === 'movie') ? result.release_date : result.first_air_date,
         posterUrl: result.poster_path ? TMDB_IMG_BASE + result.poster_path : ""
       };
-      // If TV & season
       if (type === 'tv' && season) {
         try {
           const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${season}?api_key=${TMDB_API_KEY}`);
@@ -260,7 +265,7 @@ window.editCard = (button) => {
   };
 };
 
-// TMDB fetch button
+// TMDB fetch button event
 fetchTmdbBtn.addEventListener('click', async (e) => {
   e.preventDefault();
   const title = titleInput.value;
@@ -271,14 +276,14 @@ fetchTmdbBtn.addEventListener('click', async (e) => {
   }
 });
 
-// Clear TMDB preview
+// Clear TMDB preview event
 clearPreviewBtn.addEventListener('click', (e) => {
   e.preventDefault();
   tmdbPreview.innerHTML = "";
   selectedTMDBData = null;
 });
 
-// Submit new card
+// Submit new card event
 submitBtn.addEventListener('click', async (e) => {
   e.preventDefault();
   if (!selectedTMDBData) {
@@ -298,7 +303,7 @@ submitBtn.addEventListener('click', async (e) => {
 openModalBtn.addEventListener('click', () => modal.classList.add('open'));
 closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
 
-// Detail modal
+// Detail modal: open details
 window.openDetailModalHandler = async (e, docId) => {
   e.stopPropagation();
   try {
