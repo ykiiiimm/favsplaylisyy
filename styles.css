@@ -2,8 +2,8 @@
    Global Variables
 --------------------------------------------- */
 :root {
-  --primary-purple: #9a1b89;
-  --accent-color: #ffffff;
+  --primary-purple: #9a1b89; /* Single purple base color */
+  --accent-color: #ffffff;   /* White text */
   --overlay-bg-color: rgba(0, 0, 0, 0.7);
   --button-text-color: #000000;
   --font-family: 'Montserrat', sans-serif;
@@ -21,12 +21,22 @@
 body {
   font-family: var(--font-family);
   background-color: var(--primary-purple);
+
+  /* 
+    Large white circles, some half out of view, 
+    to mimic your screenshot. 
+  */
   background-image:
-    radial-gradient(circle 450px at 20% 30%, #fff 20%, transparent 20%),
-    radial-gradient(circle 400px at 80% 20%, #fff 20%, transparent 20%),
-    radial-gradient(circle 450px at 40% 70%, #fff 20%, transparent 20%),
-    radial-gradient(circle 400px at 85% 80%, #fff 20%, transparent 20%),
-    radial-gradient(circle 300px at 15% 80%, #fff 20%, transparent 20%);
+    /* Big circle partially off top-left */
+    radial-gradient(circle 400px at -100px -100px, #fff 30%, transparent 30%),
+    /* Another large circle top-right */
+    radial-gradient(circle 300px at 120% 10%, #fff 25%, transparent 25%),
+    /* Center-ish big circle */
+    radial-gradient(circle 250px at 50% 50%, #fff 25%, transparent 25%),
+    /* Bottom-left half circle */
+    radial-gradient(circle 300px at -100px 120%, #fff 25%, transparent 25%),
+    /* Bottom-right circle */
+    radial-gradient(circle 300px at 110% 80%, #fff 25%, transparent 25%);
   background-repeat: no-repeat;
   background-size: cover;
   color: var(--accent-color);
@@ -76,7 +86,7 @@ a:hover {
   opacity: 0.9;
 }
 
-/* Google sign-in button */
+/* Google sign-in button can remain red if you want */
 .btn-google {
   background-color: #db4437;
   border: none;
