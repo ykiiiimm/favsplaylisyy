@@ -2,8 +2,8 @@
    Global Variables
 --------------------------------------------- */
 :root {
-  --primary-purple: #9a1b89; /* Your purple */
-  --accent-color: #ffffff;   /* White text */
+  --primary-purple: #9a1b89;
+  --accent-color: #ffffff;
   --overlay-bg-color: rgba(0, 0, 0, 0.7);
   --button-text-color: #000000;
   --font-family: 'Montserrat', sans-serif;
@@ -22,15 +22,9 @@ body {
   font-family: var(--font-family);
   color: var(--accent-color);
   line-height: 1.6;
-  background-color: var(--primary-purple);
-  /* Four giant white arcs in the corners */
-  background-image:
-    radial-gradient(circle 700px at 0 0, #fff 50%, transparent 50%),
-    radial-gradient(circle 700px at 100% 0, #fff 50%, transparent 50%),
-    radial-gradient(circle 700px at 0 100%, #fff 50%, transparent 50%),
-    radial-gradient(circle 700px at 100% 100%, #fff 50%, transparent 50%);
-  background-repeat: no-repeat;
-  background-attachment: scroll;
+  /* Use your background image with fallback color */
+  background: var(--primary-purple) url('Screenshot 2025-02-26 155545.png') no-repeat center center fixed;
+  background-size: cover;
 }
 
 /* Links */
