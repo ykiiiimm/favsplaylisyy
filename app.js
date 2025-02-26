@@ -61,7 +61,7 @@ contentTypeSelect.addEventListener('change', () => {
   seasonInput.style.display = (contentTypeSelect.value === 'tv') ? 'block' : 'none';
 });
 
-// Profile modal open
+// Open profile modal and load user data
 profileBtn.addEventListener('click', async () => {
   const user = auth.currentUser;
   if (user) {
@@ -87,7 +87,7 @@ toggleContactBtn.addEventListener('click', () => {
   contactInfo.classList.toggle('hidden');
 });
 
-// Auth state listener
+// Listen for auth state changes
 auth.onAuthStateChanged(user => {
   if (user) {
     document.getElementById('loginContainer').classList.add('hidden');
@@ -99,7 +99,7 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-// Fetch TMDB results
+// Fetch TMDB results based on title and type
 async function fetchTMDBResults(title, type) {
   let searchUrl = type === 'movie'
     ? `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`
@@ -165,7 +165,7 @@ function displayTMDBOptions(results) {
   tmdbPreview.appendChild(container);
 }
 
-// Firestore: Save new card
+// Save new card to Firestore
 async function saveCard(cardData) {
   try {
     const userId = auth.currentUser.uid;
