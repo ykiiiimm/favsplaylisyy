@@ -1,12 +1,10 @@
 /* ---------------------------------------------
    Global Variables
-   - Header bar: #7e168e
-   - Footer bar: #4f2e54
 --------------------------------------------- */
 :root {
-  --header-bg: #7e168e;         /* Bright red for header (top bar) */
-  --footer-bg: #4f2e54;         /* Darker red for footer (bottom) */
-  --card-bg: #7e168e;           /* Darker red for cards & login card */
+  --header-bg: #e50914;         /* Bright red for header (top bar) */
+  --footer-bg: #b20707;         /* Darker red for footer (bottom) */
+  --card-bg: #b20707;           /* Darker red for cards & login card */
   --overlay-bg-color: rgba(0, 0, 0, 0.7);
   --accent-color: #ffffff;      /* White text */
   --button-text-color: #000000; /* Black text for buttons */
@@ -24,7 +22,13 @@
 
 body {
   font-family: var(--font-family);
-  background-color: var(--header-bg);
+  /* Purple background with subtle white circles */
+  background-color: #6a0dad;
+  background-image: 
+    radial-gradient(circle, rgba(255,255,255,0.15) 20%, transparent 20%), 
+    radial-gradient(circle, rgba(255,255,255,0.15) 20%, transparent 20%);
+  background-size: 80px 80px;
+  background-position: 0 0, 40px 40px;
   color: var(--accent-color);
   line-height: 1.6;
 }
@@ -46,7 +50,6 @@ a:hover {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  /* background: var(--header-bg); */
 }
 
 .login-card {
@@ -173,25 +176,18 @@ header {
 }
 
 /* ---------------------------------------------
-   Cards Grid (Updated)
+   Cards Grid
 --------------------------------------------- */
 .cards-container {
-  /* 
-    We set a fixed column width of 250px. The 'auto-fill' repeats 
-    as many 250px columns as will fit in the row, then wraps. 
-    This ensures every card is 250px wide, and we can scroll 
-    vertically if there are many cards.
-  */
   display: grid;
   grid-template-columns: repeat(auto-fill, 250px);
   gap: 20px;
   padding: 20px;
-  justify-content: center; /* Center the cards if there's extra space */
+  justify-content: center;
 }
 
-/* Card (Updated) */
 .card {
-  width: 250px; /* Fixed width to ensure consistent card size */
+  width: 250px;
   background: var(--card-bg);
   border-radius: 10px;
   overflow: hidden;
@@ -207,7 +203,7 @@ header {
 
 .card img {
   width: 100%;
-  height: 350px; /* Fixed height to keep poster dimension consistent */
+  height: 350px;
   object-fit: cover;
 }
 
@@ -342,7 +338,7 @@ header {
 }
 
 /* ---------------------------------------------
-   Detail Modal (Horizontal Layout)
+   Detail Modal
 --------------------------------------------- */
 .detail-content {
   display: flex;
@@ -382,7 +378,7 @@ header {
 }
 
 /* ---------------------------------------------
-   Profile Modal (Advanced Layout)
+   Profile Modal
 --------------------------------------------- */
 .profile-content {
   background: var(--card-bg);
@@ -459,7 +455,7 @@ header {
 }
 
 /* ---------------------------------------------
-   Footer (Bottom Bar)
+   Footer
 --------------------------------------------- */
 footer {
   background: var(--footer-bg);
@@ -482,6 +478,22 @@ footer {
 
 .social-links a:hover {
   color: #ffffff;
+}
+
+/* Styling for legal links in footer */
+.legal-links {
+  margin-top: 10px;
+  font-size: 0.8rem;
+}
+
+.legal-links a {
+  color: var(--accent-color);
+  text-decoration: none;
+  margin: 0 5px;
+}
+
+.legal-links a:hover {
+  text-decoration: underline;
 }
 
 /* ---------------------------------------------
