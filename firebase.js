@@ -3,7 +3,7 @@ import {
   getAuth,
   signInWithPopup,
   GoogleAuthProvider,
-  signOut
+  signOut,
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 import {
   getFirestore,
@@ -13,7 +13,7 @@ import {
   deleteDoc,
   doc,
   updateDoc,
-  setDoc
+  setDoc,
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -23,7 +23,7 @@ const firebaseConfig = {
   storageBucket: "ykiiiiiiiiiiiiiiim.appspot.com",
   messagingSenderId: "1042062383289",
   appId: "1:1042062383289:web:a4f43aa710b06a0f38a368",
-  measurementId: "G-KNVLQ0TMB0"
+  measurementId: "G-KNVLQ0TMB0",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -42,7 +42,7 @@ export {
   doc,
   updateDoc,
   setDoc,
-  signOut
+  signOut,
 };
 
 const loginContainer = document.getElementById("loginContainer");
@@ -56,7 +56,7 @@ googleLoginBtn.addEventListener("click", () => {
       loginContainer.classList.add("hidden");
       mainContent.classList.remove("hidden");
     })
-    .catch(error => {
+    .catch((error) => {
       console.error("Login error:", error);
     });
 });
@@ -67,12 +67,12 @@ logoutBtn.addEventListener("click", () => {
       loginContainer.classList.remove("hidden");
       mainContent.classList.add("hidden");
     })
-    .catch(error => {
+    .catch((error) => {
       console.error("Logout error:", error);
     });
 });
 
-auth.onAuthStateChanged(user => {
+auth.onAuthStateChanged((user) => {
   if (user) {
     loginContainer.classList.add("hidden");
     mainContent.classList.remove("hidden");
