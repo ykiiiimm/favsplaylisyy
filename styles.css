@@ -20,29 +20,27 @@
 
 body {
   font-family: var(--font-family);
-  background-color: var(--primary-purple);
-
-  /* 
-    Large white circles, some half out of view, 
-    to mimic your screenshot. 
-  */
-  background-image:
-    /* Big circle partially off top-left */
-    radial-gradient(circle 400px at -100px -100px, #fff 30%, transparent 30%),
-    /* Another large circle top-right */
-    radial-gradient(circle 300px at 120% 10%, #fff 25%, transparent 25%),
-    /* Center-ish big circle */
-    radial-gradient(circle 250px at 50% 50%, #fff 25%, transparent 25%),
-    /* Bottom-left half circle */
-    radial-gradient(circle 300px at -100px 120%, #fff 25%, transparent 25%),
-    /* Bottom-right circle */
-    radial-gradient(circle 300px at 110% 80%, #fff 25%, transparent 25%);
-  background-repeat: no-repeat;
-  background-size: cover;
   color: var(--accent-color);
   line-height: 1.6;
+  /* 
+    Big white circles, some partially offscreen,
+    to mimic half-circles at corners
+  */
+  background-color: var(--primary-purple);
+  background-image:
+    /* Top-left big circle half offscreen */
+    radial-gradient(circle 700px at -100px -100px, #fff 40%, transparent 40%),
+    /* Top-right big circle half offscreen */
+    radial-gradient(circle 700px at calc(100% + 100px) -100px, #fff 40%, transparent 40%),
+    /* Bottom-left big circle half offscreen */
+    radial-gradient(circle 700px at -100px calc(100% + 100px), #fff 40%, transparent 40%),
+    /* Bottom-right big circle half offscreen */
+    radial-gradient(circle 700px at calc(100% + 100px) calc(100% + 100px), #fff 40%, transparent 40%);
+  background-repeat: no-repeat;
+  background-attachment: scroll; /* or 'fixed' if you prefer */
 }
 
+/* Links */
 a {
   color: var(--accent-color);
   text-decoration: none;
@@ -86,7 +84,6 @@ a:hover {
   opacity: 0.9;
 }
 
-/* Google sign-in button can remain red if you want */
 .btn-google {
   background-color: #db4437;
   border: none;
