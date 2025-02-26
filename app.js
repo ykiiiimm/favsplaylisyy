@@ -1,5 +1,4 @@
 // This file is loaded as a module at the end of index.html
-// All DOM elements are available, so we do not need a DOMContentLoaded wrapper.
 
 import {
   auth,
@@ -18,7 +17,6 @@ const TMDB_API_KEY = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500";
 
-// DOM references
 const openModalBtn = document.getElementById("openModalBtn");
 const modal = document.getElementById("modal");
 const closeModalBtn = document.getElementById("closeModalBtn");
@@ -32,7 +30,6 @@ const tmdbPreview = document.getElementById("tmdbPreview");
 const clearPreviewBtn = document.getElementById("clearPreviewBtn");
 const searchInput = document.getElementById("searchInput");
 
-// Detail modal
 const detailModal = document.getElementById("detailModal");
 const closeDetailModal = document.getElementById("closeDetailModal");
 const detailPoster = document.getElementById("detailPoster");
@@ -41,7 +38,6 @@ const detailOverview = document.getElementById("detailOverview");
 const detailRating = document.getElementById("detailRating");
 const detailRelease = document.getElementById("detailRelease");
 
-// Profile modal
 const profileBtn = document.getElementById("profileBtn");
 const profileModal = document.getElementById("profileModal");
 const closeProfileModal = document.getElementById("closeProfileModal");
@@ -59,12 +55,10 @@ const contactInfo = document.getElementById("contactInfo");
 
 let selectedTMDBData = null;
 
-// Show/hide season input
 contentTypeSelect.addEventListener("change", () => {
   seasonInput.style.display = contentTypeSelect.value === "tv" ? "block" : "none";
 });
 
-// Open profile modal
 profileBtn.addEventListener("click", async () => {
   const user = auth.currentUser;
   if (user) {
