@@ -45,43 +45,39 @@ export {
   signOut
 };
 
-// Login/Logout
-const loginContainer = document.getElementById('loginContainer');
-const mainContent = document.getElementById('mainContent');
-const googleLoginBtn = document.getElementById('googleLoginBtn');
-const logoutBtn = document.getElementById('logoutBtn');
+const loginContainer = document.getElementById("loginContainer");
+const mainContent = document.getElementById("mainContent");
+const googleLoginBtn = document.getElementById("googleLoginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
 
-// Google Login
-googleLoginBtn.addEventListener('click', () => {
+googleLoginBtn.addEventListener("click", () => {
   signInWithPopup(auth, provider)
     .then(() => {
-      loginContainer.classList.add('hidden');
-      mainContent.classList.remove('hidden');
+      loginContainer.classList.add("hidden");
+      mainContent.classList.remove("hidden");
     })
-    .catch((error) => {
+    .catch(error => {
       console.error("Login error:", error);
     });
 });
 
-// Logout
-logoutBtn.addEventListener('click', () => {
+logoutBtn.addEventListener("click", () => {
   signOut(auth)
     .then(() => {
-      loginContainer.classList.remove('hidden');
-      mainContent.classList.add('hidden');
+      loginContainer.classList.remove("hidden");
+      mainContent.classList.add("hidden");
     })
-    .catch((error) => {
+    .catch(error => {
       console.error("Logout error:", error);
     });
 });
 
-// Auth State
-auth.onAuthStateChanged((user) => {
+auth.onAuthStateChanged(user => {
   if (user) {
-    loginContainer.classList.add('hidden');
-    mainContent.classList.remove('hidden');
+    loginContainer.classList.add("hidden");
+    mainContent.classList.remove("hidden");
   } else {
-    loginContainer.classList.remove('hidden');
-    mainContent.classList.add('hidden');
+    loginContainer.classList.remove("hidden");
+    mainContent.classList.add("hidden");
   }
 });
