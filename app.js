@@ -56,12 +56,12 @@ const contactInfo = document.getElementById('contactInfo');
 
 let selectedTMDBData = null;
 
-// Show/hide season input based on content type
+// Show/hide season input
 contentTypeSelect.addEventListener('change', () => {
   seasonInput.style.display = (contentTypeSelect.value === 'tv') ? 'block' : 'none';
 });
 
-// Open profile modal and load user data
+// Open Profile Modal
 profileBtn.addEventListener('click', async () => {
   const user = auth.currentUser;
   if (user) {
@@ -79,15 +79,15 @@ profileBtn.addEventListener('click', async () => {
   }
 });
 
-// Close profile modal
+// Close Profile Modal
 closeProfileModal.addEventListener('click', () => profileModal.classList.remove('open'));
 
-// Toggle contact info visibility
+// Toggle contact info
 toggleContactBtn.addEventListener('click', () => {
   contactInfo.classList.toggle('hidden');
 });
 
-// Listen for auth state changes
+// Auth state
 auth.onAuthStateChanged(user => {
   if (user) {
     document.getElementById('loginContainer').classList.add('hidden');
@@ -99,7 +99,7 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-// Fetch TMDB results based on title and type
+// TMDB
 async function fetchTMDBResults(title, type) {
   let searchUrl = type === 'movie'
     ? `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`
@@ -165,7 +165,7 @@ function displayTMDBOptions(results) {
   tmdbPreview.appendChild(container);
 }
 
-// Save new card to Firestore
+// Firestore
 async function saveCard(cardData) {
   try {
     const userId = auth.currentUser.uid;
@@ -175,7 +175,6 @@ async function saveCard(cardData) {
   }
 }
 
-// Load cards from Firestore
 async function loadCards() {
   try {
     const userId = auth.currentUser.uid;
@@ -207,7 +206,7 @@ function createCardElement(cardData, docId) {
   cardContainer.appendChild(card);
 }
 
-// Global functions for card actions
+// Global so we can call from HTML onclick
 window.deleteCard = async (button) => {
   const card = button.closest('.card');
   const docId = card.dataset.id;
@@ -265,7 +264,7 @@ window.editCard = (button) => {
   };
 };
 
-// TMDB fetch button event
+// TMDB fetch button
 fetchTmdbBtn.addEventListener('click', async (e) => {
   e.preventDefault();
   const title = titleInput.value;
@@ -276,14 +275,14 @@ fetchTmdbBtn.addEventListener('click', async (e) => {
   }
 });
 
-// Clear TMDB preview event
+// Clear TMDB preview
 clearPreviewBtn.addEventListener('click', (e) => {
   e.preventDefault();
   tmdbPreview.innerHTML = "";
   selectedTMDBData = null;
 });
 
-// Submit new card event
+// Submit new card
 submitBtn.addEventListener('click', async (e) => {
   e.preventDefault();
   if (!selectedTMDBData) {
@@ -303,7 +302,7 @@ submitBtn.addEventListener('click', async (e) => {
 openModalBtn.addEventListener('click', () => modal.classList.add('open'));
 closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
 
-// Detail modal: open details
+// Detail modal
 window.openDetailModalHandler = async (e, docId) => {
   e.stopPropagation();
   try {
@@ -329,7 +328,7 @@ window.openDetailModalHandler = async (e, docId) => {
 };
 closeDetailModal.addEventListener('click', () => detailModal.classList.remove('open'));
 
-// Search functionality
+// Search
 searchInput.addEventListener('input', () => {
   const query = searchInput.value.toLowerCase();
   document.querySelectorAll('.card').forEach(card => {
