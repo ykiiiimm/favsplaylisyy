@@ -31,7 +31,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
 
-// Export Firestore functions (including setDoc)
+// Export Firestore functions and auth
 export { 
   auth, 
   provider, 
