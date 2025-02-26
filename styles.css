@@ -1,10 +1,10 @@
 /* ---------------------------------------------
-   Global Variables
+   Global Variables (all red values changed to purple)
 --------------------------------------------- */
 :root {
-  --header-bg: #e50914;         /* Bright red for header (top bar) */
-  --footer-bg: #b20707;         /* Darker red for footer (bottom) */
-  --card-bg: #b20707;           /* Darker red for cards & login card */
+  --header-bg: #6a0dad;         /* Deep purple for header */
+  --footer-bg: #6a0dad;         /* Deep purple for footer */
+  --card-bg: #8e44ad;           /* Lighter purple for cards & login card */
   --overlay-bg-color: rgba(0, 0, 0, 0.7);
   --accent-color: #ffffff;      /* White text */
   --button-text-color: #000000; /* Black text for buttons */
@@ -22,13 +22,15 @@
 
 body {
   font-family: var(--font-family);
-  /* Purple background with subtle white circles */
   background-color: #6a0dad;
+  /* Four large, subtle white circles in the corners */
   background-image: 
-    radial-gradient(circle, rgba(255,255,255,0.15) 20%, transparent 20%), 
-    radial-gradient(circle, rgba(255,255,255,0.15) 20%, transparent 20%);
-  background-size: 80px 80px;
-  background-position: 0 0, 40px 40px;
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.15) 40%, transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15) 40%, transparent 40%),
+    radial-gradient(circle at 20% 80%, rgba(255,255,255,0.15) 40%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(255,255,255,0.15) 40%, transparent 40%);
+  background-repeat: no-repeat;
+  background-size: 300px 300px;
   color: var(--accent-color);
   line-height: 1.6;
 }
@@ -77,7 +79,7 @@ a:hover {
 }
 
 .btn-google {
-  background-color: #db4437; /* Google red */
+  background-color: #db4437; /* Google red remains for the login button */
   border: none;
   padding: 12px 20px;
   border-radius: 5px;
@@ -164,7 +166,7 @@ header {
   border: none;
   padding: 15px 30px;
   border-radius: 50px;
-  color: var(--button-text-color); /* Black text */
+  color: var(--button-text-color);
   font-size: 1.2rem;
   cursor: pointer;
   transition: transform 0.3s, box-shadow 0.3s;
