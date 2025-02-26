@@ -2,21 +2,21 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>UR FAV'S - Discover Your Favorites</title>
     <meta
       name="description"
       content="Discover and organize your favorite movies and TV shows with a modern, dynamic design."
     />
-    <!-- Use a query parameter like ?v=4 to force fresh CSS -->
+    <!-- Force fresh CSS if needed -->
     <link rel="stylesheet" href="styles.css?v=4" />
 
-    <!-- Montserrat font for a modern look -->
+    <!-- Montserrat font -->
     <link
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap"
       rel="stylesheet"
     />
-    <!-- Font Awesome icons -->
+    <!-- Font Awesome for icons -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
@@ -63,7 +63,7 @@
           </button>
         </div>
         <section class="cards-container" id="card-container">
-          <!-- Cards will be dynamically injected here -->
+          <!-- Cards will be injected dynamically -->
         </section>
       </main>
 
@@ -79,9 +79,8 @@
             </a>
           </span>
         </p>
-        <!-- Footer legal links -->
         <div class="legal-links">
-          <a href="terms-of-service.html">Terms of Service</a> | 
+          <a href="terms-of-service.html">Terms of Service</a> |
           <a href="privacy-policy.html">Privacy Policy</a>
         </div>
       </footer>
@@ -105,7 +104,6 @@
           style="display: none;"
         />
         <button id="fetchTmdbBtn" class="btn">Fetch Info from TMDB</button>
-        <!-- TMDB Preview / Selection Area -->
         <div id="tmdbPreview" class="tmdb-preview"></div>
         <button id="clearPreviewBtn" class="btn btn-clear">Clear Preview</button>
         <button id="submitBtn" class="btn btn-submit">Submit</button>
@@ -159,7 +157,7 @@
       </div>
     </div>
 
-    <!-- Firebase and App Scripts -->
+    <!-- Firebase & Main App Scripts -->
     <script type="module" src="firebase.js"></script>
     <script type="module" src="app.js"></script>
   </body>
