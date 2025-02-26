@@ -15,7 +15,6 @@ const TMDB_API_KEY = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500";
 
-// DOM references
 const openModalBtn = document.getElementById('openModalBtn');
 const modal = document.getElementById('modal');
 const closeModalBtn = document.getElementById('closeModalBtn');
@@ -29,7 +28,6 @@ const tmdbPreview = document.getElementById('tmdbPreview');
 const clearPreviewBtn = document.getElementById('clearPreviewBtn');
 const searchInput = document.getElementById('searchInput');
 
-// Detail modal
 const detailModal = document.getElementById('detailModal');
 const closeDetailModal = document.getElementById('closeDetailModal');
 const detailPoster = document.getElementById('detailPoster');
@@ -38,7 +36,6 @@ const detailOverview = document.getElementById('detailOverview');
 const detailRating = document.getElementById('detailRating');
 const detailRelease = document.getElementById('detailRelease');
 
-// Profile modal
 const profileBtn = document.getElementById('profileBtn');
 const profileModal = document.getElementById('profileModal');
 const closeProfileModal = document.getElementById('closeProfileModal');
@@ -56,12 +53,10 @@ const contactInfo = document.getElementById('contactInfo');
 
 let selectedTMDBData = null;
 
-// Show/hide season input
 contentTypeSelect.addEventListener('change', () => {
   seasonInput.style.display = (contentTypeSelect.value === 'tv') ? 'block' : 'none';
 });
 
-// Open Profile Modal
 profileBtn.addEventListener('click', async () => {
   const user = auth.currentUser;
   if (user) {
@@ -72,22 +67,24 @@ profileBtn.addEventListener('click', async () => {
     profileSnap.forEach(docSnap => {
       profileData = docSnap.data();
     });
-    profileNicknameDisplay.textContent = (profileData && profileData.nickname) || user.displayName || "Anonymous";
-    profileTaglineDisplay.textContent = (profileData && profileData.tagline) || "Your tagline here";
-    profileBioDisplay.textContent = (profileData && profileData.bio) || "Write a short bio about yourself...";
+    profileNicknameDisplay.textContent =
+      (profileData && profileData.nickname) || user.displayName || "Anonymous";
+    profileTaglineDisplay.textContent =
+      (profileData && profileData.tagline) || "Your tagline here";
+    profileBioDisplay.textContent =
+      (profileData && profileData.bio) || "Write a short bio about yourself...";
     profileModal.classList.add('open');
   }
 });
 
-// Close Profile Modal
-closeProfileModal.addEventListener('click', () => profileModal.classList.remove('open'));
+closeProfileModal.addEventListener('click', () => {
+  profileModal.classList.remove('open');
+});
 
-// Toggle contact info
 toggleContactBtn.addEventListener('click', () => {
   contactInfo.classList.toggle('hidden');
 });
 
-// Auth state
 auth.onAuthStateChanged(user => {
   if (user) {
     document.getElementById('loginContainer').classList.add('hidden');
@@ -99,11 +96,11 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-// TMDB
 async function fetchTMDBResults(title, type) {
-  let searchUrl = type === 'movie'
-    ? `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`
-    : `${TMDB_BASE_URL}/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
+  const searchUrl =
+    type === 'movie'
+      ? `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`
+      : `${TMDB_BASE_URL}/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
   try {
     const res = await fetch(searchUrl);
     const data = await res.json();
@@ -126,8 +123,8 @@ function displayTMDBOptions(results) {
     const option = document.createElement('div');
     option.classList.add('tmdb-option');
     const name = result.title || result.name;
-    const year = (result.release_date || result.first_air_date || '').substring(0, 4);
-    const posterPath = result.poster_path ? TMDB_IMG_BASE + result.poster_path : '';
+    const year = (result.release_date || result.first_air_date || "").substring(0, 4);
+    const posterPath = result.poster_path ? TMDB_IMG_BASE + result.poster_path : "";
     option.innerHTML = `
       <img src="${posterPath}" alt="${name}">
       <p>${name} (${year})</p>
@@ -137,12 +134,14 @@ function displayTMDBOptions(results) {
         title: name,
         overview: result.overview,
         rating: result.vote_average,
-        releaseDate: (contentTypeSelect.value === 'movie') ? result.release_date : result.first_air_date,
-        posterUrl: posterPath
+        releaseDate: contentTypeSelect.value === "movie" ? result.release_date : result.first_air_date,
+        posterUrl: posterPath,
       };
-      if (contentTypeSelect.value === 'tv' && seasonInput.value) {
+      if (contentTypeSelect.value === "tv" && seasonInput.value) {
         try {
-          const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${seasonInput.value}?api_key=${TMDB_API_KEY}`);
+          const seasonRes = await fetch(
+            `${TMDB_BASE_URL}/tv/${result.id}/season/${seasonInput.value}?api_key=${TMDB_API_KEY}`
+          );
           const seasonData = await seasonRes.json();
           if (seasonData.poster_path) {
             data.posterUrl = TMDB_IMG_BASE + seasonData.poster_path;
@@ -165,7 +164,6 @@ function displayTMDBOptions(results) {
   tmdbPreview.appendChild(container);
 }
 
-// Firestore
 async function saveCard(cardData) {
   try {
     const userId = auth.currentUser.uid;
@@ -189,8 +187,8 @@ async function loadCards() {
 }
 
 function createCardElement(cardData, docId) {
-  const card = document.createElement('div');
-  card.classList.add('card');
+  const card = document.createElement("div");
+  card.classList.add("card");
   card.dataset.id = docId;
   card.innerHTML = `
     <img src="${cardData.posterUrl}" alt="Poster">
@@ -206,9 +204,8 @@ function createCardElement(cardData, docId) {
   cardContainer.appendChild(card);
 }
 
-// Delete card
-window.deleteCard = async (button) => {
-  const card = button.closest('.card');
+window.deleteCard = async button => {
+  const card = button.closest(".card");
   const docId = card.dataset.id;
   try {
     const userId = auth.currentUser.uid;
@@ -219,16 +216,15 @@ window.deleteCard = async (button) => {
   }
 };
 
-// Edit card
-window.editCard = (button) => {
-  const card = button.closest('.card');
+window.editCard = button => {
+  const card = button.closest(".card");
   const docId = card.dataset.id;
-  titleInput.value = card.querySelector('.title').textContent;
-  modal.classList.add('open');
-  submitBtn.onclick = async (e) => {
+  titleInput.value = card.querySelector(".title").textContent;
+  modal.classList.add("open");
+  submitBtn.onclick = async e => {
     e.preventDefault();
     const type = contentTypeSelect.value;
-    const season = (type === 'tv') ? seasonInput.value : null;
+    const season = type === "tv" ? seasonInput.value : null;
     const results = await fetchTMDBResults(titleInput.value, type);
     if (results.length > 0) {
       const result = results[0];
@@ -236,12 +232,14 @@ window.editCard = (button) => {
         title: result.title || result.name,
         overview: result.overview,
         rating: result.vote_average,
-        releaseDate: (type === 'movie') ? result.release_date : result.first_air_date,
+        releaseDate: type === "movie" ? result.release_date : result.first_air_date,
         posterUrl: result.poster_path ? TMDB_IMG_BASE + result.poster_path : ""
       };
-      if (type === 'tv' && season) {
+      if (type === "tv" && season) {
         try {
-          const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${season}?api_key=${TMDB_API_KEY}`);
+          const seasonRes = await fetch(
+            `${TMDB_BASE_URL}/tv/${result.id}/season/${season}?api_key=${TMDB_API_KEY}`
+          );
           const seasonData = await seasonRes.json();
           if (seasonData.poster_path) {
             data.posterUrl = TMDB_IMG_BASE + seasonData.poster_path;
@@ -255,9 +253,9 @@ window.editCard = (button) => {
       try {
         const userId = auth.currentUser.uid;
         await updateDoc(doc(db, "users", userId, "cards", docId), data);
-        card.querySelector('img').src = data.posterUrl;
-        card.querySelector('.title').textContent = data.title;
-        modal.classList.remove('open');
+        card.querySelector("img").src = data.posterUrl;
+        card.querySelector(".title").textContent = data.title;
+        modal.classList.remove("open");
       } catch (err) {
         console.error("Error updating card:", err);
       }
@@ -265,8 +263,7 @@ window.editCard = (button) => {
   };
 };
 
-// TMDB fetch button
-fetchTmdbBtn.addEventListener('click', async (e) => {
+fetchTmdbBtn.addEventListener("click", async e => {
   e.preventDefault();
   const title = titleInput.value;
   const type = contentTypeSelect.value;
@@ -276,15 +273,13 @@ fetchTmdbBtn.addEventListener('click', async (e) => {
   }
 });
 
-// Clear TMDB preview
-clearPreviewBtn.addEventListener('click', (e) => {
+clearPreviewBtn.addEventListener("click", e => {
   e.preventDefault();
   tmdbPreview.innerHTML = "";
   selectedTMDBData = null;
 });
 
-// Submit new card
-submitBtn.addEventListener('click', async (e) => {
+submitBtn.addEventListener("click", async e => {
   e.preventDefault();
   if (!selectedTMDBData) {
     alert("Please fetch and select a TMDB result before submitting.");
@@ -292,18 +287,16 @@ submitBtn.addEventListener('click', async (e) => {
   }
   await saveCard(selectedTMDBData);
   await loadCards();
-  modal.classList.remove('open');
-  titleInput.value = '';
-  seasonInput.value = '';
+  modal.classList.remove("open");
+  titleInput.value = "";
+  seasonInput.value = "";
   tmdbPreview.innerHTML = "";
   selectedTMDBData = null;
 });
 
-// Open & close Add/Edit modal
-openModalBtn.addEventListener('click', () => modal.classList.add('open'));
-closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
+openModalBtn.addEventListener("click", () => modal.classList.add("open"));
+closeModalBtn.addEventListener("click", () => modal.classList.remove("open"));
 
-// Detail modal
 window.openDetailModalHandler = async (e, docId) => {
   e.stopPropagation();
   try {
@@ -321,37 +314,37 @@ window.openDetailModalHandler = async (e, docId) => {
       detailOverview.textContent = cardData.overview;
       detailRating.textContent = `Rating: ${cardData.rating}`;
       detailRelease.textContent = `Release: ${cardData.releaseDate}`;
-      detailModal.classList.add('open');
+      detailModal.classList.add("open");
     }
   } catch (error) {
     console.error("Error opening detail modal:", error);
   }
 };
-closeDetailModal.addEventListener('click', () => detailModal.classList.remove('open'));
 
-// Search
-searchInput.addEventListener('input', () => {
+closeDetailModal.addEventListener("click", () => {
+  detailModal.classList.remove("open");
+});
+
+searchInput.addEventListener("input", () => {
   const query = searchInput.value.toLowerCase();
-  document.querySelectorAll('.card').forEach(card => {
-    const title = card.querySelector('.title').textContent.toLowerCase();
-    card.style.display = title.includes(query) ? 'block' : 'none';
+  document.querySelectorAll(".card").forEach(card => {
+    const title = card.querySelector(".title").textContent.toLowerCase();
+    card.style.display = title.includes(query) ? "block" : "none";
   });
 });
 
-// Profile picture preview
-profilePicInput.addEventListener('change', () => {
+profilePicInput.addEventListener("change", () => {
   const file = profilePicInput.files[0];
   if (file) {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       profilePhoto.src = e.target.result;
     };
     reader.readAsDataURL(file);
   }
 });
 
-// Save profile data
-saveProfileBtn.addEventListener('click', async () => {
+saveProfileBtn.addEventListener("click", async () => {
   const user = auth.currentUser;
   if (!user) return;
   const profileData = {
