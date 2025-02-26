@@ -1,11 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import { 
-  getAuth, 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  signOut 
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-import { 
+import {
   getFirestore,
   collection,
   addDoc,
@@ -31,10 +31,9 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
 
-// Export Firestore functions and auth
-export { 
-  auth, 
-  provider, 
+export {
+  auth,
+  provider,
   db,
   collection,
   addDoc,
@@ -43,10 +42,10 @@ export {
   doc,
   updateDoc,
   setDoc,
-  signOut 
+  signOut
 };
 
-// Login/Logout Logic
+// Login/Logout
 const loginContainer = document.getElementById('loginContainer');
 const mainContent = document.getElementById('mainContent');
 const googleLoginBtn = document.getElementById('googleLoginBtn');
@@ -76,7 +75,7 @@ logoutBtn.addEventListener('click', () => {
     });
 });
 
-// Auth State Listener
+// Auth State
 auth.onAuthStateChanged((user) => {
   if (user) {
     loginContainer.classList.add('hidden');
