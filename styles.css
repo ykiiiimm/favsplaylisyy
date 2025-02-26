@@ -1,13 +1,11 @@
 /* ---------------------------------------------
-   Global Variables (all red replaced by purple hues)
+   Global Variables
 --------------------------------------------- */
 :root {
-  --header-bg: #4a148c;    /* Dark purple for header */
-  --footer-bg: #4a148c;    /* Dark purple for footer */
-  --card-bg: #6a1b9a;      /* Medium purple for cards & login card */
+  --primary-purple: #C65DB8;        /* Single purple base color */
+  --accent-color: #ffffff;          /* White text */
   --overlay-bg-color: rgba(0, 0, 0, 0.7);
-  --accent-color: #ffffff; /* White text */
-  --button-text-color: #000000;
+  --button-text-color: #000000;     /* Black text for buttons */
   --font-family: 'Montserrat', sans-serif;
 }
 
@@ -22,15 +20,19 @@
 
 body {
   font-family: var(--font-family);
-  background-color: #6a0dad;
-  /* Four large, subtle white circles in each corner */
-  background-image: 
-    radial-gradient(circle at top left, rgba(255,255,255,0.1) 30%, transparent 30%),
-    radial-gradient(circle at top right, rgba(255,255,255,0.1) 30%, transparent 30%),
-    radial-gradient(circle at bottom left, rgba(255,255,255,0.1) 30%, transparent 30%),
-    radial-gradient(circle at bottom right, rgba(255,255,255,0.1) 30%, transparent 30%);
-  background-size: 50% 50%;
-  background-position: top left, top right, bottom left, bottom right;
+  /* 
+    Use a single purple base plus large white circles 
+    to replicate your screenshot. 
+  */
+  background-color: var(--primary-purple);
+  background-image:
+    radial-gradient(circle 300px at 20% 30%, #fff 15%, transparent 15%),
+    radial-gradient(circle 200px at 80% 20%, #fff 15%, transparent 15%),
+    radial-gradient(circle 250px at 40% 70%, #fff 15%, transparent 15%),
+    radial-gradient(circle 180px at 85% 80%, #fff 15%, transparent 15%),
+    radial-gradient(circle 80px at 15% 80%, #fff 15%, transparent 15%);
+  background-repeat: no-repeat;
+  background-size: cover;
   color: var(--accent-color);
   line-height: 1.6;
 }
@@ -55,7 +57,7 @@ a:hover {
 }
 
 .login-card {
-  background: var(--card-bg);
+  background: var(--primary-purple);
   padding: 40px;
   border-radius: 10px;
   text-align: center;
@@ -78,8 +80,9 @@ a:hover {
   opacity: 0.9;
 }
 
+/* Google sign-in button can remain red if desired */
 .btn-google {
-  background-color: #db4437; /* Keeping Google red for the sign-in button */
+  background-color: #db4437;
   border: none;
   padding: 12px 20px;
   border-radius: 5px;
@@ -103,9 +106,9 @@ a:hover {
   display: none;
 }
 
-/* Header (Top Bar) */
+/* Header */
 header {
-  background: var(--header-bg);
+  background: var(--primary-purple);
   padding: 10px 20px;
   animation: slideDown 0.5s ease-out;
 }
@@ -134,7 +137,7 @@ header {
   color: var(--accent-color);
   font-size: 1.1rem;
   cursor: pointer;
-  transition: color 0.3s;
+  transition: opacity 0.3s;
 }
 
 .nav-links li button:hover {
@@ -173,7 +176,7 @@ header {
 
 .btn-add:hover {
   transform: scale(1.05);
-  box-shadow: 0 8px 16px rgba(255,255,255,0.2);
+  box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2);
 }
 
 /* ---------------------------------------------
@@ -189,17 +192,17 @@ header {
 
 .card {
   width: 250px;
-  background: var(--card-bg);
+  background: var(--primary-purple);
   border-radius: 10px;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.6);
-  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card:hover {
   transform: scale(1.03);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
 }
 
 .card img {
@@ -215,7 +218,7 @@ header {
   background: var(--overlay-bg-color);
   padding: 10px;
   text-align: center;
-  animation: fadeIn 0.5s;
+  animation: fadeIn 0.5s ease;
 }
 
 .overlay .title {
@@ -231,7 +234,9 @@ header {
   gap: 10px;
 }
 
-/* Base .btn styling */
+/* ---------------------------------------------
+   Base .btn styling
+--------------------------------------------- */
 .btn {
   background: #ffffff;
   border: none;
@@ -240,7 +245,7 @@ header {
   color: var(--button-text-color);
   font-size: 0.95rem;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.3s ease;
 }
 
 .btn:hover {
@@ -248,7 +253,7 @@ header {
 }
 
 /* ---------------------------------------------
-   Modal Styles
+   Modals
 --------------------------------------------- */
 .modal {
   display: none;
@@ -257,11 +262,11 @@ header {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0, 0, 0, 0.85);
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  animation: fadeIn 0.5s;
+  animation: fadeIn 0.5s ease;
 }
 
 .modal.open {
@@ -269,14 +274,14 @@ header {
 }
 
 .modal-content {
-  background: var(--card-bg);
+  background: var(--primary-purple);
   padding: 20px;
   border-radius: 10px;
   width: 90%;
   max-width: 500px;
   position: relative;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-  animation: slideUp 0.5s;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  animation: slideUp 0.5s ease;
 }
 
 .modal-content input,
@@ -316,11 +321,11 @@ header {
   flex: 0 0 auto;
   width: 150px;
   cursor: pointer;
-  background: var(--card-bg);
+  background: var(--primary-purple);
   padding: 5px;
   border-radius: 5px;
   text-align: center;
-  transition: transform 0.3s;
+  transition: transform 0.3s ease;
 }
 
 .tmdb-option:hover {
@@ -382,14 +387,14 @@ header {
    Profile Modal
 --------------------------------------------- */
 .profile-content {
-  background: var(--card-bg);
+  background: var(--primary-purple);
   padding: 20px;
   border-radius: 10px;
   width: 90%;
   max-width: 450px;
   position: relative;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-  animation: slideUp 0.5s;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  animation: slideUp 0.5s ease;
 }
 
 .profile-display {
@@ -417,7 +422,7 @@ header {
 }
 
 .profile-edit {
-  border-top: 1px solid rgba(255,255,255,0.33);
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
   padding-top: 15px;
   margin-top: 15px;
 }
@@ -459,7 +464,7 @@ header {
    Footer
 --------------------------------------------- */
 footer {
-  background: var(--footer-bg);
+  background: var(--primary-purple);
   text-align: center;
   padding: 15px;
   font-size: 0.9rem;
@@ -481,7 +486,6 @@ footer {
   color: #ffffff;
 }
 
-/* Legal links styling */
 .legal-links {
   margin-top: 10px;
   font-size: 0.8rem;
@@ -502,15 +506,15 @@ footer {
 --------------------------------------------- */
 @keyframes fadeIn {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
 @keyframes slideUp {
   from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  to   { transform: translateY(0); opacity: 1; }
 }
 
 @keyframes slideDown {
   from { transform: translateY(-20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  to   { transform: translateY(0); opacity: 1; }
 }
