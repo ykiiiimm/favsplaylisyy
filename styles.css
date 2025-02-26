@@ -2,7 +2,7 @@
    Global Variables
 --------------------------------------------- */
 :root {
-  --primary-purple: #9a1b89; /* The purple you chose */
+  --primary-purple: #9a1b89; /* Your purple */
   --accent-color: #ffffff;   /* White text */
   --overlay-bg-color: rgba(0, 0, 0, 0.7);
   --button-text-color: #000000;
@@ -23,13 +23,7 @@ body {
   color: var(--accent-color);
   line-height: 1.6;
   background-color: var(--primary-purple);
-
-  /*
-    Four giant circles, each 700px radius, 
-    placed partially offscreen at each corner.
-    50% coverage means half the circle is white.
-    That creates large arcs in the corners.
-  */
+  /* Four giant white arcs in the corners */
   background-image:
     radial-gradient(circle 700px at 0 0, #fff 50%, transparent 50%),
     radial-gradient(circle 700px at 100% 0, #fff 50%, transparent 50%),
@@ -505,32 +499,16 @@ footer {
    Animations
 --------------------------------------------- */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 @keyframes slideDown {
-  from {
-    transform: translateY(-20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
