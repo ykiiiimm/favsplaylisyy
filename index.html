@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UR FAV'S - Cosmic Entertainment Hub</title>
-    <meta name="description" content="Explore, rate, and share your favorite movies and TV shows in a cosmic universe." />
-    <link rel="stylesheet" href="styles.css?v=10" />
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;600&display=swap" rel="stylesheet" />
+    <title>UR FAV'S - Your Movie & TV Hub</title>
+    <meta name="description" content="Discover, rate, and share your favorite movies and TV shows." />
+    <link rel="stylesheet" href="styles.css?v=11" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 </head>
 <body>
-    <div class="cosmic-background"></div>
     <div class="main-content" id="mainContent">
         <header>
             <nav class="navbar">
                 <div class="logo">UR FAV'S</div>
                 <div class="search-container">
-                    <input type="text" id="searchInput" placeholder="Search the Cosmos..." />
-                    <button id="voiceSearchBtn" class="search-btn"><i class="fas fa-microphone"></i></button>
+                    <input type="text" id="searchInput" placeholder="Search movies, TV shows..." />
+                    <button id="voiceSearchBtn" class="search-btn"><i class="fas fa-search"></i></button>
                 </div>
                 <ul class="nav-links">
                     <li><button id="homeBtn" class="nav-btn">Home</button></li>
@@ -33,16 +32,16 @@
         <div class="container">
             <main>
                 <div class="action-bar">
-                    <button id="openModalBtn" class="btn btn-primary">Add New Star</button>
+                    <button id="openModalBtn" class="btn btn-primary">Add Title</button>
                 </div>
 
                 <section class="trending-section">
-                    <h2>Trending Nebulae</h2>
+                    <h2>Trending Now</h2>
                     <div class="card-grid" id="trendingContainer"></div>
                 </section>
 
                 <section class="favorites-section">
-                    <h2>Your Starfield</h2>
+                    <h2>Your Favorites</h2>
                     <select id="categoryFilter">
                         <option value="all">All</option>
                         <option value="movie">Movies</option>
@@ -52,18 +51,18 @@
                 </section>
 
                 <section class="watchlist-section">
-                    <h2>Watch Later Constellations</h2>
+                    <h2>Watch Later</h2>
                     <div class="card-grid" id="watchlistContainer"></div>
                 </section>
 
                 <section class="recommendations-section">
-                    <h2>Cosmic Recommendations</h2>
+                    <h2>Recommended for You</h2>
                     <div class="card-grid" id="recommendationsContainer"></div>
                 </section>
             </main>
 
             <aside class="sidebar">
-                <h3>Your Cosmic Dashboard</h3>
+                <h3>Your Dashboard</h3>
                 <div id="userInfo">
                     <img id="sidebarPhoto" src="" alt="Profile Photo" />
                     <p id="sidebarNickname">Loading...</p>
@@ -72,7 +71,7 @@
                         <p>Avg Rating: <span id="avgRating">0</span></p>
                     </div>
                 </div>
-                <button id="galaxyToggle" class="btn btn-primary">Galaxy Explorer</button>
+                <button id="galaxyToggle" class="btn btn-primary">Galaxy View</button>
                 <div class="galaxy-view hidden" id="galaxyView">
                     <canvas id="galaxyCanvas"></canvas>
                     <button id="zoomIn" class="zoom-btn">+</button>
@@ -82,7 +81,7 @@
         </div>
 
         <footer>
-            <p>© 2025 UR FAV'S by ITSHAKIMOUUUUUUUUUUU | <a href="privacy-policy.html">Privacy</a> | <a href="terms-of-service.html">Terms</a> | <a href="https://discord.com/invite/6SfgHHJQUD">Discord</a> | <a href="https://www.instagram.com/itshakimouuuuu">Instagram</a></p>
+            <p>© 2025 UR FAV'S by ITSHAKIMOUUUUUUUUUUU | <a href="privacy-policy.html">Privacy Policy</a> | <a href="terms-of-service.html">Terms of Service</a> | <a href="https://discord.com/invite/6SfgHHJQUD">Discord</a> | <a href="https://www.instagram.com/itshakimouuuuu">Instagram</a></p>
         </footer>
     </div>
 
@@ -91,8 +90,8 @@
         <div class="modal-content login-modal">
             <span class="close-btn" id="closeLoginModal">×</span>
             <h1 class="login-title">UR FAV'S</h1>
-            <p>Enter the Cosmic Hub</p>
-            <button id="googleLoginBtn" class="btn btn-login"><i class="fab fa-google"></i> Launch with Google</button>
+            <p>Sign in to your movie & TV hub</p>
+            <button id="googleLoginBtn" class="btn btn-login"><i class="fab fa-google"></i> Sign in with Google</button>
         </div>
     </div>
 
@@ -100,19 +99,19 @@
     <div class="modal hidden" id="modal">
         <div class="modal-content">
             <span class="close-btn" id="closeModalBtn">×</span>
-            <h2>Add a New Star</h2>
+            <h2>Add New Title</h2>
             <input type="text" id="title" placeholder="Title" />
             <select id="content-type">
                 <option value="movie">Movie</option>
                 <option value="tv">TV Show</option>
             </select>
-            <input type="number" id="season" placeholder="Season (if TV)" min="1" style="display: none;" />
+            <input type="number" id="season" placeholder="Season (if TV Show)" min="1" style="display: none;" />
             <input type="number" id="userRating" min="1" max="10" placeholder="Your Rating (1-10)" />
             <label><input type="checkbox" id="watchLater"> Add to Watch Later</label>
-            <button id="fetchTmdbBtn" class="btn btn-secondary">Scan TMDB</button>
+            <button id="fetchTmdbBtn" class="btn btn-secondary">Fetch from TMDB</button>
             <div id="tmdbPreview" class="tmdb-preview"></div>
-            <button id="clearPreviewBtn" class="btn btn-secondary">Clear Orbit</button>
-            <button id="submitBtn" class="btn btn-primary">Launch</button>
+            <button id="clearPreviewBtn" class="btn btn-secondary">Clear</button>
+            <button id="submitBtn" class="btn btn-primary">Add</button>
         </div>
     </div>
 
@@ -145,8 +144,8 @@
                 <input type="file" id="profilePicInput" accept="image/*" />
                 <input type="text" id="profileNickname" placeholder="Nickname" />
                 <input type="text" id="profileTagline" placeholder="Tagline" />
-                <textarea id="profileBio" placeholder="Cosmic Bio..."></textarea>
-                <button id="saveProfileBtn" class="btn btn-primary">Save Nebula</button>
+                <textarea id="profileBio" placeholder="Bio..."></textarea>
+                <button id="saveProfileBtn" class="btn btn-primary">Save Profile</button>
             </div>
         </div>
     </div>
