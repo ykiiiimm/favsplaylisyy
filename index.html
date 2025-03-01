@@ -1,163 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UR FAV'S - Discover Your Favorites</title>
-    <meta
-      name="description"
-      content="Discover and organize your favorite movies and TV shows with a modern, dynamic design."
-    />
-    <link rel="stylesheet" href="styles.css?v=4" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-  </head>
-  <body>
+    <title>UR FAV'S - Cosmic Favorites</title>
+    <meta name="description" content="A cosmic journey to discover and organize your favorite movies and TV shows." />
+    <link rel="stylesheet" href="styles.css?v=6" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+</head>
+<body>
+    <!-- Cosmic Particle Background -->
+    <div id="particle-background"></div>
+
     <!-- Login Page -->
     <div class="login-container" id="loginContainer">
-      <div class="login-card">
-        <h1 class="login-title">UR FAV'S</h1>
-        <p class="login-subtitle">Discover &amp; Organize Your Favorites</p>
-        <button id="googleLoginBtn" class="btn btn-google">
-          <i class="fab fa-google"></i> Sign in with Google
-        </button>
-      </div>
+        <div class="login-card">
+            <h1 class="login-title">UR FAV'S</h1>
+            <p class="login-subtitle">Embark on a Cosmic Adventure</p>
+            <button id="googleLoginBtn" class="btn btn-google">
+                <i class="fab fa-google"></i> Launch with Google
+            </button>
+        </div>
     </div>
 
     <!-- Main Content -->
     <div class="main-content hidden" id="mainContent">
-      <header>
-        <nav class="navbar">
-          <div class="logo">UR FAV'S</div>
-          <ul class="nav-links">
-            <li><button id="homeBtn" class="nav-btn">Home</button></li>
-            <li><button id="profileBtn" class="nav-btn">Profile</button></li>
-            <li>
-              <button id="logoutBtn" class="btn btn-logout nav-btn">Logout</button>
-            </li>
-          </ul>
-        </nav>
-        <div class="search-container">
-          <input
-            type="text"
-            id="searchInput"
-            placeholder="Search for movies, TV shows, etc..."
-          />
-        </div>
-      </header>
+        <header>
+            <nav class="navbar">
+                <div class="logo">UR FAV'S</div>
+                <ul class="nav-links">
+                    <li><button id="homeBtn" class="nav-btn">Hyperdrive Home</button></li>
+                    <li><button id="profileBtn" class="nav-btn">Astro Profile</button></li>
+                    <li><button id="galaxyToggle" class="nav-btn">Galaxy View</button></li>
+                    <li><button id="voiceSearchBtn" class="nav-btn"><i class="fas fa-microphone"></i></button></li>
+                    <li><button id="themeToggle" class="theme-toggle"><i class="fas fa-moon"></i></button></li>
+                    <li><button id="logoutBtn" class="nav-btn">Eject</button></li>
+                </ul>
+            </nav>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search the Cosmos..." />
+            </div>
+        </header>
 
-      <main>
-        <div class="action-bar">
-          <button id="openModalBtn" class="btn btn-add">
-            <i class="fas fa-plus"></i> Add New Content
-          </button>
-        </div>
-        <section class="cards-container" id="card-container">
-          <!-- Cards will be injected dynamically -->
-        </section>
-      </main>
+        <main>
+            <div class="action-bar">
+                <button id="openModalBtn" class="btn btn-add">
+                    <i class="fas fa-rocket"></i> Add Cosmic Content
+                </button>
+            </div>
 
-      <footer>
-        <p>
-          Created BY ITSHAKIMOUUUUUUUUUUU
-          <span class="social-links">
-            <a href="https://discord.com/invite/6SfgHHJQUD" target="_blank">
-              <i class="fab fa-discord"></i>
-            </a>
-            <a href="https://www.instagram.com/itshakimouuuuu" target="_blank">
-              <i class="fab fa-instagram"></i>
-            </a>
-          </span>
-        </p>
-        <div class="legal-links">
-          <a href="terms-of-service.html">Terms of Service</a> |
-          <a href="privacy-policy.html">Privacy Policy</a>
-        </div>
-      </footer>
+            <!-- Trending Section -->
+            <section class="trending-section">
+                <h2>Trending in the Universe</h2>
+                <div class="trending-container" id="trendingContainer"></div>
+            </section>
+
+            <!-- Favorites Section -->
+            <section class="cards-container" id="card-container"></section>
+
+            <!-- Galaxy View (3D) -->
+            <div class="galaxy-view hidden" id="galaxyView">
+                <canvas id="galaxyCanvas"></canvas>
+            </div>
+        </main>
+
+        <footer>
+            <p>
+                Powered by ITSHAKIMOUUUUUUUUUUU
+                <span class="social-links">
+                    <a href="https://discord.com/invite/6SfgHHJQUD" target="_blank"><i class="fab fa-discord"></i></a>
+                    <a href="https://www.instagram.com/itshakimouuuuu" target="_blank"><i class="fab fa-instagram"></i></a>
+                </span>
+            </p>
+        </footer>
     </div>
 
     <!-- Add/Edit Modal -->
     <div class="modal" id="modal">
-      <div class="modal-content">
-        <span class="close-btn" id="closeModalBtn">&times;</span>
-        <h2>Add New Content</h2>
-        <input type="text" id="title" placeholder="Title" />
-        <select id="content-type">
-          <option value="movie">Movie</option>
-          <option value="tv">TV Show</option>
-        </select>
-        <input
-          type="number"
-          id="season"
-          placeholder="Season (if TV Show)"
-          min="1"
-          style="display: none;"
-        />
-        <button id="fetchTmdbBtn" class="btn">Fetch Info from TMDB</button>
-        <div id="tmdbPreview" class="tmdb-preview"></div>
-        <button id="clearPreviewBtn" class="btn btn-clear">Clear Preview</button>
-        <button id="submitBtn" class="btn btn-submit">Submit</button>
-      </div>
+        <div class="modal-content">
+            <span class="close-btn" id="closeModalBtn">&times;</span>
+            <h2>Launch New Content</h2>
+            <input type="text" id="title" placeholder="Title" />
+            <select id="content-type">
+                <option value="movie">Movie</option>
+                <option value="tv">TV Show</option>
+            </select>
+            <input type="number" id="season" placeholder="Season (if TV Show)" min="1" style="display: none;" />
+            <button id="fetchTmdbBtn" class="btn">Scan TMDB Nebula</button>
+            <div id="tmdbPreview" class="tmdb-preview"></div>
+            <button id="clearPreviewBtn" class="btn btn-clear">Clear Scan</button>
+            <button id="submitBtn" class="btn btn-submit">Deploy</button>
+        </div>
     </div>
 
     <!-- Detail Modal -->
     <div class="modal" id="detailModal">
-      <div class="modal-content detail-content">
-        <span class="close-btn" id="closeDetailModal">&times;</span>
-        <div class="detail-img">
-          <img id="detailPoster" src="" alt="Poster" />
+        <div class="modal-content detail-content">
+            <span class="close-btn" id="closeDetailModal">&times;</span>
+            <div class="detail-img">
+                <img id="detailPoster" src="" alt="Poster" />
+            </div>
+            <div class="detail-info">
+                <h2 id="detailTitle"></h2>
+                <p id="detailOverview"></p>
+                <p id="detailRating"></p>
+                <p id="detailRelease"></p>
+            </div>
         </div>
-        <div class="detail-info">
-          <h2 id="detailTitle"></h2>
-          <p id="detailOverview"></p>
-          <p id="detailRating"></p>
-          <p id="detailRelease"></p>
-        </div>
-      </div>
     </div>
 
     <!-- Profile Modal -->
     <div class="modal" id="profileModal">
-      <div class="modal-content profile-content">
-        <span class="close-btn" id="closeProfileModal">&times;</span>
-        <div class="profile-display">
-          <img id="profilePhoto" src="" alt="Profile Photo" />
-          <h2 id="profileNicknameDisplay">Your Nickname</h2>
-          <p id="profileTaglineDisplay">Your Tagline</p>
-          <p id="profileBioDisplay">A short bio about you...</p>
+        <div class="modal-content profile-content">
+            <span class="close-btn" id="closeProfileModal">&times;</span>
+            <div class="profile-display">
+                <img id="profilePhoto" src="" alt="Profile Photo" />
+                <h2 id="profileNicknameDisplay">Your Nickname</h2>
+                <p id="profileTaglineDisplay">Your Tagline</p>
+                <p id="profileBioDisplay">A short bio about you...</p>
+            </div>
+            <div class="profile-edit">
+                <h3>Update Astro Profile</h3>
+                <label for="profilePicInput">Change Star Avatar:</label>
+                <input type="file" id="profilePicInput" accept="image/*" />
+                <input type="text" id="profileNickname" placeholder="Nickname" />
+                <input type="text" id="profileTagline" placeholder="Tagline" />
+                <textarea id="profileBio" placeholder="Your cosmic story..."></textarea>
+                <button id="saveProfileBtn" class="btn btn-update">Save Orbit</button>
+            </div>
+            <button id="toggleContactBtn" class="btn btn-contact">Interstellar Contact</button>
+            <div id="contactInfo" class="contact-info hidden">
+                <a href="https://discord.com/invite/6SfgHHJQUD" target="_blank"><i class="fab fa-discord"></i></a>
+                <a href="https://www.instagram.com/itshakimouuuuu" target="_blank"><i class="fab fa-instagram"></i></a>
+            </div>
         </div>
-        <div class="profile-edit">
-          <h3>Update Profile</h3>
-          <label for="profilePicInput">Change Profile Picture:</label>
-          <input type="file" id="profilePicInput" accept="image/*" />
-          <input type="text" id="profileNickname" placeholder="Nickname" />
-          <input type="text" id="profileTagline" placeholder="Tagline" />
-          <textarea
-            id="profileBio"
-            placeholder="Write something about yourself..."
-          ></textarea>
-          <button id="saveProfileBtn" class="btn btn-update">Save Profile</button>
-        </div>
-        <button id="toggleContactBtn" class="btn btn-contact">Contact Me</button>
-        <div id="contactInfo" class="contact-info hidden">
-          <a href="https://discord.com/invite/6SfgHHJQUD" target="_blank">
-            <i class="fab fa-discord"></i>
-          </a>
-          <a href="https://www.instagram.com/itshakimouuuuu" target="_blank">
-            <i class="fab fa-instagram"></i>
-          </a>
-        </div>
-      </div>
     </div>
 
-    <!-- Load Firebase and App scripts -->
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <script type="module" src="firebase.js"></script>
     <script type="module" src="app.js"></script>
-  </body>
+</body>
 </html>
