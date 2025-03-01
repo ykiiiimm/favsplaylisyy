@@ -1,6 +1,6 @@
 import { 
   auth, db, storage, loginWithGoogle, logout, monitorAuthState, updateUserProfile, 
-  addDocument, getDocuments, deleteDocument, updateDocument, setDocument, 
+  addDocument, getDocuments, getWatchlistDocuments, deleteDocument, updateDocument, setDocument, 
   uploadFile, getFileURL, trackEvent 
 } from './firebase.js';
 
@@ -49,7 +49,7 @@ const zoomIn = document.getElementById('zoomIn');
 const zoomOut = document.getElementById('zoomOut');
 const voiceSearchBtn = document.getElementById('voiceSearchBtn');
 const themeToggle = document.getElementById('themeToggle');
-const trendingContainer = document.getElementById('trendingContainer');
+const trendingContainer = document.getElementOrDefault('trendingContainer');
 const recommendationsContainer = document.getElementById('recommendationsContainer');
 const loginModal = document.getElementById('loginModal');
 const closeLoginModal = document.getElementById('closeLoginModal');
@@ -226,7 +226,7 @@ monitorAuthState(user => {
         const data = doc.data();
         sidebarNickname.textContent = data.nickname || user.displayName;
       });
-    });
+    }).catch(err => console.error("Profile fetch error:", err));
   } else {
     loginModal.classList.add('open');
     document.body.classList.remove('logged-in');
@@ -301,12 +301,11 @@ async function loadCards() {
       createCardElement(data, doc.id, cardContainer);
     }
   });
-  updateUserStats();
 }
 
 async function loadWatchlist() {
   const userId = auth.currentUser.uid;
-  const snapshot = await getDocuments(`users/${userId}/cards`);
+  const snapshot = await getWatchlistDocuments(`users/${userId}/cards`);
   watchlistContainer.innerHTML = "";
   snapshot.forEach(doc => {
     const data = doc.data();
