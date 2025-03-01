@@ -1,19 +1,7 @@
 import { 
-  auth, 
-  db, 
-  storage, 
-  loginWithGoogle, 
-  logout, 
-  monitorAuthState, 
-  updateUserProfile, 
-  addDocument, 
-  getDocuments, 
-  deleteDocument, 
-  updateDocument, 
-  setDocument, 
-  uploadFile, 
-  getFileURL, 
-  trackEvent 
+  auth, db, storage, loginWithGoogle, logout, monitorAuthState, updateUserProfile, 
+  addDocument, getDocuments, deleteDocument, updateDocument, setDocument, 
+  uploadFile, getFileURL, trackEvent 
 } from './firebase.js';
 
 const TMDB_API_KEY = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
@@ -29,6 +17,7 @@ const cardContainer = document.getElementById('card-container');
 const titleInput = document.getElementById('title');
 const contentTypeSelect = document.getElementById('content-type');
 const seasonInput = document.getElementById('season');
+const userRatingInput = document.getElementById('userRating');
 const fetchTmdbBtn = document.getElementById('fetchTmdbBtn');
 const tmdbPreview = document.getElementById('tmdbPreview');
 const clearPreviewBtn = document.getElementById('clearPreviewBtn');
@@ -39,6 +28,7 @@ const detailPoster = document.getElementById('detailPoster');
 const detailTitle = document.getElementById('detailTitle');
 const detailOverview = document.getElementById('detailOverview');
 const detailRating = document.getElementById('detailRating');
+const detailUserRating = document.getElementById('detailUserRating');
 const detailRelease = document.getElementById('detailRelease');
 const profileBtn = document.getElementById('profileBtn');
 const profileModal = document.getElementById('profileModal');
@@ -57,16 +47,19 @@ const galaxyView = document.getElementById('galaxyView');
 const voiceSearchBtn = document.getElementById('voiceSearchBtn');
 const themeToggle = document.getElementById('themeToggle');
 const trendingContainer = document.getElementById('trendingContainer');
+const recommendationsContainer = document.getElementById('recommendationsContainer');
 const loginModal = document.getElementById('loginModal');
 const closeLoginModal = document.getElementById('closeLoginModal');
 const googleLoginBtn = document.getElementById('googleLoginBtn');
 const sidebarPhoto = document.getElementById('sidebarPhoto');
 const sidebarNickname = document.getElementById('sidebarNickname');
 const homeBtn = document.getElementById('homeBtn');
+const exportBtn = document.getElementById('exportBtn');
+const categoryFilter = document.getElementById('categoryFilter');
 
 let selectedTMDBData = null;
 
-// Galaxy View (Enhanced)
+// Galaxy View (Optimized)
 let scene, camera, renderer, starField;
 function initGalaxy() {
   scene = new THREE.Scene();
@@ -78,18 +71,18 @@ function initGalaxy() {
   getDocuments(`users/${auth.currentUser.uid}/cards`).then(snapshot => {
     snapshot.forEach(doc => {
       const data = doc.data();
-      const geometry = new THREE.SphereGeometry(2, 32, 32);
+      const geometry = new THREE.SphereGeometry(2.5, 32, 32);
       const material = new THREE.MeshBasicMaterial({ 
-        map: new THREE.TextureLoader().load(data.posterUrl),
+        map: new THREE.TextureLoader().load(data.posterUrl, undefined, undefined, (err) => console.error("Texture load error:", err)),
         transparent: true
       });
       const star = new THREE.Mesh(geometry, material);
       star.position.set(
-        (Math.random() - 0.5) * 200,
-        (Math.random() - 0.5) * 200,
-        (Math.random() - 0.5) * 200
+        (Math.random() - 0.5) * 150,
+        (Math.random() - 0.5) * 150,
+        (Math.random() - 0.5) * 150
       );
-      star.userData = { id: doc.id, title: data.title };
+      star.userData = { id: doc.id, title: data.title, rating: data.userRating };
       stars.push(star);
       scene.add(star);
     });
@@ -98,7 +91,6 @@ function initGalaxy() {
     stars.forEach(star => starField.add(star));
     scene.add(starField);
 
-    // Add interactivity
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
     galaxyView.addEventListener('mousemove', (e) => {
@@ -107,12 +99,12 @@ function initGalaxy() {
       mouse.y = -((e.clientY - rect.top) / 250) * 2 + 1;
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects(stars);
+      stars.forEach(s => s.scale.set(1, 1, 1));
       if (intersects.length) {
         const star = intersects[0].object;
-        star.scale.set(3, 3, 3);
-        galaxyView.title = star.userData.title; // Tooltip
+        star.scale.set(2.5, 2.5, 2.5);
+        galaxyView.title = `${star.userData.title} (Your Rating: ${star.userData.rating || 'N/A'})`;
       } else {
-        stars.forEach(s => s.scale.set(1, 1, 1));
         galaxyView.title = "";
       }
     });
@@ -122,17 +114,17 @@ function initGalaxy() {
       const intersects = raycaster.intersectObjects(stars);
       if (intersects.length) openDetailModalHandler(e, intersects[0].object.userData.id);
     });
-  });
+  }).catch(err => console.error("Galaxy load error:", err));
 
-  camera.position.z = 300;
+  camera.position.z = 200;
   animateGalaxy();
 }
 
 function animateGalaxy() {
   requestAnimationFrame(animateGalaxy);
   if (starField) {
-    starField.rotation.x += 0.002;
-    starField.rotation.y += 0.002;
+    starField.rotation.x += 0.0015;
+    starField.rotation.y += 0.0015;
   }
   renderer.render(scene, camera);
 }
@@ -149,7 +141,7 @@ function initVoiceSearch() {
       searchCards(transcript);
       trackEvent('voice_search', { query: transcript });
     };
-    voiceSearchBtn.addEventListener('click', () => recognition.start());
+    voiceSearchBtn.onclick = () => recognition.start();
   } else {
     voiceSearchBtn.style.display = 'none';
   }
@@ -157,14 +149,14 @@ function initVoiceSearch() {
 
 function searchCards(query) {
   const lowerQuery = query.toLowerCase();
-  document.querySelectorAll('.card').forEach(card => {
+  document.querySelectorAll('#card-container .card').forEach(card => {
     const title = card.querySelector('.title').textContent.toLowerCase();
     card.style.display = title.includes(lowerQuery) ? 'block' : 'none';
   });
 }
 
 // Login Handling
-googleLoginBtn.addEventListener('click', () => {
+googleLoginBtn.onclick = () => {
   loginWithGoogle()
     .then(() => {
       loginModal.classList.remove('open');
@@ -172,39 +164,40 @@ googleLoginBtn.addEventListener('click', () => {
       trackEvent('login', { method: 'google' });
     })
     .catch(error => console.error("Login error:", error));
-});
+};
 
-closeLoginModal.addEventListener('click', () => loginModal.classList.remove('open'));
+closeLoginModal.onclick = () => loginModal.classList.remove('open');
 
 // Event Listeners
-contentTypeSelect.addEventListener('change', () => {
+contentTypeSelect.onchange = () => {
   seasonInput.style.display = contentTypeSelect.value === 'tv' ? 'block' : 'none';
-});
+};
 
-profileBtn.addEventListener('click', async () => {
+profileBtn.onclick = async () => {
   const user = auth.currentUser;
   if (user) {
-    profilePhoto.src = user.photoURL || 'https://via.placeholder.com/100';
+    profilePhoto.src = user.photoURL || 'https://via.placeholder.com/120';
     const profileSnap = await getDocuments(`users/${user.uid}/profile`);
     let profileData = {};
     profileSnap.forEach(doc => profileData = doc.data());
     profileNicknameDisplay.textContent = profileData.nickname || user.displayName || "Anonymous";
-    profileTaglineDisplay.textContent = profileData.tagline || "Your tagline";
-    profileBioDisplay.textContent = profileData.bio || "Write a bio...";
+    profileTaglineDisplay.textContent = profileData.tagline || "Movie Enthusiast";
+    profileBioDisplay.textContent = profileData.bio || "Tell us about yourself...";
     profileModal.classList.add('open');
     trackEvent('profile_view', { user_id: user.uid });
   }
-});
+};
 
-closeProfileModal.addEventListener('click', () => profileModal.classList.remove('open'));
+closeProfileModal.onclick = () => profileModal.classList.remove('open');
 
 monitorAuthState(user => {
   if (user) {
     document.body.classList.add('logged-in');
     loadCards();
     loadTrending();
+    loadRecommendations();
     initVoiceSearch();
-    sidebarPhoto.src = user.photoURL || 'https://via.placeholder.com/50';
+    sidebarPhoto.src = user.photoURL || 'https://via.placeholder.com/60';
     sidebarNickname.textContent = user.displayName || "Anonymous";
     getDocuments(`users/${user.uid}/profile`).then(snap => {
       snap.forEach(doc => {
@@ -219,12 +212,16 @@ monitorAuthState(user => {
 });
 
 async function fetchTMDBResults(title, type) {
-  const searchUrl = type === 'movie' 
-    ? `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`
-    : `${TMDB_BASE_URL}/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
-  const res = await fetch(searchUrl);
-  const data = await res.json();
-  return data.results || [];
+  const searchUrl = `${TMDB_BASE_URL}/search/${type}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
+  try {
+    const res = await fetch(searchUrl);
+    if (!res.ok) throw new Error("TMDB fetch failed");
+    const data = await res.json();
+    return data.results || [];
+  } catch (error) {
+    console.error("Error fetching TMDB:", error);
+    return [];
+  }
 }
 
 function displayTMDBOptions(results) {
@@ -238,15 +235,17 @@ function displayTMDBOptions(results) {
     option.classList.add('tmdb-option');
     const name = result.title || result.name;
     const year = (result.release_date || result.first_air_date || '').substring(0, 4);
-    const posterPath = result.poster_path ? TMDB_IMG_BASE + result.poster_path : 'https://via.placeholder.com/50';
+    const posterPath = result.poster_path ? TMDB_IMG_BASE + result.poster_path : 'https://via.placeholder.com/60';
     option.innerHTML = `<img src="${posterPath}" alt="${name}"><p>${name} (${year})</p>`;
-    option.addEventListener('click', async () => {
+    option.onclick = async () => {
       const data = {
         title: name,
         overview: result.overview,
         rating: result.vote_average,
         releaseDate: contentTypeSelect.value === 'movie' ? result.release_date : result.first_air_date,
-        posterUrl: posterPath
+        posterUrl: posterPath,
+        type: contentTypeSelect.value,
+        userRating: userRatingInput.value || null
       };
       if (contentTypeSelect.value === 'tv' && seasonInput.value) {
         const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${seasonInput.value}?api_key=${TMDB_API_KEY}`);
@@ -258,7 +257,7 @@ function displayTMDBOptions(results) {
       selectedTMDBData = data;
       tmdbPreview.innerHTML = `<img src="${data.posterUrl}" alt="${data.title}"><h3>${data.title}</h3><p>${data.overview.substring(0, 100)}...</p>`;
       trackEvent('tmdb_select', { title: data.title });
-    });
+    };
     tmdbPreview.appendChild(option);
   });
 }
@@ -273,7 +272,12 @@ async function loadCards() {
   const userId = auth.currentUser.uid;
   const snapshot = await getDocuments(`users/${userId}/cards`);
   cardContainer.innerHTML = "";
-  snapshot.forEach(doc => createCardElement(doc.data(), doc.id));
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    if (categoryFilter.value === 'all' || data.type === categoryFilter.value) {
+      createCardElement(data, doc.id);
+    }
+  });
 }
 
 function createCardElement(cardData, docId) {
@@ -314,6 +318,7 @@ window.editCard = (e, button) => {
     e.preventDefault();
     const type = contentTypeSelect.value;
     const season = type === 'tv' ? seasonInput.value : null;
+    const userRating = userRatingInput.value || null;
     const results = await fetchTMDBResults(titleInput.value, type);
     if (results.length) {
       const result = results[0];
@@ -322,7 +327,9 @@ window.editCard = (e, button) => {
         overview: result.overview,
         rating: result.vote_average,
         releaseDate: type === 'movie' ? result.release_date : result.first_air_date,
-        posterUrl: result.poster_path ? TMDB_IMG_BASE + result.poster_path : ""
+        posterUrl: result.poster_path ? TMDB_IMG_BASE + result.poster_path : "",
+        type: type,
+        userRating: userRating
       };
       if (type === 'tv' && season) {
         const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${season}?api_key=${TMDB_API_KEY}`);
@@ -336,12 +343,13 @@ window.editCard = (e, button) => {
       card.querySelector('img').src = data.posterUrl;
       card.querySelector('.title').textContent = data.title;
       modal.classList.remove('open');
+      loadCards();
       trackEvent('card_edited', { title: data.title });
     }
   };
 };
 
-fetchTmdbBtn.addEventListener('click', async (e) => {
+fetchTmdbBtn.onclick = async (e) => {
   e.preventDefault();
   const title = titleInput.value;
   const type = contentTypeSelect.value;
@@ -349,15 +357,15 @@ fetchTmdbBtn.addEventListener('click', async (e) => {
     const results = await fetchTMDBResults(title, type);
     displayTMDBOptions(results);
   }
-});
+};
 
-clearPreviewBtn.addEventListener('click', (e) => {
+clearPreviewBtn.onclick = (e) => {
   e.preventDefault();
   tmdbPreview.innerHTML = "";
   selectedTMDBData = null;
-});
+};
 
-submitBtn.addEventListener('click', async (e) => {
+submitBtn.onclick = async (e) => {
   e.preventDefault();
   if (!selectedTMDBData) {
     alert("Please fetch and select a TMDB result.");
@@ -368,20 +376,21 @@ submitBtn.addEventListener('click', async (e) => {
   modal.classList.remove('open');
   titleInput.value = '';
   seasonInput.value = '';
+  userRatingInput.value = '';
   tmdbPreview.innerHTML = "";
   selectedTMDBData = null;
-});
+};
 
-openModalBtn.addEventListener('click', (e) => {
+openModalBtn.onclick = (e) => {
   e.preventDefault();
   if (auth.currentUser) modal.classList.add('open');
   else loginModal.classList.add('open');
-});
+};
 
-closeModalBtn.addEventListener('click', (e) => {
+closeModalBtn.onclick = (e) => {
   e.preventDefault();
   modal.classList.remove('open');
-});
+};
 
 window.openDetailModalHandler = async (e, docId) => {
   e.preventDefault();
@@ -395,21 +404,22 @@ window.openDetailModalHandler = async (e, docId) => {
     detailPoster.src = cardData.posterUrl;
     detailTitle.textContent = cardData.title;
     detailOverview.textContent = cardData.overview;
-    detailRating.textContent = `Rating: ${cardData.rating}/10`;
+    detailRating.textContent = `TMDB Rating: ${cardData.rating}/10`;
+    detailUserRating.textContent = `Your Rating: ${cardData.userRating || 'Not Rated'}/10`;
     detailRelease.textContent = `Released: ${cardData.releaseDate}`;
     detailModal.classList.add('open');
     trackEvent('card_details_viewed', { title: cardData.title });
   }
 };
 
-closeDetailModal.addEventListener('click', (e) => {
+closeDetailModal.onclick = (e) => {
   e.preventDefault();
   detailModal.classList.remove('open');
-});
+};
 
-searchInput.addEventListener('input', () => searchCards(searchInput.value));
+searchInput.oninput = () => searchCards(searchInput.value);
 
-profilePicInput.addEventListener('change', async () => {
+profilePicInput.onchange = async () => {
   const file = profilePicInput.files[0];
   if (file) {
     const userId = auth.currentUser.uid;
@@ -420,16 +430,16 @@ profilePicInput.addEventListener('change', async () => {
     await updateUserProfile(auth.currentUser, { photoURL: url });
     trackEvent('profile_pic_updated', { user_id: userId });
   }
-});
+};
 
-saveProfileBtn.addEventListener('click', async (e) => {
+saveProfileBtn.onclick = async (e) => {
   e.preventDefault();
   const user = auth.currentUser;
   if (!user) return;
   const profileData = {
     nickname: profileNickname.value || user.displayName || "Anonymous",
-    tagline: profileTagline.value || "Your tagline",
-    bio: profileBio.value || "Write a bio..."
+    tagline: profileTagline.value || "Movie Enthusiast",
+    bio: profileBio.value || "Tell us about yourself..."
   };
   await setDocument(`users/${user.uid}/profile`, "profile", profileData);
   profileNicknameDisplay.textContent = profileData.nickname;
@@ -438,19 +448,18 @@ saveProfileBtn.addEventListener('click', async (e) => {
   sidebarNickname.textContent = profileData.nickname;
   profileModal.classList.remove('open');
   trackEvent('profile_updated', { user_id: user.uid });
-});
+};
 
-// Fixed and Enhanced Trending
 async function loadTrending() {
   try {
-    const res = await fetch(`${TMDB_BASE_URL}/trending/all/day?api_key=${TMDB_API_KEY}`); // Changed to /day for fresher data
-    if (!res.ok) throw new Error("Failed to fetch trending data");
+    const res = await fetch(`${TMDB_BASE_URL}/trending/all/day?api_key=${TMDB_API_KEY}`);
+    if (!res.ok) throw new Error("Failed to fetch trending");
     const data = await res.json();
     trendingContainer.innerHTML = '';
-    data.results.slice(0, 8).forEach(item => { // Reduced to 8 for cleaner layout
+    data.results.slice(0, 8).forEach(item => {
       const card = document.createElement('div');
       card.classList.add('card');
-      const posterUrl = item.poster_path ? `${TMDB_IMG_BASE}${item.poster_path}` : 'https://via.placeholder.com/200';
+      const posterUrl = item.poster_path ? `${TMDB_IMG_BASE}${item.poster_path}` : 'https://via.placeholder.com/220';
       card.innerHTML = `
         <img src="${posterUrl}" alt="${item.title || item.name}">
         <div class="overlay">
@@ -464,25 +473,67 @@ async function loadTrending() {
     });
     trackEvent('trending_loaded', { items: data.results.length });
   } catch (error) {
-    console.error("Error loading trending:", error);
-    trendingContainer.innerHTML = '<p>Unable to load trending items.</p>';
+    console.error("Trending error:", error);
+    trendingContainer.innerHTML = '<p>Failed to load trending items.</p>';
   }
 }
 
 async function fetchTrendingDetails(id, mediaType) {
-  const url = `${TMDB_BASE_URL}/${mediaType}/${id}?api_key=${TMDB_API_KEY}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  detailPoster.src = data.poster_path ? `${TMDB_IMG_BASE}${data.poster_path}` : 'https://via.placeholder.com/200';
-  detailTitle.textContent = data.title || data.name;
-  detailOverview.textContent = data.overview;
-  detailRating.textContent = `Rating: ${data.vote_average}/10`;
-  detailRelease.textContent = `Released: ${data.release_date || data.first_air_date}`;
-  detailModal.classList.add('open');
-  trackEvent('trending_details_viewed', { title: data.title || data.name });
+  try {
+    const url = `${TMDB_BASE_URL}/${mediaType}/${id}?api_key=${TMDB_API_KEY}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Failed to fetch details");
+    const data = await res.json();
+    detailPoster.src = data.poster_path ? `${TMDB_IMG_BASE}${data.poster_path}` : 'https://via.placeholder.com/250';
+    detailTitle.textContent = data.title || data.name;
+    detailOverview.textContent = data.overview;
+    detailRating.textContent = `TMDB Rating: ${data.vote_average}/10`;
+    detailUserRating.textContent = "Your Rating: Not Rated";
+    detailRelease.textContent = `Released: ${data.release_date || data.first_air_date}`;
+    detailModal.classList.add('open');
+    trackEvent('trending_details_viewed', { title: data.title || data.name });
+  } catch (error) {
+    console.error("Detail fetch error:", error);
+  }
 }
 
-galaxyToggle.addEventListener('click', (e) => {
+async function loadRecommendations() {
+  try {
+    const userId = auth.currentUser.uid;
+    const snapshot = await getDocuments(`users/${userId}/cards`);
+    const genres = new Set();
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.genres) data.genres.forEach(g => genres.add(g));
+    });
+    const genreIds = Array.from(genres).slice(0, 2).join(',');
+    const res = await fetch(`${TMDB_BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&with_genres=${genreIds}&sort_by=popularity.desc`);
+    if (!res.ok) throw new Error("Failed to fetch recommendations");
+    const data = await res.json();
+    recommendationsContainer.innerHTML = '';
+    data.results.slice(0, 6).forEach(item => {
+      const card = document.createElement('div');
+      card.classList.add('card');
+      const posterUrl = item.poster_path ? `${TMDB_IMG_BASE}${item.poster_path}` : 'https://via.placeholder.com/220';
+      card.innerHTML = `
+        <img src="${posterUrl}" alt="${item.title}">
+        <div class="overlay">
+          <div class="title">${item.title}</div>
+          <div class="action-buttons">
+            <button class="btn btn-info" onclick="fetchTrendingDetails('${item.id}', 'movie')">Info</button>
+          </div>
+        </div>
+      `;
+      recommendationsContainer.appendChild(card);
+    });
+    trackEvent('recommendations_loaded', { items: data.results.length });
+  } catch (error) {
+    console.error("Recommendations error:", error);
+    recommendationsContainer.innerHTML = '<p>Failed to load recommendations.</p>';
+  }
+}
+
+galaxyToggle.onclick = (e) => {
   e.preventDefault();
   if (!auth.currentUser) {
     loginModal.classList.add('open');
@@ -490,28 +541,46 @@ galaxyToggle.addEventListener('click', (e) => {
   }
   galaxyView.classList.toggle('hidden');
   if (!galaxyView.classList.contains('hidden') && !starField) initGalaxy();
-});
+};
 
-themeToggle.addEventListener('click', (e) => {
+themeToggle.onclick = (e) => {
   e.preventDefault();
   document.documentElement.classList.toggle('light-mode');
-  themeToggle.innerHTML = document.documentElement.classList.contains('light-mode') 
-    ? '<i class="fas fa-sun"></i>' 
-    : '<i class="fas fa-moon"></i>';
+  themeToggle.innerHTML = document.documentElement.classList.contains('light-mode') ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
   trackEvent('theme_toggled', { mode: document.documentElement.classList.contains('light-mode') ? 'light' : 'dark' });
-});
+};
 
-logoutBtn.addEventListener('click', (e) => {
+logoutBtn.onclick = (e) => {
   e.preventDefault();
   logout().then(() => {
     document.body.classList.remove('logged-in');
     loginModal.classList.add('open');
     trackEvent('logout', { user_id: auth.currentUser?.uid });
   }).catch(error => console.error("Logout error:", error));
-});
+};
 
-homeBtn.addEventListener('click', (e) => {
+homeBtn.onclick = (e) => {
   e.preventDefault();
   loadCards();
   loadTrending();
-});
+  loadRecommendations();
+};
+
+exportBtn.onclick = async (e) => {
+  e.preventDefault();
+  const userId = auth.currentUser.uid;
+  const snapshot = await getDocuments(`users/${userId}/cards`);
+  const favorites = [];
+  snapshot.forEach(doc => favorites.push(doc.data()));
+  const json = JSON.stringify(favorites, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'ur_favs_export.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  trackEvent('favorites_exported', { count: favorites.length });
+};
+
+categoryFilter.onchange = () => loadCards();
