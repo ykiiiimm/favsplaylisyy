@@ -75,9 +75,13 @@ function getFileURL(path) {
     return storage.ref(path).getDownloadURL();
 }
 
-// Analytics Function
+// Analytics Function (Optional, can skip if blocked by extensions)
 function trackEvent(eventName, params) {
-    analytics.logEvent(eventName, params);
+    if (analytics && analytics.logEvent) {
+        analytics.logEvent(eventName, params);
+    } else {
+        console.warn("Analytics not available, event not tracked:", eventName, params);
+    }
 }
 
 // Export functions globally
