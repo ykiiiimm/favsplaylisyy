@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UR FAV'S - Cosmic Favorites</title>
     <meta name="description" content="A cosmic journey to discover and organize your favorite movies and TV shows." />
-    <link rel="stylesheet" href="styles.css?v=6" />
+    <link rel="stylesheet" href="styles.css?v=7" />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 </head>
@@ -13,19 +13,8 @@
     <!-- Cosmic Particle Background -->
     <div id="particle-background"></div>
 
-    <!-- Login Page -->
-    <div class="login-container" id="loginContainer">
-        <div class="login-card">
-            <h1 class="login-title">UR FAV'S</h1>
-            <p class="login-subtitle">Embark on a Cosmic Adventure</p>
-            <button id="googleLoginBtn" class="btn btn-google">
-                <i class="fab fa-google"></i> Launch with Google
-            </button>
-        </div>
-    </div>
-
     <!-- Main Content -->
-    <div class="main-content hidden" id="mainContent">
+    <div class="main-content" id="mainContent">
         <header>
             <nav class="navbar">
                 <div class="logo">UR FAV'S</div>
@@ -76,8 +65,20 @@
         </footer>
     </div>
 
+    <!-- Login Modal -->
+    <div class="modal hidden" id="loginModal">
+        <div class="modal-content login-card">
+            <span class="close-btn" id="closeLoginModal">&times;</span>
+            <h1 class="login-title">UR FAV'S</h1>
+            <p class="login-subtitle">Embark on a Cosmic Adventure</p>
+            <button id="googleLoginBtn" class="btn btn-google">
+                <i class="fab fa-google"></i> Launch with Google
+            </button>
+        </div>
+    </div>
+
     <!-- Add/Edit Modal -->
-    <div class="modal" id="modal">
+    <div class="modal hidden" id="modal">
         <div class="modal-content">
             <span class="close-btn" id="closeModalBtn">&times;</span>
             <h2>Launch New Content</h2>
@@ -95,7 +96,7 @@
     </div>
 
     <!-- Detail Modal -->
-    <div class="modal" id="detailModal">
+    <div class="modal hidden" id="detailModal">
         <div class="modal-content detail-content">
             <span class="close-btn" id="closeDetailModal">&times;</span>
             <div class="detail-img">
@@ -111,7 +112,7 @@
     </div>
 
     <!-- Profile Modal -->
-    <div class="modal" id="profileModal">
+    <div class="modal hidden" id="profileModal">
         <div class="modal-content profile-content">
             <span class="close-btn" id="closeProfileModal">&times;</span>
             <div class="profile-display">
