@@ -1,10 +1,12 @@
 import { auth, db, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc, signOut } from './firebase.js';
+import { signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 
 const TMDB_API_KEY = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500";
+const provider = new GoogleAuthProvider();
 
-// DOM References (unchanged)
+// DOM References
 const openModalBtn = document.getElementById('openModalBtn');
 const modal = document.getElementById('modal');
 const closeModalBtn = document.getElementById('closeModalBtn');
@@ -38,13 +40,14 @@ const profileBio = document.getElementById('profileBio');
 const saveProfileBtn = document.getElementById('saveProfileBtn');
 const toggleContactBtn = document.getElementById('toggleContactBtn');
 const contactInfo = document.getElementById('contactInfo');
-
-// New Elements
 const galaxyToggle = document.getElementById('galaxyToggle');
 const galaxyView = document.getElementById('galaxyView');
 const voiceSearchBtn = document.getElementById('voiceSearchBtn');
 const themeToggle = document.getElementById('themeToggle');
 const trendingContainer = document.getElementById('trendingContainer');
+const loginModal = document.getElementById('loginModal');
+const closeLoginModal = document.getElementById('closeLoginModal');
+const googleLoginBtn = document.getElementById('googleLoginBtn');
 
 let selectedTMDBData = null;
 
@@ -60,7 +63,6 @@ function initParticles() {
     particle.style.animationDuration = `${Math.random() * 10 + 5}s`;
     particles.appendChild(particle);
   }
-  // Add CSS dynamically
   const style = document.createElement('style');
   style.textContent = `
     .particle {
@@ -142,9 +144,25 @@ function searchCards(query) {
   });
 }
 
-// Existing Event Listeners (unchanged except for new additions)
+// Login Handling
+googleLoginBtn.addEventListener('click', () => {
+  signInWithPopup(auth, provider)
+    .then(() => {
+      loginModal.classList.remove('open');
+      document.body.classList.add('logged-in');
+    })
+    .catch((error) => {
+      console.error("Login error:", error);
+    });
+});
+
+closeLoginModal.addEventListener('click', () => {
+  loginModal.classList.remove('open');
+});
+
+// Event Listeners
 contentTypeSelect.addEventListener('change', () => {
-  seasonInput.style.display = (contentTypeSelect.value === 'tv') ? 'block' : 'none';
+  seasonInput.style.display = contentTypeSelect.value === 'tv' ? 'block' : 'none';
 });
 
 profileBtn.addEventListener('click', async () => {
@@ -169,15 +187,13 @@ toggleContactBtn.addEventListener('click', () => contactInfo.classList.toggle('h
 
 auth.onAuthStateChanged(user => {
   if (user) {
-    document.getElementById('loginContainer').classList.add('hidden');
-    document.getElementById('mainContent').classList.remove('hidden');
+    document.body.classList.add('logged-in');
     loadCards();
     loadTrending();
     initParticles();
     initVoiceSearch();
   } else {
-    document.getElementById('loginContainer').classList.remove('hidden');
-    document.getElementById('mainContent').classList.add('hidden');
+    loginModal.classList.add('open');
   }
 });
 
@@ -370,7 +386,11 @@ submitBtn.addEventListener('click', async (e) => {
   selectedTMDBData = null;
 });
 
-openModalBtn.addEventListener('click', () => modal.classList.add('open'));
+openModalBtn.addEventListener('click', () => {
+  if (auth.currentUser) modal.classList.add('open');
+  else loginModal.classList.add('open');
+});
+
 closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
 
 window.openDetailModalHandler = async (e, docId) => {
@@ -446,6 +466,10 @@ async function loadTrending() {
 }
 
 galaxyToggle.addEventListener('click', () => {
+  if (!auth.currentUser) {
+    loginModal.classList.add('open');
+    return;
+  }
   galaxyView.classList.toggle('hidden');
   cardContainer.classList.toggle('hidden');
   trendingContainer.parentElement.classList.toggle('hidden');
@@ -457,4 +481,11 @@ themeToggle.addEventListener('click', () => {
   themeToggle.innerHTML = document.documentElement.classList.contains('light-mode') 
     ? '<i class="fas fa-sun"></i>' 
     : '<i class="fas fa-moon"></i>';
+});
+
+logoutBtn.addEventListener('click', () => {
+  signOut(auth).then(() => {
+    document.body.classList.remove('logged-in');
+    loginModal.classList.add('open');
+  }).catch(error => console.error("Logout error:", error));
 });
