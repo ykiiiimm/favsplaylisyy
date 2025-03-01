@@ -1,274 +1,245 @@
-/* ---------------------------------------------
-   Global Variables (Cosmic Theme)
---------------------------------------------- */
 :root {
-  --cosmic-bg: #0d0b21;          /* Deep space black */
-  --nebula-gradient: linear-gradient(135deg, #ff007a, #00ddeb, #ff00cc); /* Neon pink, cyan, purple */
-  --star-glow: #ffffff;          /* White for text and glow */
-  --card-bg: rgba(20, 20, 50, 0.9); /* Semi-transparent cosmic blue */
-  --button-glow: #00ddeb;        /* Neon cyan for buttons */
-  --text-secondary: #b0b0ff;     /* Light cosmic purple */
-  --font-primary: 'Orbitron', sans-serif; /* Futuristic font */
-  --font-secondary: 'Poppins', sans-serif; /* Readable secondary font */
+  --bg-color: #1a1a1a;         /* Dark gray like IMDb */
+  --text-color: #ffffff;       /* White text */
+  --accent-color: #f5c518;     /* IMDb yellow */
+  --card-bg: #2a2a2a;         /* Slightly lighter gray */
+  --btn-primary: #f5c518;      /* Yellow buttons */
+  --btn-secondary: #555;       /* Gray buttons */
+  --font-family: 'Roboto', sans-serif;
 }
 
 /* Light Mode */
 :root.light-mode {
-  --cosmic-bg: #e0f7ff;
-  --nebula-gradient: linear-gradient(135deg, #ff6f61, #40c4ff, #ffeb3b);
-  --star-glow: #1a1a2e;
-  --card-bg: rgba(255, 255, 255, 0.95);
-  --button-glow: #ff6f61;
-  --text-secondary: #555;
-}
-
-/* ---------------------------------------------
-   Base Styles
---------------------------------------------- */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+  --bg-color: #ffffff;
+  --text-color: #000000;
+  --card-bg: #f0f0f0;
+  --btn-secondary: #ccc;
 }
 
 body {
-  font-family: var(--font-secondary);
-  background: var(--cosmic-bg);
-  color: var(--star-glow);
-  overflow: hidden; /* Prevent scrolling on load */
-  position: relative;
-  transition: background 0.5s ease;
+  font-family: var(--font-family);
+  background: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* No scroll on load */
 }
 
-/* Enable scrolling after login */
 body.logged-in {
   overflow: auto;
 }
 
-/* Particle Background */
-#particle-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  pointer-events: none;
-}
-
-/* ---------------------------------------------
-   Header
---------------------------------------------- */
+/* Header */
 header {
-  background: rgba(10, 10, 30, 0.9);
-  padding: 20px 40px;
+  background: var(--card-bg);
+  padding: 10px 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   position: sticky;
   top: 0;
-  z-index: 20;
-  box-shadow: 0 0 25px rgba(0, 221, 235, 0.3);
+  z-index: 10;
 }
 
 .navbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .logo {
-  font-family: var(--font-primary);
-  font-size: 3rem;
-  background: var(--nebula-gradient);
-  -webkit-background-clip: text;
-  color: transparent;
-  text-shadow: 0 0 10px rgba(0, 221, 235, 0.7);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent-color);
 }
 
-.nav-links {
-  display: flex;
-  gap: 30px;
-}
-
-.nav-btn {
-  background: transparent;
-  border: none;
-  color: var(--star-glow);
-  font-family: var(--font-primary);
-  font-size: 1.2rem;
-  padding: 10px 20px;
-  cursor: pointer;
-  transition: all 0.4s ease;
-}
-
-.nav-btn:hover {
-  background: var(--nebula-gradient);
-  border-radius: 25px;
-  box-shadow: 0 0 15px var(--button-glow);
-}
-
-.theme-toggle {
-  background: none;
-  border: none;
-  font-size: 1.8rem;
-  color: var(--star-glow);
-  cursor: pointer;
-}
-
-/* Search */
 .search-container {
-  margin: 30px auto;
-  max-width: 700px;
+  flex: 1;
+  display: flex;
+  margin: 0 20px;
 }
 
 .search-container input {
   width: 100%;
-  padding: 18px 25px;
-  border-radius: 50px;
-  border: 2px solid var(--button-glow);
-  background: rgba(20, 20, 50, 0.8);
-  color: var(--star-glow);
-  font-size: 1.3rem;
-  box-shadow: 0 0 15px rgba(0, 221, 235, 0.5);
-  transition: all 0.3s ease;
+  padding: 10px;
+  border: none;
+  border-radius: 5px 0 0 5px;
+  background: #fff;
+  color: #000;
 }
 
-.search-container input:focus {
-  box-shadow: 0 0 25px var(--button-glow);
-  outline: none;
+.search-btn {
+  background: var(--accent-color);
+  border: none;
+  padding: 10px;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
+  color: #000;
 }
 
-/* ---------------------------------------------
-   Action Bar
---------------------------------------------- */
+.nav-links {
+  display: flex;
+  gap: 15px;
+  list-style: none;
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+
+.nav-btn:hover {
+  color: var(--accent-color);
+}
+
+/* Container */
+.container {
+  display: flex;
+  max-width: 1200px;
+  margin: 20px auto;
+  gap: 20px;
+}
+
+/* Main */
+main {
+  flex: 3;
+}
+
 .action-bar {
+  margin: 20px 0;
   text-align: center;
-  margin: 40px 0;
 }
 
 .btn-add {
-  background: var(--nebula-gradient);
+  background: var(--btn-primary);
+  color: #000;
+  padding: 10px 20px;
   border: none;
-  padding: 20px 50px;
-  border-radius: 50px;
-  color: var(--star-glow);
-  font-family: var(--font-primary);
-  font-size: 1.5rem;
-  box-shadow: 0 0 20px var(--button-glow);
-  transition: all 0.4s ease;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 700;
 }
 
 .btn-add:hover {
-  transform: scale(1.1) translateZ(15px);
-  box-shadow: 0 0 30px var(--button-glow);
+  background: #e0b015;
 }
 
-/* ---------------------------------------------
-   Trending Section
---------------------------------------------- */
-.trending-section {
-  padding: 40px;
-  background: rgba(15, 15, 40, 0.9);
-  margin: 30px 0;
-  border-radius: 20px;
-  box-shadow: 0 0 25px rgba(0, 221, 235, 0.3);
+/* Sections */
+.featured-section, .favorites-section {
+  margin-bottom: 30px;
 }
 
-.trending-section h2 {
-  font-family: var(--font-primary);
-  font-size: 2.5rem;
-  background: var(--nebula-gradient);
-  -webkit-background-clip: text;
-  color: transparent;
-  text-shadow: 0 0 15px rgba(255, 0, 122, 0.5);
-  margin-bottom: 25px;
+h2 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: var(--accent-color);
 }
 
-.trending-container {
-  display: flex;
-  overflow-x: auto;
-  gap: 25px;
-  padding-bottom: 20px;
-}
-
-/* ---------------------------------------------
-   Cards Grid
---------------------------------------------- */
-.cards-container {
+.card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 30px;
-  padding: 40px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
 }
 
 .card {
   background: var(--card-bg);
-  border-radius: 15px;
+  border-radius: 5px;
   overflow: hidden;
-  position: relative;
-  box-shadow: 0 0 20px rgba(0, 221, 235, 0.4);
-  transform: perspective(1000px);
-  transition: all 0.5s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s;
 }
 
 .card:hover {
-  transform: perspective(1000px) translateZ(20px);
-  box-shadow: 0 0 30px rgba(0, 221, 235, 0.7);
+  transform: scale(1.05);
 }
 
 .card img {
   width: 100%;
-  height: 450px;
+  height: 300px;
   object-fit: cover;
-  border-bottom: 5px solid var(--button-glow);
 }
 
 .overlay {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  background: rgba(0, 0, 0, 0.85);
-  padding: 20px;
+  padding: 10px;
   text-align: center;
 }
 
 .overlay .title {
-  font-family: var(--font-primary);
-  font-size: 1.6rem;
-  color: var(--star-glow);
-  text-shadow: 0 0 10px var(--button-glow);
+  font-size: 1.2rem;
+  margin-bottom: 5px;
 }
 
 .action-buttons .btn {
-  background: var(--button-glow);
-  padding: 12px 20px;
-  border-radius: 25px;
-  color: var(--star-glow);
-  font-family: var(--font-primary);
+  background: var(--btn-secondary);
+  color: #fff;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 3px;
+  margin: 0 5px;
+  cursor: pointer;
 }
 
 .action-buttons .btn:hover {
-  background: var(--nebula-gradient);
+  background: var(--btn-primary);
+  color: #000;
 }
 
-/* ---------------------------------------------
-   Galaxy View
---------------------------------------------- */
+/* Sidebar */
+.sidebar {
+  flex: 1;
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.sidebar h3 {
+  color: var(--accent-color);
+  margin-bottom: 15px;
+}
+
+#userInfo img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+#sidebarNickname {
+  font-size: 1.1rem;
+}
+
+.sidebar-btn {
+  width: 100%;
+  margin-top: 15px;
+  background: var(--btn-primary);
+  color: #000;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.sidebar-btn:hover {
+  background: #e0b015;
+}
+
 .galaxy-view {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 10;
+  margin-top: 15px;
 }
 
-#galaxyCanvas {
-  width: 100%;
-  height: 100%;
+/* Footer */
+footer {
+  text-align: center;
+  padding: 20px;
+  background: var(--card-bg);
+  color: var(--text-color);
 }
 
-/* ---------------------------------------------
-   Modal Styles
---------------------------------------------- */
+/* Modals */
 .modal {
   display: none;
   position: fixed;
@@ -276,7 +247,7 @@ header {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.95);
+  background: rgba(0, 0, 0, 0.8);
   justify-content: center;
   align-items: center;
   z-index: 1000;
@@ -288,113 +259,121 @@ header {
 
 .modal-content {
   background: var(--card-bg);
-  padding: 40px;
-  border-radius: 25px;
-  max-width: 600px;
-  box-shadow: 0 0 40px rgba(0, 221, 235, 0.6);
-  transform: perspective(1000px) rotateY(5deg);
-  transition: transform 0.5s ease;
-}
-
-.modal-content:hover {
-  transform: perspective(1000px) rotateY(0deg);
-}
-
-.modal-content h2 {
-  font-family: var(--font-primary);
-  font-size: 2.5rem;
-  background: var(--nebula-gradient);
-  -webkit-background-clip: text;
-  color: transparent;
-}
-
-.modal-content input,
-.modal-content select,
-.modal-content button {
-  padding: 15px;
-  border-radius: 15px;
-  font-family: var(--font-secondary);
-  font-size: 1.2rem;
-}
-
-.btn-submit {
-  background: var(--nebula-gradient);
-  color: var(--star-glow);
-}
-
-.btn-submit:hover {
-  box-shadow: 0 0 25px var(--button-glow);
-}
-
-/* Login Modal Specific */
-.login-card {
+  padding: 20px;
+  border-radius: 5px;
   max-width: 500px;
+  width: 90%;
+}
+
+.close-btn {
+  float: right;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.login-modal {
   text-align: center;
 }
 
 .login-title {
-  font-family: var(--font-primary);
-  font-size: 5rem;
-  font-weight: 700;
-  background: var(--nebula-gradient);
-  -webkit-background-clip: text;
-  color: transparent;
-  text-shadow: 0 0 15px rgba(255, 0, 122, 0.8);
-}
-
-.login-subtitle {
-  font-size: 1.5rem;
-  color: var(--text-secondary);
-  margin-bottom: 40px;
-}
-
-.btn-google {
-  background: transparent;
-  border: 3px solid var(--button-glow);
-  padding: 15px 30px;
-  border-radius: 50px;
-  color: var(--star-glow);
-  font-family: var(--font-primary);
-  font-size: 1.3rem;
-  cursor: pointer;
-  display: inline-flex;
-  gap: 15px;
-  box-shadow: 0 0 20px var(--button-glow);
-  transition: all 0.4s ease;
-}
-
-.btn-google:hover {
-  background: var(--button-glow);
-  transform: scale(1.1) translateZ(10px);
-}
-
-/* ---------------------------------------------
-   Footer
---------------------------------------------- */
-footer {
-  background: rgba(10, 10, 30, 0.9);
-  padding: 25px;
-  text-align: center;
-  border-top: 3px solid var(--button-glow);
-}
-
-.social-links a {
   font-size: 2rem;
-  margin: 0 15px;
-  color: var(--star-glow);
-  transition: all 0.5s ease;
+  color: var(--accent-color);
+  margin-bottom: 10px;
 }
 
-.social-links a:hover {
-  color: var(--button-glow);
-  transform: scale(1.3) rotate(360deg);
+.btn-login {
+  background: var(--btn-primary);
+  color: #000;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px auto;
 }
 
-/* ---------------------------------------------
-   Animations
---------------------------------------------- */
-@keyframes pulse {
-  0% { opacity: 0.8; }
-  50% { opacity: 1; }
-  100% { opacity: 0.8; }
+.btn-login:hover {
+  background: #e0b015;
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 5px;
+}
+
+.btn-primary {
+  background: var(--btn-primary);
+  color: #000;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+}
+
+.btn-primary:hover {
+  background: #e0b015;
+}
+
+.btn-secondary {
+  background: var(--btn-secondary);
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+}
+
+.btn-secondary:hover {
+  background: #777;
+}
+
+.tmdb-preview {
+  margin: 10px 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.tmdb-option {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.tmdb-option img {
+  width: 50px;
+  margin-right: 10px;
+}
+
+.tmdb-option:hover {
+  background: #555;
+}
+
+.detail-modal {
+  display: flex;
+  max-width: 700px;
+}
+
+.detail-modal img {
+  width: 200px;
+  height: auto;
+}
+
+.detail-info {
+  padding: 20px;
+}
+
+.profile-modal {
+  max-width: 400px;
+}
+
+.profile-info img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-bottom: 10px;
 }
