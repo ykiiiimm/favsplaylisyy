@@ -35,13 +35,13 @@ import {
   uploadBytes, 
   getDownloadURL, 
   deleteObject 
-} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-storage.js";
+} from "https://www.gstatic.com/ajax/libs/firebase/9.6.10/firebase-storage.js";
 
 // Firebase Analytics
 import { 
   getAnalytics, 
   logEvent 
-} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics.js";
+} from "https://www.gstatic.com/ajax/libs/firebase/9.6.10/firebase-analytics.js";
 
 // Firebase Realtime Database (not used currently, kept for future expansion)
 import { 
