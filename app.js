@@ -1,108 +1,190 @@
-// This file is loaded as a module at the end of index.html
-
-import {
-  auth,
-  db,
-  collection,
-  addDoc,
-  getDocs,
-  deleteDoc,
-  doc,
-  updateDoc,
-  setDoc,
-  signOut,
-} from "./firebase.js";
+import { auth, db, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc, signOut } from './firebase.js';
 
 const TMDB_API_KEY = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500";
 
-const openModalBtn = document.getElementById("openModalBtn");
-const modal = document.getElementById("modal");
-const closeModalBtn = document.getElementById("closeModalBtn");
-const submitBtn = document.getElementById("submitBtn");
-const cardContainer = document.getElementById("card-container");
-const titleInput = document.getElementById("title");
-const contentTypeSelect = document.getElementById("content-type");
-const seasonInput = document.getElementById("season");
-const fetchTmdbBtn = document.getElementById("fetchTmdbBtn");
-const tmdbPreview = document.getElementById("tmdbPreview");
-const clearPreviewBtn = document.getElementById("clearPreviewBtn");
-const searchInput = document.getElementById("searchInput");
+// DOM References (unchanged)
+const openModalBtn = document.getElementById('openModalBtn');
+const modal = document.getElementById('modal');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const submitBtn = document.getElementById('submitBtn');
+const cardContainer = document.getElementById('card-container');
+const titleInput = document.getElementById('title');
+const contentTypeSelect = document.getElementById('content-type');
+const seasonInput = document.getElementById('season');
+const fetchTmdbBtn = document.getElementById('fetchTmdbBtn');
+const tmdbPreview = document.getElementById('tmdbPreview');
+const clearPreviewBtn = document.getElementById('clearPreviewBtn');
+const searchInput = document.getElementById('searchInput');
+const detailModal = document.getElementById('detailModal');
+const closeDetailModal = document.getElementById('closeDetailModal');
+const detailPoster = document.getElementById('detailPoster');
+const detailTitle = document.getElementById('detailTitle');
+const detailOverview = document.getElementById('detailOverview');
+const detailRating = document.getElementById('detailRating');
+const detailRelease = document.getElementById('detailRelease');
+const profileBtn = document.getElementById('profileBtn');
+const profileModal = document.getElementById('profileModal');
+const closeProfileModal = document.getElementById('closeProfileModal');
+const profilePhoto = document.getElementById('profilePhoto');
+const profileNicknameDisplay = document.getElementById('profileNicknameDisplay');
+const profileTaglineDisplay = document.getElementById('profileTaglineDisplay');
+const profileBioDisplay = document.getElementById('profileBioDisplay');
+const profilePicInput = document.getElementById('profilePicInput');
+const profileNickname = document.getElementById('profileNickname');
+const profileTagline = document.getElementById('profileTagline');
+const profileBio = document.getElementById('profileBio');
+const saveProfileBtn = document.getElementById('saveProfileBtn');
+const toggleContactBtn = document.getElementById('toggleContactBtn');
+const contactInfo = document.getElementById('contactInfo');
 
-const detailModal = document.getElementById("detailModal");
-const closeDetailModal = document.getElementById("closeDetailModal");
-const detailPoster = document.getElementById("detailPoster");
-const detailTitle = document.getElementById("detailTitle");
-const detailOverview = document.getElementById("detailOverview");
-const detailRating = document.getElementById("detailRating");
-const detailRelease = document.getElementById("detailRelease");
-
-const profileBtn = document.getElementById("profileBtn");
-const profileModal = document.getElementById("profileModal");
-const closeProfileModal = document.getElementById("closeProfileModal");
-const profilePhoto = document.getElementById("profilePhoto");
-const profileNicknameDisplay = document.getElementById("profileNicknameDisplay");
-const profileTaglineDisplay = document.getElementById("profileTaglineDisplay");
-const profileBioDisplay = document.getElementById("profileBioDisplay");
-const profilePicInput = document.getElementById("profilePicInput");
-const profileNickname = document.getElementById("profileNickname");
-const profileTagline = document.getElementById("profileTagline");
-const profileBio = document.getElementById("profileBio");
-const saveProfileBtn = document.getElementById("saveProfileBtn");
-const toggleContactBtn = document.getElementById("toggleContactBtn");
-const contactInfo = document.getElementById("contactInfo");
+// New Elements
+const galaxyToggle = document.getElementById('galaxyToggle');
+const galaxyView = document.getElementById('galaxyView');
+const voiceSearchBtn = document.getElementById('voiceSearchBtn');
+const themeToggle = document.getElementById('themeToggle');
+const trendingContainer = document.getElementById('trendingContainer');
 
 let selectedTMDBData = null;
 
-contentTypeSelect.addEventListener("change", () => {
-  seasonInput.style.display = contentTypeSelect.value === "tv" ? "block" : "none";
+// Particle Background
+function initParticles() {
+  const particleCount = 200;
+  const particles = document.getElementById('particle-background');
+  for (let i = 0; i < particleCount; i++) {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
+    particle.style.left = `${Math.random() * 100}vw`;
+    particle.style.top = `${Math.random() * 100}vh`;
+    particle.style.animationDuration = `${Math.random() * 10 + 5}s`;
+    particles.appendChild(particle);
+  }
+  // Add CSS dynamically
+  const style = document.createElement('style');
+  style.textContent = `
+    .particle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 5px #00ddeb;
+      animation: float infinite linear;
+    }
+    @keyframes float {
+      0% { transform: translateY(0); opacity: 0.8; }
+      50% { opacity: 1; }
+      100% { transform: translateY(-100vh); opacity: 0.8; }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// Galaxy View (3D)
+let scene, camera, renderer, stars;
+function initGalaxy() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxyCanvas') });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  const geometry = new THREE.BufferGeometry();
+  const vertices = [];
+  getDocs(collection(db, "users", auth.currentUser.uid, "cards")).then(snapshot => {
+    snapshot.forEach(doc => {
+      const x = (Math.random() - 0.5) * 1000;
+      const y = (Math.random() - 0.5) * 1000;
+      const z = (Math.random() - 0.5) * 1000;
+      vertices.push(x, y, z);
+    });
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    const material = new THREE.PointsMaterial({ color: 0x00ddeb, size: 5 });
+    stars = new THREE.Points(geometry, material);
+    scene.add(stars);
+  });
+
+  camera.position.z = 500;
+  animateGalaxy();
+}
+
+function animateGalaxy() {
+  requestAnimationFrame(animateGalaxy);
+  stars.rotation.x += 0.001;
+  stars.rotation.y += 0.001;
+  renderer.render(scene, camera);
+}
+
+// Voice Search
+function initVoiceSearch() {
+  if ('webkitSpeechRecognition' in window) {
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      searchInput.value = transcript;
+      searchCards(transcript);
+    };
+    voiceSearchBtn.addEventListener('click', () => {
+      recognition.start();
+    });
+  } else {
+    voiceSearchBtn.style.display = 'none';
+  }
+}
+
+function searchCards(query) {
+  const lowerQuery = query.toLowerCase();
+  document.querySelectorAll('.card').forEach(card => {
+    const title = card.querySelector('.title').textContent.toLowerCase();
+    card.style.display = title.includes(lowerQuery) ? 'block' : 'none';
+  });
+}
+
+// Existing Event Listeners (unchanged except for new additions)
+contentTypeSelect.addEventListener('change', () => {
+  seasonInput.style.display = (contentTypeSelect.value === 'tv') ? 'block' : 'none';
 });
 
-profileBtn.addEventListener("click", async () => {
+profileBtn.addEventListener('click', async () => {
   const user = auth.currentUser;
   if (user) {
-    profilePhoto.src = user.photoURL || "default-profile.png";
+    profilePhoto.src = user.photoURL || 'default-profile.png';
     const profileCollectionRef = collection(db, "users", user.uid, "profile");
     const profileSnap = await getDocs(profileCollectionRef);
     let profileData;
-    profileSnap.forEach((docSnap) => {
+    profileSnap.forEach(docSnap => {
       profileData = docSnap.data();
     });
-    profileNicknameDisplay.textContent =
-      (profileData && profileData.nickname) || user.displayName || "Anonymous";
-    profileTaglineDisplay.textContent =
-      (profileData && profileData.tagline) || "Your tagline here";
-    profileBioDisplay.textContent =
-      (profileData && profileData.bio) || "Write a short bio about yourself...";
-    profileModal.classList.add("open");
+    profileNicknameDisplay.textContent = (profileData && profileData.nickname) || user.displayName || "Anonymous";
+    profileTaglineDisplay.textContent = (profileData && profileData.tagline) || "Your tagline here";
+    profileBioDisplay.textContent = (profileData && profileData.bio) || "Write a short bio about yourself...";
+    profileModal.classList.add('open');
   }
 });
 
-closeProfileModal.addEventListener("click", () => {
-  profileModal.classList.remove("open");
-});
+closeProfileModal.addEventListener('click', () => profileModal.classList.remove('open'));
+toggleContactBtn.addEventListener('click', () => contactInfo.classList.toggle('hidden'));
 
-toggleContactBtn.addEventListener("click", () => {
-  contactInfo.classList.toggle("hidden");
-});
-
-auth.onAuthStateChanged((user) => {
+auth.onAuthStateChanged(user => {
   if (user) {
-    document.getElementById("loginContainer").classList.add("hidden");
-    document.getElementById("mainContent").classList.remove("hidden");
+    document.getElementById('loginContainer').classList.add('hidden');
+    document.getElementById('mainContent').classList.remove('hidden');
     loadCards();
+    loadTrending();
+    initParticles();
+    initVoiceSearch();
   } else {
-    document.getElementById("loginContainer").classList.remove("hidden");
-    document.getElementById("mainContent").classList.add("hidden");
+    document.getElementById('loginContainer').classList.remove('hidden');
+    document.getElementById('mainContent').classList.add('hidden');
   }
 });
 
 async function fetchTMDBResults(title, type) {
-  const searchUrl =
-    type === "movie"
-      ? `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`
-      : `${TMDB_BASE_URL}/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
+  let searchUrl = type === 'movie' 
+    ? `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`
+    : `${TMDB_BASE_URL}/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
   try {
     const res = await fetch(searchUrl);
     const data = await res.json();
@@ -119,36 +201,31 @@ function displayTMDBOptions(results) {
     tmdbPreview.textContent = "No results found.";
     return;
   }
-  const container = document.createElement("div");
-  container.classList.add("tmdb-options");
-  results.forEach((result) => {
-    const option = document.createElement("div");
-    option.classList.add("tmdb-option");
+  const container = document.createElement('div');
+  container.classList.add('tmdb-options');
+  results.forEach(result => {
+    const option = document.createElement('div');
+    option.classList.add('tmdb-option');
     const name = result.title || result.name;
-    const year = (result.release_date || result.first_air_date || "").substring(0, 4);
-    const posterPath = result.poster_path ? TMDB_IMG_BASE + result.poster_path : "";
+    const year = (result.release_date || result.first_air_date || '').substring(0, 4);
+    const posterPath = result.poster_path ? TMDB_IMG_BASE + result.poster_path : '';
     option.innerHTML = `
       <img src="${posterPath}" alt="${name}">
       <p>${name} (${year})</p>
     `;
-    option.addEventListener("click", async () => {
+    option.addEventListener('click', async () => {
       const data = {
         title: name,
         overview: result.overview,
         rating: result.vote_average,
-        releaseDate:
-          contentTypeSelect.value === "movie" ? result.release_date : result.first_air_date,
-        posterUrl: posterPath,
+        releaseDate: (contentTypeSelect.value === 'movie') ? result.release_date : result.first_air_date,
+        posterUrl: posterPath
       };
-      if (contentTypeSelect.value === "tv" && seasonInput.value) {
+      if (contentTypeSelect.value === 'tv' && seasonInput.value) {
         try {
-          const seasonRes = await fetch(
-            `${TMDB_BASE_URL}/tv/${result.id}/season/${seasonInput.value}?api_key=${TMDB_API_KEY}`
-          );
+          const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${seasonInput.value}?api_key=${TMDB_API_KEY}`);
           const seasonData = await seasonRes.json();
-          if (seasonData.poster_path) {
-            data.posterUrl = TMDB_IMG_BASE + seasonData.poster_path;
-          }
+          if (seasonData.poster_path) data.posterUrl = TMDB_IMG_BASE + seasonData.poster_path;
           data.overview = seasonData.overview || data.overview;
           data.releaseDate = seasonData.air_date || data.releaseDate;
         } catch (err) {
@@ -181,7 +258,7 @@ async function loadCards() {
     const userId = auth.currentUser.uid;
     const snapshot = await getDocs(collection(db, "users", userId, "cards"));
     cardContainer.innerHTML = "";
-    snapshot.forEach((docSnap) => {
+    snapshot.forEach(docSnap => {
       createCardElement(docSnap.data(), docSnap.id);
     });
   } catch (error) {
@@ -190,8 +267,8 @@ async function loadCards() {
 }
 
 function createCardElement(cardData, docId) {
-  const card = document.createElement("div");
-  card.classList.add("card");
+  const card = document.createElement('div');
+  card.classList.add('card');
   card.dataset.id = docId;
   card.innerHTML = `
     <img src="${cardData.posterUrl}" alt="Poster">
@@ -208,7 +285,7 @@ function createCardElement(cardData, docId) {
 }
 
 window.deleteCard = async (button) => {
-  const card = button.closest(".card");
+  const card = button.closest('.card');
   const docId = card.dataset.id;
   try {
     const userId = auth.currentUser.uid;
@@ -220,14 +297,14 @@ window.deleteCard = async (button) => {
 };
 
 window.editCard = (button) => {
-  const card = button.closest(".card");
+  const card = button.closest('.card');
   const docId = card.dataset.id;
-  titleInput.value = card.querySelector(".title").textContent;
-  modal.classList.add("open");
+  titleInput.value = card.querySelector('.title').textContent;
+  modal.classList.add('open');
   submitBtn.onclick = async (e) => {
     e.preventDefault();
     const type = contentTypeSelect.value;
-    const season = type === "tv" ? seasonInput.value : null;
+    const season = (type === 'tv') ? seasonInput.value : null;
     const results = await fetchTMDBResults(titleInput.value, type);
     if (results.length > 0) {
       const result = results[0];
@@ -235,18 +312,14 @@ window.editCard = (button) => {
         title: result.title || result.name,
         overview: result.overview,
         rating: result.vote_average,
-        releaseDate: type === "movie" ? result.release_date : result.first_air_date,
-        posterUrl: result.poster_path ? TMDB_IMG_BASE + result.poster_path : "",
+        releaseDate: (type === 'movie') ? result.release_date : result.first_air_date,
+        posterUrl: result.poster_path ? TMDB_IMG_BASE + result.poster_path : ""
       };
-      if (type === "tv" && season) {
+      if (type === 'tv' && season) {
         try {
-          const seasonRes = await fetch(
-            `${TMDB_BASE_URL}/tv/${result.id}/season/${season}?api_key=${TMDB_API_KEY}`
-          );
+          const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${season}?api_key=${TMDB_API_KEY}`);
           const seasonData = await seasonRes.json();
-          if (seasonData.poster_path) {
-            data.posterUrl = TMDB_IMG_BASE + seasonData.poster_path;
-          }
+          if (seasonData.poster_path) data.posterUrl = TMDB_IMG_BASE + seasonData.poster_path;
           data.overview = seasonData.overview || data.overview;
           data.releaseDate = seasonData.air_date || data.releaseDate;
         } catch (err) {
@@ -256,9 +329,9 @@ window.editCard = (button) => {
       try {
         const userId = auth.currentUser.uid;
         await updateDoc(doc(db, "users", userId, "cards", docId), data);
-        card.querySelector("img").src = data.posterUrl;
-        card.querySelector(".title").textContent = data.title;
-        modal.classList.remove("open");
+        card.querySelector('img').src = data.posterUrl;
+        card.querySelector('.title').textContent = data.title;
+        modal.classList.remove('open');
       } catch (err) {
         console.error("Error updating card:", err);
       }
@@ -266,7 +339,7 @@ window.editCard = (button) => {
   };
 };
 
-fetchTmdbBtn.addEventListener("click", async (e) => {
+fetchTmdbBtn.addEventListener('click', async (e) => {
   e.preventDefault();
   const title = titleInput.value;
   const type = contentTypeSelect.value;
@@ -276,13 +349,13 @@ fetchTmdbBtn.addEventListener("click", async (e) => {
   }
 });
 
-clearPreviewBtn.addEventListener("click", (e) => {
+clearPreviewBtn.addEventListener('click', (e) => {
   e.preventDefault();
   tmdbPreview.innerHTML = "";
   selectedTMDBData = null;
 });
 
-submitBtn.addEventListener("click", async (e) => {
+submitBtn.addEventListener('click', async (e) => {
   e.preventDefault();
   if (!selectedTMDBData) {
     alert("Please fetch and select a TMDB result before submitting.");
@@ -290,15 +363,15 @@ submitBtn.addEventListener("click", async (e) => {
   }
   await saveCard(selectedTMDBData);
   await loadCards();
-  modal.classList.remove("open");
-  titleInput.value = "";
-  seasonInput.value = "";
+  modal.classList.remove('open');
+  titleInput.value = '';
+  seasonInput.value = '';
   tmdbPreview.innerHTML = "";
   selectedTMDBData = null;
 });
 
-openModalBtn.addEventListener("click", () => modal.classList.add("open"));
-closeModalBtn.addEventListener("click", () => modal.classList.remove("open"));
+openModalBtn.addEventListener('click', () => modal.classList.add('open'));
+closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
 
 window.openDetailModalHandler = async (e, docId) => {
   e.stopPropagation();
@@ -306,10 +379,8 @@ window.openDetailModalHandler = async (e, docId) => {
     const userId = auth.currentUser.uid;
     const snapshot = await getDocs(collection(db, "users", userId, "cards"));
     let cardData;
-    snapshot.forEach((docSnap) => {
-      if (docSnap.id === docId) {
-        cardData = docSnap.data();
-      }
+    snapshot.forEach(docSnap => {
+      if (docSnap.id === docId) cardData = docSnap.data();
     });
     if (cardData) {
       detailPoster.src = cardData.posterUrl;
@@ -317,43 +388,33 @@ window.openDetailModalHandler = async (e, docId) => {
       detailOverview.textContent = cardData.overview;
       detailRating.textContent = `Rating: ${cardData.rating}`;
       detailRelease.textContent = `Release: ${cardData.releaseDate}`;
-      detailModal.classList.add("open");
+      detailModal.classList.add('open');
     }
   } catch (error) {
     console.error("Error opening detail modal:", error);
   }
 };
+closeDetailModal.addEventListener('click', () => detailModal.classList.remove('open'));
 
-closeDetailModal.addEventListener("click", () => {
-  detailModal.classList.remove("open");
-});
+searchInput.addEventListener('input', () => searchCards(searchInput.value));
 
-searchInput.addEventListener("input", () => {
-  const query = searchInput.value.toLowerCase();
-  document.querySelectorAll(".card").forEach((card) => {
-    const title = card.querySelector(".title").textContent.toLowerCase();
-    card.style.display = title.includes(query) ? "block" : "none";
-  });
-});
-
-profilePicInput.addEventListener("change", () => {
+// Profile Picture Preview
+profilePicInput.addEventListener('change', () => {
   const file = profilePicInput.files[0];
   if (file) {
     const reader = new FileReader();
-    reader.onload = (e) => {
-      profilePhoto.src = e.target.result;
-    };
+    reader.onload = (e) => profilePhoto.src = e.target.result;
     reader.readAsDataURL(file);
   }
 });
 
-saveProfileBtn.addEventListener("click", async () => {
+saveProfileBtn.addEventListener('click', async () => {
   const user = auth.currentUser;
   if (!user) return;
   const profileData = {
     nickname: profileNickname.value || user.displayName || "Anonymous",
     tagline: profileTagline.value || "Your tagline here",
-    bio: profileBio.value || "Write a short bio about yourself...",
+    bio: profileBio.value || "Write a short bio about yourself..."
   };
   try {
     await setDoc(doc(db, "users", user.uid, "profile", "profile"), profileData);
@@ -364,4 +425,36 @@ saveProfileBtn.addEventListener("click", async () => {
   } catch (err) {
     console.error("Error updating profile:", err);
   }
+});
+
+// New Features
+async function loadTrending() {
+  const res = await fetch(`${TMDB_BASE_URL}/trending/all/week?api_key=${TMDB_API_KEY}`);
+  const data = await res.json();
+  trendingContainer.innerHTML = '';
+  data.results.slice(0, 10).forEach(item => {
+    const card = document.createElement('div');
+    card.classList.add('card');
+    card.innerHTML = `
+      <img src="${TMDB_IMG_BASE}${item.poster_path}" alt="${item.title || item.name}">
+      <div class="overlay">
+        <div class="title">${item.title || item.name}</div>
+      </div>
+    `;
+    trendingContainer.appendChild(card);
+  });
+}
+
+galaxyToggle.addEventListener('click', () => {
+  galaxyView.classList.toggle('hidden');
+  cardContainer.classList.toggle('hidden');
+  trendingContainer.parentElement.classList.toggle('hidden');
+  if (!galaxyView.classList.contains('hidden') && !stars) initGalaxy();
+});
+
+themeToggle.addEventListener('click', () => {
+  document.documentElement.classList.toggle('light-mode');
+  themeToggle.innerHTML = document.documentElement.classList.contains('light-mode') 
+    ? '<i class="fas fa-sun"></i>' 
+    : '<i class="fas fa-moon"></i>';
 });
