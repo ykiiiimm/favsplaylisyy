@@ -1,4 +1,21 @@
-// Note: This uses Firebase from CDN in index.html, not firebase.js, for GitHub Pages compatibility
+// Firebase Configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
+    authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
+    projectId: "ykiiiiiiiiiiiiiiim",
+    storageBucket: "ykiiiiiiiiiiiiiiim.appspot.com",
+    messagingSenderId: "1042062383289",
+    appId: "1:1042062383289:web:a4f43aa710b06a0f38a368",
+    measurementId: "G-KNVLQ0TMB0"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+const analytics = firebase.analytics();
+
 const TMDB_API_KEY = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500";
@@ -75,78 +92,106 @@ let selectedTMDBData = null;
 let scene, camera, renderer, starField;
 let histogramChart;
 
+// Verify DOM Elements
+function checkDOMElements() {
+  const elements = [
+    openModalBtn, modal, closeModalBtn, submitBtn, cardContainer, watchlistContainer,
+    titleInput, contentTypeSelect, seasonInput, userRatingInput, watchLaterCheckbox,
+    watchlistTagSelect, fetchTmdbBtn, tmdbPreview, clearPreviewBtn, searchInput,
+    detailModal, closeDetailModal, detailPoster, detailTitle, detailOverview,
+    detailRating, detailUserRating, detailRelease, detailCast, detailGenres,
+    detailRuntime, profileBtn, profileModal, closeProfileModal, profilePhoto,
+    profileNicknameDisplay, profileTaglineDisplay, profileBioDisplay, profilePicInput,
+    profileNickname, profileTagline, profileBio, saveProfileBtn, dashboardBtn,
+    dashboardModal, closeDashboardModal, dashboardPhoto, dashboardNickname,
+    dashboardTotalFavorites, dashboardAvgRating, galaxyToggle, galaxyView,
+    zoomIn, zoomOut, voiceSearchBtn, themeToggle, trendingContainer,
+    recommendationsContainer, ratingsHistogram, activityLog, loginModal,
+    closeLoginModal, googleLoginBtn, homeBtn, exportBtn, shareBtn, randomPickBtn,
+    categoryFilter, watchlistTagFilter, sortFavorites
+  ];
+  elements.forEach(el => {
+    if (!el) console.error(`Element not found: ${el}`);
+  });
+}
+checkDOMElements();
+
 // Galaxy View
 function initGalaxy() {
-  scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(75, 250 / 250, 0.1, 1000);
-  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxyCanvas'), alpha: true });
-  renderer.setSize(250, 250);
+  try {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, 250 / 250, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer({ canvas: galaxyCanvas, alpha: true });
+    renderer.setSize(250, 250);
 
-  const stars = [];
-  const loader = new THREE.TextureLoader();
-  db.collection(`users/${auth.currentUser.uid}/cards`).get().then(snapshot => {
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      if (!data.watchLater) {
-        const geometry = new THREE.SphereGeometry(2.5, 32, 32);
-        const material = new THREE.MeshBasicMaterial({
-          map: loader.load(data.posterUrl, undefined, undefined, () => {
-            material.map = loader.load('https://via.placeholder.com/50');
-          }),
-          transparent: true
-        });
-        const star = new THREE.Mesh(geometry, material);
-        star.position.set(
-          (Math.random() - 0.5) * 150,
-          (Math.random() - 0.5) * 150,
-          (Math.random() - 0.5) * 150
-        );
-        star.userData = { id: doc.id, title: data.title, rating: data.userRating };
-        stars.push(star);
-        scene.add(star);
-      }
-    });
+    const stars = [];
+    const loader = new THREE.TextureLoader();
+    db.collection(`users/${auth.currentUser.uid}/cards`).get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (!data.watchLater) {
+          const geometry = new THREE.SphereGeometry(2.5, 32, 32);
+          const material = new THREE.MeshBasicMaterial({
+            map: loader.load(data.posterUrl, undefined, undefined, () => {
+              material.map = loader.load('https://via.placeholder.com/50');
+            }),
+            transparent: true
+          });
+          const star = new THREE.Mesh(geometry, material);
+          star.position.set(
+            (Math.random() - 0.5) * 150,
+            (Math.random() - 0.5) * 150,
+            (Math.random() - 0.5) * 150
+          );
+          star.userData = { id: doc.id, title: data.title, rating: data.userRating };
+          stars.push(star);
+          scene.add(star);
+        }
+      });
 
-    starField = new THREE.Group();
-    stars.forEach(star => starField.add(star));
-    scene.add(starField);
+      starField = new THREE.Group();
+      stars.forEach(star => starField.add(star));
+      scene.add(starField);
 
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-    galaxyView.addEventListener('mousemove', (e) => {
-      const rect = galaxyCanvas.getBoundingClientRect();
-      mouse.x = ((e.clientX - rect.left) / 250) * 2 - 1;
-      mouse.y = -((e.clientY - rect.top) / 250) * 2 + 1;
-      raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObjects(stars);
-      stars.forEach(s => s.scale.set(1, 1, 1));
-      if (intersects.length) {
-        const star = intersects[0].object;
-        star.scale.set(2.5, 2.5, 2.5);
-        galaxyView.title = `${star.userData.title} (Rating: ${star.userData.rating || 'N/A'})`;
-      } else {
-        galaxyView.title = "";
-      }
-    });
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      galaxyView.addEventListener('mousemove', (e) => {
+        const rect = galaxyCanvas.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / 250) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / 250) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(stars);
+        stars.forEach(s => s.scale.set(1, 1, 1));
+        if (intersects.length) {
+          const star = intersects[0].object;
+          star.scale.set(2.5, 2.5, 2.5);
+          galaxyView.title = `${star.userData.title} (Rating: ${star.userData.rating || 'N/A'})`;
+        } else {
+          galaxyView.title = "";
+        }
+      });
 
-    galaxyView.addEventListener('click', (e) => {
-      raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObjects(stars);
-      if (intersects.length) openDetailModalHandler(e, intersects[0].object.userData.id);
-    });
+      galaxyView.addEventListener('click', (e) => {
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(stars);
+        if (intersects.length) openDetailModalHandler(e, intersects[0].object.userData.id);
+      });
 
-    zoomIn.onclick = () => {
-      camera.position.z = Math.max(50, camera.position.z - 20);
-      logEvent(analytics, 'galaxy_zoom_in', { zoom: camera.position.z });
-    };
-    zoomOut.onclick = () => {
-      camera.position.z = Math.min(300, camera.position.z + 20);
-      logEvent(analytics, 'galaxy_zoom_out', { zoom: camera.position.z });
-    };
-  }).catch(err => console.error("Galaxy load error:", err));
+      zoomIn.onclick = () => {
+        camera.position.z = Math.max(50, camera.position.z - 20);
+        analytics.logEvent('galaxy_zoom_in', { zoom: camera.position.z });
+      };
+      zoomOut.onclick = () => {
+        camera.position.z = Math.min(300, camera.position.z + 20);
+        analytics.logEvent('galaxy_zoom_out', { zoom: camera.position.z });
+      };
+    }).catch(err => console.error("Galaxy load error:", err));
 
-  camera.position.z = 200;
-  animateGalaxy();
+    camera.position.z = 200;
+    animateGalaxy();
+  } catch (error) {
+    console.error("Galaxy initialization error:", error);
+  }
 }
 
 function animateGalaxy() {
@@ -181,7 +226,7 @@ function initVoiceSearch() {
     const transcript = event.results[0][0].transcript.trim();
     searchInput.value = transcript;
     searchCards(transcript);
-    logEvent(analytics, 'voice_search', { query: transcript });
+    analytics.logEvent('voice_search', { query: transcript });
     voiceSearchBtn.classList.remove('active');
   };
 
@@ -198,6 +243,7 @@ function initVoiceSearch() {
   voiceSearchBtn.onclick = () => {
     try {
       recognition.start();
+      console.log("Voice search button clicked.");
     } catch (error) {
       console.error("Voice recognition start error:", error);
     }
@@ -214,17 +260,25 @@ function searchCards(query) {
 
 // Login Handling
 googleLoginBtn.onclick = () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .then(() => {
-      loginModal.classList.remove('open');
-      document.body.classList.add('logged-in');
-      logEvent(analytics, 'login', { method: 'google' });
-    })
-    .catch(error => console.error("Login error:", error));
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+      .then(() => {
+        loginModal.classList.remove('open');
+        document.body.classList.add('logged-in');
+        analytics.logEvent('login', { method: 'google' });
+        console.log("Google login successful.");
+      })
+      .catch(error => console.error("Login error:", error));
+  } catch (error) {
+    console.error("Google login button error:", error);
+  }
 };
 
-closeLoginModal.onclick = () => loginModal.classList.remove('open');
+closeLoginModal.onclick = () => {
+  loginModal.classList.remove('open');
+  console.log("Login modal closed.");
+};
 
 // Event Listeners
 contentTypeSelect.onchange = () => {
@@ -237,41 +291,55 @@ watchLaterCheckbox.onchange = () => {
 };
 
 profileBtn.onclick = () => {
-  const user = auth.currentUser;
-  if (user) {
-    profilePhoto.src = user.photoURL || 'https://via.placeholder.com/100';
-    db.collection(`users/${user.uid}/profile`).get().then(snapshot => {
-      let profileData = {};
-      snapshot.forEach(doc => profileData = doc.data());
-      profileNicknameDisplay.textContent = profileData.nickname || user.displayName || "Anonymous";
-      profileTaglineDisplay.textContent = profileData.tagline || "Movie & TV Fan";
-      profileBioDisplay.textContent = profileData.bio || "Tell us about yourself...";
-      profileModal.classList.add('open');
-      logEvent(analytics, 'profile_view', { user_id: user.uid });
-    }).catch(err => console.error("Profile fetch error:", err));
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      profilePhoto.src = user.photoURL || 'https://via.placeholder.com/100';
+      db.collection(`users/${user.uid}/profile`).get().then(snapshot => {
+        let profileData = {};
+        snapshot.forEach(doc => profileData = doc.data());
+        profileNicknameDisplay.textContent = profileData.nickname || user.displayName || "Anonymous";
+        profileTaglineDisplay.textContent = profileData.tagline || "Movie & TV Fan";
+        profileBioDisplay.textContent = profileData.bio || "Tell us about yourself...";
+        profileModal.classList.add('open');
+        analytics.logEvent('profile_view', { user_id: user.uid });
+        console.log("Profile modal opened.");
+      }).catch(err => console.error("Profile fetch error:", err));
+    }
+  } catch (error) {
+    console.error("Profile button error:", error);
   }
 };
 
-closeProfileModal.onclick = () => profileModal.classList.remove('open');
+closeProfileModal.onclick = () => {
+  profileModal.classList.remove('open');
+  console.log("Profile modal closed.");
+};
 
 dashboardBtn.onclick = () => {
-  const user = auth.currentUser;
-  if (user) {
-    dashboardPhoto.src = user.photoURL || 'https://via.placeholder.com/100';
-    db.collection(`users/${user.uid}/profile`).get().then(snapshot => {
-      let profileData = {};
-      snapshot.forEach(doc => profileData = doc.data());
-      dashboardNickname.textContent = profileData.nickname || user.displayName || "Anonymous";
-      updateDashboardStats();
-      dashboardModal.classList.add('open');
-      logEvent(analytics, 'dashboard_view', { user_id: user.uid });
-    }).catch(err => console.error("Dashboard fetch error:", err));
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      dashboardPhoto.src = user.photoURL || 'https://via.placeholder.com/100';
+      db.collection(`users/${user.uid}/profile`).get().then(snapshot => {
+        let profileData = {};
+        snapshot.forEach(doc => profileData = doc.data());
+        dashboardNickname.textContent = profileData.nickname || user.displayName || "Anonymous";
+        updateDashboardStats();
+        dashboardModal.classList.add('open');
+        analytics.logEvent('dashboard_view', { user_id: user.uid });
+        console.log("Dashboard modal opened.");
+      }).catch(err => console.error("Dashboard fetch error:", err));
+    }
+  } catch (error) {
+    console.error("Dashboard button error:", error);
   }
 };
 
 closeDashboardModal.onclick = () => {
   dashboardModal.classList.remove('open');
   galaxyView.classList.add('hidden');
+  console.log("Dashboard modal closed.");
 };
 
 auth.onAuthStateChanged(user => {
@@ -285,9 +353,11 @@ auth.onAuthStateChanged(user => {
     updateRatingsHistogram();
     updateActivityLog();
     loginModal.classList.remove('open');
+    console.log("User logged in:", user.uid);
   } else {
     loginModal.classList.add('open');
     document.body.classList.remove('logged-in');
+    console.log("User logged out.");
   }
 });
 
@@ -354,7 +424,7 @@ function displayTMDBOptions(results) {
       }
       selectedTMDBData = data;
       tmdbPreview.innerHTML = `<img src="${data.posterUrl}" alt="${data.title}"><h3>${data.title}</h3><p>${data.overview.substring(0, 100)}...</p>`;
-      logEvent(analytics, 'tmdb_select', { title: data.title });
+      analytics.logEvent('tmdb_select', { title: data.title });
     };
     tmdbPreview.appendChild(option);
   });
@@ -367,51 +437,61 @@ async function saveCard(cardData) {
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
   });
   addToActivityLog(`Added "${cardData.title}" to ${cardData.watchLater ? 'Watch Later' : 'Favorites'}`);
-  logEvent(analytics, cardData.watchLater ? 'watchlist_added' : 'card_added', { title: cardData.title, doc_id: docRef.id });
+  analytics.logEvent(cardData.watchLater ? 'watchlist_added' : 'card_added', { title: cardData.title, doc_id: docRef.id });
 }
 
 async function loadCards() {
-  const userId = auth.currentUser.uid;
-  const snapshot = await db.collection(`users/${userId}/cards`).get();
-  let cards = [];
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    if (!data.watchLater) cards.push({ id: doc.id, ...data });
-  });
+  try {
+    const userId = auth.currentUser.uid;
+    const snapshot = await db.collection(`users/${userId}/cards`).get();
+    let cards = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (!data.watchLater) cards.push({ id: doc.id, ...data });
+    });
 
-  const sortBy = sortFavorites.value;
-  cards.sort((a, b) => {
-    if (sortBy === 'title') return a.title.localeCompare(b.title);
-    if (sortBy === 'rating') return (b.userRating || 0) - (a.userRating || 0);
-    if (sortBy === 'date') return b.timestamp?.toMillis() - a.timestamp?.toMillis();
-    return 0;
-  });
+    const sortBy = sortFavorites.value;
+    cards.sort((a, b) => {
+      if (sortBy === 'title') return a.title.localeCompare(b.title);
+      if (sortBy === 'rating') return (b.userRating || 0) - (a.userRating || 0);
+      if (sortBy === 'date') return b.timestamp?.toMillis() - a.timestamp?.toMillis();
+      return 0;
+    });
 
-  cardContainer.innerHTML = "";
-  cards.forEach(card => {
-    if (categoryFilter.value === 'all' || card.type === categoryFilter.value) {
-      createCardElement(card, cardContainer);
-    }
-  });
-  updateRatingsHistogram();
+    cardContainer.innerHTML = "";
+    cards.forEach(card => {
+      if (categoryFilter.value === 'all' || card.type === categoryFilter.value) {
+        createCardElement(card, cardContainer);
+      }
+    });
+    updateRatingsHistogram();
+    console.log("Cards loaded successfully.");
+  } catch (error) {
+    console.error("Load cards error:", error);
+  }
 }
 
 async function loadWatchlist() {
-  const userId = auth.currentUser.uid;
-  const snapshot = await db.collection(`users/${userId}/cards`).where("watchLater", "==", true).get();
-  let watchlist = [];
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    if (data.watchLater) watchlist.push({ id: doc.id, ...data });
-  });
+  try {
+    const userId = auth.currentUser.uid;
+    const snapshot = await db.collection(`users/${userId}/cards`).where("watchLater", "==", true).get();
+    let watchlist = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.watchLater) watchlist.push({ id: doc.id, ...data });
+    });
 
-  watchlistContainer.innerHTML = "";
-  watchlist.forEach(item => {
-    if ((categoryFilter.value === 'all' || item.type === categoryFilter.value) &&
-        (watchlistTagFilter.value === 'all' || item.watchlistTag === watchlistTagFilter.value)) {
-      createCardElement(item, watchlistContainer);
-    }
-  });
+    watchlistContainer.innerHTML = "";
+    watchlist.forEach(item => {
+      if ((categoryFilter.value === 'all' || item.type === categoryFilter.value) &&
+          (watchlistTagFilter.value === 'all' || item.watchlistTag === watchlistTagFilter.value)) {
+        createCardElement(item, watchlistContainer);
+      }
+    });
+    console.log("Watchlist loaded successfully.");
+  } catch (error) {
+    console.error("Load watchlist error:", error);
+  }
 }
 
 function createCardElement(cardData, container) {
@@ -434,79 +514,96 @@ function createCardElement(cardData, container) {
 
 window.deleteCard = async (e, button) => {
   e.preventDefault();
-  const card = button.closest('.card');
-  const docId = card.dataset.id;
-  const userId = auth.currentUser.uid;
-  const docRef = db.collection(`users/${userId}/cards`).doc(docId);
-  const doc = await docRef.get();
-  const title = doc.data().title;
-  await docRef.delete();
-  card.remove();
-  addToActivityLog(`Deleted "${title}"`);
-  loadCards();
-  loadWatchlist();
-  logEvent(analytics, 'card_deleted', { doc_id: docId });
+  try {
+    const card = button.closest('.card');
+    const docId = card.dataset.id;
+    const userId = auth.currentUser.uid;
+    const docRef = db.collection(`users/${userId}/cards`).doc(docId);
+    const doc = await docRef.get();
+    const title = doc.data().title;
+    await docRef.delete();
+    card.remove();
+    addToActivityLog(`Deleted "${title}"`);
+    loadCards();
+    loadWatchlist();
+    analytics.logEvent('card_deleted', { doc_id: docId });
+    console.log(`Deleted card: ${title}`);
+  } catch (error) {
+    console.error("Delete card error:", error);
+  }
 };
 
 window.editCard = (e, button) => {
   e.preventDefault();
-  const card = button.closest('.card');
-  const docId = card.dataset.id;
-  titleInput.value = card.querySelector('.title').textContent;
-  modal.classList.add('open');
-  submitBtn.onclick = async (e) => {
-    e.preventDefault();
-    const type = contentTypeSelect.value;
-    const season = type === 'tv' ? seasonInput.value : null;
-    const userRating = userRatingInput.value || null;
-    const watchLater = watchLaterCheckbox.checked;
-    const watchlistTag = watchLater ? watchlistTagSelect.value : null;
-    const results = await fetchTMDBResults(titleInput.value, type);
-    if (results.length) {
-      const result = results[0];
-      const details = await fetchTMDBDetails(result.id, type);
-      const data = {
-        title: result.title || result.name,
-        overview: result.overview,
-        rating: result.vote_average,
-        releaseDate: type === 'movie' ? result.release_date : result.first_air_date,
-        posterUrl: result.poster_path ? TMDB_IMG_BASE + result.poster_path : "",
-        type: type,
-        userRating: userRating,
-        watchLater: watchLater,
-        watchlistTag: watchlistTag,
-        cast: details ? details.credits.cast.slice(0, 3).map(c => c.name).join(', ') : '',
-        genres: details ? details.genres.map(g => g.name).join(', ') : '',
-        runtime: details ? (details.runtime || (details.episode_run_time && details.episode_run_time[0]) || 'N/A') : 'N/A',
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      };
-      if (type === 'tv' && season) {
-        const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${season}?api_key=${TMDB_API_KEY}`);
-        const seasonData = await seasonRes.json();
-        if (seasonData.poster_path) data.posterUrl = TMDB_IMG_BASE + seasonData.poster_path;
-        data.overview = seasonData.overview || data.overview;
-        data.releaseDate = seasonData.air_date || data.releaseDate;
+  try {
+    const card = button.closest('.card');
+    const docId = card.dataset.id;
+    titleInput.value = card.querySelector('.title').textContent;
+    modal.classList.add('open');
+    submitBtn.onclick = async (e) => {
+      e.preventDefault();
+      const type = contentTypeSelect.value;
+      const season = type === 'tv' ? seasonInput.value : null;
+      const userRating = userRatingInput.value || null;
+      const watchLater = watchLaterCheckbox.checked;
+      const watchlistTag = watchLater ? watchlistTagSelect.value : null;
+      const results = await fetchTMDBResults(titleInput.value, type);
+      if (results.length) {
+        const result = results[0];
+        const details = await fetchTMDBDetails(result.id, type);
+        const data = {
+          title: result.title || result.name,
+          overview: result.overview,
+          rating: result.vote_average,
+          releaseDate: type === 'movie' ? result.release_date : result.first_air_date,
+          posterUrl: result.poster_path ? TMDB_IMG_BASE + result.poster_path : "",
+          type: type,
+          userRating: userRating,
+          watchLater: watchLater,
+          watchlistTag: watchlistTag,
+          cast: details ? details.credits.cast.slice(0, 3).map(c => c.name).join(', ') : '',
+          genres: details ? details.genres.map(g => g.name).join(', ') : '',
+          runtime: details ? (details.runtime || (details.episode_run_time && details.episode_run_time[0]) || 'N/A') : 'N/A',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        if (type === 'tv' && season) {
+          const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${season}?api_key=${TMDB_API_KEY}`);
+          const seasonData = await seasonRes.json();
+          if (seasonData.poster_path) data.posterUrl = TMDB_IMG_BASE + seasonData.poster_path;
+          data.overview = seasonData.overview || data.overview;
+          data.releaseDate = seasonData.air_date || data.releaseDate;
+        }
+        const userId = auth.currentUser.uid;
+        await db.collection(`users/${userId}/cards`).doc(docId).update(data);
+        card.querySelector('img').src = data.posterUrl;
+        card.querySelector('.title').textContent = data.title;
+        addToActivityLog(`Edited "${data.title}"`);
+        modal.classList.remove('open');
+        loadCards();
+        loadWatchlist();
+        analytics.logEvent('card_edited', { title: data.title });
+        console.log(`Edited card: ${data.title}`);
       }
-      const userId = auth.currentUser.uid;
-      await db.collection(`users/${userId}/cards`).doc(docId).update(data);
-      card.querySelector('img').src = data.posterUrl;
-      card.querySelector('.title').textContent = data.title;
-      addToActivityLog(`Edited "${data.title}"`);
-      modal.classList.remove('open');
-      loadCards();
-      loadWatchlist();
-      logEvent(analytics, 'card_edited', { title: data.title });
-    }
-  };
+    };
+  } catch (error) {
+    console.error("Edit card error:", error);
+  }
 };
 
 fetchTmdbBtn.onclick = async (e) => {
   e.preventDefault();
-  const title = titleInput.value;
-  const type = contentTypeSelect.value;
-  if (title) {
-    const results = await fetchTMDBResults(title, type);
-    displayTMDBOptions(results);
+  try {
+    const title = titleInput.value;
+    const type = contentTypeSelect.value;
+    if (title) {
+      const results = await fetchTMDBResults(title, type);
+      displayTMDBOptions(results);
+      console.log("Fetched TMDB results.");
+    } else {
+      console.log("No title entered for TMDB fetch.");
+    }
+  } catch (error) {
+    console.error("Fetch TMDB button error:", error);
   }
 };
 
@@ -514,100 +611,132 @@ clearPreviewBtn.onclick = (e) => {
   e.preventDefault();
   tmdbPreview.innerHTML = "";
   selectedTMDBData = null;
-};
-
-submitBtn.onclick = async (e) => {
-  e.preventDefault();
-  if (!selectedTMDBData) {
-    alert("Please fetch and select a TMDB result.");
-    return;
-  }
-  await saveCard(selectedTMDBData);
-  await loadCards();
-  await loadWatchlist();
-  modal.classList.remove('open');
-  titleInput.value = '';
-  seasonInput.value = '';
-  userRatingInput.value = '';
-  watchLaterCheckbox.checked = false;
-  watchlistTagSelect.style.display = 'none';
-  tmdbPreview.innerHTML = "";
-  selectedTMDBData = null;
+  console.log("Preview cleared.");
 };
 
 openModalBtn.onclick = (e) => {
   e.preventDefault();
-  if (auth.currentUser) modal.classList.add('open');
-  else loginModal.classList.add('open');
+  try {
+    if (auth.currentUser) {
+      modal.classList.add('open');
+      console.log("Add title modal opened.");
+    } else {
+      loginModal.classList.add('open');
+      console.log("Login modal opened due to no user.");
+    }
+  } catch (error) {
+    console.error("Open modal button error:", error);
+  }
 };
 
 closeModalBtn.onclick = (e) => {
   e.preventDefault();
   modal.classList.remove('open');
+  console.log("Add title modal closed.");
+};
+
+submitBtn.onclick = async (e) => {
+  e.preventDefault();
+  try {
+    if (!selectedTMDBData) {
+      alert("Please fetch and select a TMDB result.");
+      return;
+    }
+    await saveCard(selectedTMDBData);
+    await loadCards();
+    await loadWatchlist();
+    modal.classList.remove('open');
+    titleInput.value = '';
+    seasonInput.value = '';
+    userRatingInput.value = '';
+    watchLaterCheckbox.checked = false;
+    watchlistTagSelect.style.display = 'none';
+    tmdbPreview.innerHTML = "";
+    selectedTMDBData = null;
+    console.log("Card submitted successfully.");
+  } catch (error) {
+    console.error("Submit button error:", error);
+  }
 };
 
 window.openDetailModalHandler = async (e, docId) => {
   e.preventDefault();
-  const userId = auth.currentUser.uid;
-  const snapshot = await db.collection(`users/${userId}/cards`).get();
-  let cardData;
-  snapshot.forEach(doc => {
-    if (doc.id === docId) cardData = doc.data();
-  });
-  if (cardData) {
-    detailPoster.src = cardData.posterUrl;
-    detailTitle.textContent = cardData.title;
-    detailOverview.textContent = cardData.overview;
-    detailRating.textContent = `TMDB Rating: ${cardData.rating}/10`;
-    detailUserRating.textContent = `Your Rating: ${cardData.userRating || 'Not Rated'}/10`;
-    detailRelease.textContent = `Released: ${cardData.releaseDate}`;
-    detailCast.textContent = `Cast: ${cardData.cast || 'N/A'}`;
-    detailGenres.textContent = `Genres: ${cardData.genres || 'N/A'}`;
-    detailRuntime.textContent = `Runtime: ${cardData.runtime || 'N/A'} min`;
-    detailModal.classList.add('open');
-    logEvent(analytics, 'card_details_viewed', { title: cardData.title });
+  try {
+    const userId = auth.currentUser.uid;
+    const snapshot = await db.collection(`users/${userId}/cards`).get();
+    let cardData;
+    snapshot.forEach(doc => {
+      if (doc.id === docId) cardData = doc.data();
+    });
+    if (cardData) {
+      detailPoster.src = cardData.posterUrl;
+      detailTitle.textContent = cardData.title;
+      detailOverview.textContent = cardData.overview;
+      detailRating.textContent = `TMDB Rating: ${cardData.rating}/10`;
+      detailUserRating.textContent = `Your Rating: ${cardData.userRating || 'Not Rated'}/10`;
+      detailRelease.textContent = `Released: ${cardData.releaseDate}`;
+      detailCast.textContent = `Cast: ${cardData.cast || 'N/A'}`;
+      detailGenres.textContent = `Genres: ${cardData.genres || 'N/A'}`;
+      detailRuntime.textContent = `Runtime: ${cardData.runtime || 'N/A'} min`;
+      detailModal.classList.add('open');
+      analytics.logEvent('card_details_viewed', { title: cardData.title });
+      console.log(`Detail modal opened for: ${cardData.title}`);
+    }
+  } catch (error) {
+    console.error("Open detail modal error:", error);
   }
 };
 
 closeDetailModal.onclick = (e) => {
   e.preventDefault();
   detailModal.classList.remove('open');
+  console.log("Detail modal closed.");
 };
 
 searchInput.oninput = () => searchCards(searchInput.value);
 
 profilePicInput.onchange = async () => {
-  const file = profilePicInput.files[0];
-  if (file) {
-    const userId = auth.currentUser.uid;
-    const storageRef = storage.ref(`users/${userId}/profile-pic`);
-    await storageRef.put(file);
-    const url = await storageRef.getDownloadURL();
-    profilePhoto.src = url;
-    dashboardPhoto.src = url;
-    await auth.currentUser.updateProfile({ photoURL: url });
-    addToActivityLog("Updated profile picture");
-    logEvent(analytics, 'profile_pic_updated', { user_id: userId });
+  try {
+    const file = profilePicInput.files[0];
+    if (file) {
+      const userId = auth.currentUser.uid;
+      const storageRef = storage.ref(`users/${userId}/profile-pic`);
+      await storageRef.put(file);
+      const url = await storageRef.getDownloadURL();
+      profilePhoto.src = url;
+      dashboardPhoto.src = url;
+      await auth.currentUser.updateProfile({ photoURL: url });
+      addToActivityLog("Updated profile picture");
+      analytics.logEvent('profile_pic_updated', { user_id: userId });
+      console.log("Profile picture updated.");
+    }
+  } catch (error) {
+    console.error("Profile picture upload error:", error);
   }
 };
 
 saveProfileBtn.onclick = async (e) => {
   e.preventDefault();
-  const user = auth.currentUser;
-  if (!user) return;
-  const profileData = {
-    nickname: profileNickname.value || user.displayName || "Anonymous",
-    tagline: profileTagline.value || "Movie & TV Fan",
-    bio: profileBio.value || "Tell us about yourself..."
-  };
-  await db.collection(`users/${user.uid}/profile`).doc('profile').set(profileData);
-  profileNicknameDisplay.textContent = profileData.nickname;
-  profileTaglineDisplay.textContent = profileData.tagline;
-  profileBioDisplay.textContent = profileData.bio;
-  dashboardNickname.textContent = profileData.nickname;
-  addToActivityLog("Updated profile");
-  profileModal.classList.remove('open');
-  logEvent(analytics, 'profile_updated', { user_id: user.uid });
+  try {
+    const user = auth.currentUser;
+    if (!user) return;
+    const profileData = {
+      nickname: profileNickname.value || user.displayName || "Anonymous",
+      tagline: profileTagline.value || "Movie & TV Fan",
+      bio: profileBio.value || "Tell us about yourself..."
+    };
+    await db.collection(`users/${user.uid}/profile`).doc('profile').set(profileData);
+    profileNicknameDisplay.textContent = profileData.nickname;
+    profileTaglineDisplay.textContent = profileData.tagline;
+    profileBioDisplay.textContent = profileData.bio;
+    dashboardNickname.textContent = profileData.nickname;
+    addToActivityLog("Updated profile");
+    profileModal.classList.remove('open');
+    analytics.logEvent('profile_updated', { user_id: user.uid });
+    console.log("Profile saved.");
+  } catch (error) {
+    console.error("Save profile button error:", error);
+  }
 };
 
 async function loadTrending() {
@@ -631,7 +760,8 @@ async function loadTrending() {
       `;
       trendingContainer.appendChild(card);
     });
-    logEvent(analytics, 'trending_loaded', { items: data.results.length });
+    analytics.logEvent('trending_loaded', { items: data.results.length });
+    console.log("Trending loaded successfully.");
   } catch (error) {
     console.error("Trending error:", error);
     trendingContainer.innerHTML = '<p>Failed to load trending items.</p>';
@@ -652,9 +782,10 @@ async function fetchTrendingDetails(id, mediaType) {
     detailGenres.textContent = `Genres: ${data.genres.map(g => g.name).join(', ') || 'N/A'}`;
     detailRuntime.textContent = `Runtime: ${data.runtime || (data.episode_run_time && data.episode_run_time[0]) || 'N/A'} min`;
     detailModal.classList.add('open');
-    logEvent(analytics, 'trending_details_viewed', { title: data.title || data.name });
+    analytics.logEvent('trending_details_viewed', { title: data.title || data.name });
+    console.log(`Trending details opened for: ${data.title || data.name}`);
   } catch (error) {
-    console.error("Detail fetch error:", error);
+    console.error("Fetch trending details error:", error);
   }
 }
 
@@ -687,7 +818,8 @@ async function loadRecommendations() {
       `;
       recommendationsContainer.appendChild(card);
     });
-    logEvent(analytics, 'recommendations_loaded', { items: data.results.length });
+    analytics.logEvent('recommendations_loaded', { items: data.results.length });
+    console.log("Recommendations loaded successfully.");
   } catch (error) {
     console.error("Recommendations error:", error);
     recommendationsContainer.innerHTML = '<p>Failed to load recommendations.</p>';
@@ -695,169 +827,224 @@ async function loadRecommendations() {
 }
 
 async function updateDashboardStats() {
-  const userId = auth.currentUser.uid;
-  const snapshot = await db.collection(`users/${userId}/cards`).get();
-  let total = 0, ratedCount = 0, totalRating = 0;
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    if (!data.watchLater) {
-      total++;
-      if (data.userRating) {
-        ratedCount++;
-        totalRating += parseInt(data.userRating);
+  try {
+    const userId = auth.currentUser.uid;
+    const snapshot = await db.collection(`users/${userId}/cards`).get();
+    let total = 0, ratedCount = 0, totalRating = 0;
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (!data.watchLater) {
+        total++;
+        if (data.userRating) {
+          ratedCount++;
+          totalRating += parseInt(data.userRating);
+        }
       }
-    }
-  });
-  dashboardTotalFavorites.textContent = total;
-  dashboardAvgRating.textContent = ratedCount ? (totalRating / ratedCount).toFixed(1) : 'N/A';
+    });
+    dashboardTotalFavorites.textContent = total;
+    dashboardAvgRating.textContent = ratedCount ? (totalRating / ratedCount).toFixed(1) : 'N/A';
+    console.log("Dashboard stats updated.");
+  } catch (error) {
+    console.error("Update dashboard stats error:", error);
+  }
 }
 
 async function updateRatingsHistogram() {
-  const userId = auth.currentUser.uid;
-  const snapshot = await db.collection(`users/${userId}/cards`).get();
-  const ratings = Array(11).fill(0); // 0-10 scale
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    if (!data.watchLater && data.userRating) {
-      ratings[parseInt(data.userRating)]++;
-    }
-  });
-
-  if (window.histogramChart) window.histogramChart.destroy();
-  window.histogramChart = new Chart(ratingsHistogram, {
-    type: 'bar',
-    data: {
-      labels: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
-      datasets: [{
-        label: 'Your Ratings Distribution',
-        data: ratings,
-        backgroundColor: 'rgba(245, 197, 24, 0.7)',
-        borderColor: 'rgba(245, 197, 24, 1)',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      scales: {
-        y: { beginAtZero: true }
+  try {
+    const userId = auth.currentUser.uid;
+    const snapshot = await db.collection(`users/${userId}/cards`).get();
+    const ratings = Array(11).fill(0); // 0-10 scale
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (!data.watchLater && data.userRating) {
+        ratings[parseInt(data.userRating)]++;
       }
-    }
-  });
+    });
+
+    if (window.histogramChart) window.histogramChart.destroy();
+    window.histogramChart = new Chart(ratingsHistogram, {
+      type: 'bar',
+      data: {
+        labels: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+        datasets: [{
+          label: 'Your Ratings Distribution',
+          data: ratings,
+          backgroundColor: 'rgba(245, 197, 24, 0.7)',
+          borderColor: 'rgba(245, 197, 24, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+    console.log("Ratings histogram updated.");
+  } catch (error) {
+    console.error("Update ratings histogram error:", error);
+  }
 }
 
 async function updateActivityLog() {
-  const userId = auth.currentUser.uid;
-  const snapshot = await db.collection(`users/${userId}/activity`).orderBy('timestamp', 'desc').limit(5).get();
-  activityLog.innerHTML = '';
-  snapshot.forEach(doc => {
-    const activity = doc.data();
-    const li = document.createElement('li');
-    li.textContent = `${activity.action} - ${activity.timestamp ? new Date(activity.timestamp.toMillis()).toLocaleString() : 'N/A'}`;
-    activityLog.appendChild(li);
-  });
+  try {
+    const userId = auth.currentUser.uid;
+    const snapshot = await db.collection(`users/${userId}/activity`).orderBy('timestamp', 'desc').limit(5).get();
+    activityLog.innerHTML = '';
+    snapshot.forEach(doc => {
+      const activity = doc.data();
+      const li = document.createElement('li');
+      li.textContent = `${activity.action} - ${activity.timestamp ? new Date(activity.timestamp.toMillis()).toLocaleString() : 'N/A'}`;
+      activityLog.appendChild(li);
+    });
+    console.log("Activity log updated.");
+  } catch (error) {
+    console.error("Update activity log error:", error);
+  }
 }
 
 async function addToActivityLog(action) {
-  const userId = auth.currentUser.uid;
-  await db.collection(`users/${userId}/activity`).add({
-    action,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  });
-  updateActivityLog();
+  try {
+    const userId = auth.currentUser.uid;
+    await db.collection(`users/${userId}/activity`).add({
+      action,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    updateActivityLog();
+  } catch (error) {
+    console.error("Add to activity log error:", error);
+  }
 }
 
 galaxyToggle.onclick = (e) => {
   e.preventDefault();
-  if (!auth.currentUser) {
-    loginModal.classList.add('open');
-    return;
+  try {
+    if (!auth.currentUser) {
+      loginModal.classList.add('open');
+      console.log("Login required for galaxy view.");
+      return;
+    }
+    galaxyView.classList.toggle('hidden');
+    if (!galaxyView.classList.contains('hidden') && !starField) initGalaxy();
+    console.log("Galaxy toggle clicked.");
+  } catch (error) {
+    console.error("Galaxy toggle error:", error);
   }
-  galaxyView.classList.toggle('hidden');
-  if (!galaxyView.classList.contains('hidden') && !starField) initGalaxy();
 };
 
 themeToggle.onclick = (e) => {
   e.preventDefault();
-  document.documentElement.classList.toggle('light-mode');
-  themeToggle.innerHTML = document.documentElement.classList.contains('light-mode') ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-  logEvent(analytics, 'theme_toggled', { mode: document.documentElement.classList.contains('light-mode') ? 'light' : 'dark' });
+  try {
+    document.documentElement.classList.toggle('light-mode');
+    themeToggle.innerHTML = document.documentElement.classList.contains('light-mode') ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    analytics.logEvent('theme_toggled', { mode: document.documentElement.classList.contains('light-mode') ? 'light' : 'dark' });
+    console.log("Theme toggled.");
+  } catch (error) {
+    console.error("Theme toggle error:", error);
+  }
 };
 
 logoutBtn.onclick = (e) => {
   e.preventDefault();
-  auth.signOut().then(() => {
-    document.body.classList.remove('logged-in');
-    loginModal.classList.add('open');
-    logEvent(analytics, 'logout', { user_id: auth.currentUser?.uid });
-  }).catch(error => console.error("Logout error:", error));
+  try {
+    auth.signOut().then(() => {
+      document.body.classList.remove('logged-in');
+      loginModal.classList.add('open');
+      analytics.logEvent('logout', { user_id: auth.currentUser?.uid });
+      console.log("Logged out.");
+    }).catch(error => console.error("Logout error:", error));
+  } catch (error) {
+    console.error("Logout button error:", error);
+  }
 };
 
 homeBtn.onclick = (e) => {
   e.preventDefault();
-  loadCards();
-  loadWatchlist();
-  loadTrending();
-  loadRecommendations();
+  try {
+    loadCards();
+    loadWatchlist();
+    loadTrending();
+    loadRecommendations();
+    console.log("Home button clicked.");
+  } catch (error) {
+    console.error("Home button error:", error);
+  }
 };
 
 exportBtn.onclick = async (e) => {
   e.preventDefault();
-  const userId = auth.currentUser.uid;
-  const snapshot = await db.collection(`users/${userId}/cards`).get();
-  const favorites = [];
-  snapshot.forEach(doc => favorites.push(doc.data()));
-  
-  const json = JSON.stringify(favorites, null, 2);
-  const jsonBlob = new Blob([json], { type: 'application/json' });
-  const jsonUrl = URL.createObjectURL(jsonBlob);
-  const jsonA = document.createElement('a');
-  jsonA.href = jsonUrl;
-  jsonA.download = 'ur_favs_export.json';
-  jsonA.click();
-  URL.revokeObjectURL(jsonUrl);
+  try {
+    const userId = auth.currentUser.uid;
+    const snapshot = await db.collection(`users/${userId}/cards`).get();
+    const favorites = [];
+    snapshot.forEach(doc => favorites.push(doc.data()));
+    
+    const json = JSON.stringify(favorites, null, 2);
+    const jsonBlob = new Blob([json], { type: 'application/json' });
+    const jsonUrl = URL.createObjectURL(jsonBlob);
+    const jsonA = document.createElement('a');
+    jsonA.href = jsonUrl;
+    jsonA.download = 'ur_favs_export.json';
+    jsonA.click();
+    URL.revokeObjectURL(jsonUrl);
 
-  const csv = 'Title,Type,Rating,Release Date,Watch Later,Tag\n' + favorites.map(f => 
-    `"${f.title.replace(/"/g, '""')}",${f.type},${f.userRating || ''},${f.releaseDate},${f.watchLater ? 'Yes' : 'No'},${f.watchlistTag || ''}`
-  ).join('\n');
-  const csvBlob = new Blob([csv], { type: 'text/csv' });
-  const csvUrl = URL.createObjectURL(csvBlob);
-  const csvA = document.createElement('a');
-  csvA.href = csvUrl;
-  csvA.download = 'ur_favs_export.csv';
-  csvA.click();
-  URL.revokeObjectURL(csvUrl);
+    const csv = 'Title,Type,Rating,Release Date,Watch Later,Tag\n' + favorites.map(f => 
+      `"${f.title.replace(/"/g, '""')}",${f.type},${f.userRating || ''},${f.releaseDate},${f.watchLater ? 'Yes' : 'No'},${f.watchlistTag || ''}`
+    ).join('\n');
+    const csvBlob = new Blob([csv], { type: 'text/csv' });
+    const csvUrl = URL.createObjectURL(csvBlob);
+    const csvA = document.createElement('a');
+    csvA.href = csvUrl;
+    csvA.download = 'ur_favs_export.csv';
+    csvA.click();
+    URL.revokeObjectURL(csvUrl);
 
-  addToActivityLog("Exported favorites");
-  logEvent(analytics, 'favorites_exported', { count: favorites.length });
+    addToActivityLog("Exported favorites");
+    analytics.logEvent('favorites_exported', { count: favorites.length });
+    console.log("Favorites exported.");
+  } catch (error) {
+    console.error("Export button error:", error);
+  }
 };
 
 shareBtn.onclick = async (e) => {
   e.preventDefault();
-  const userId = auth.currentUser.uid;
-  const snapshot = await db.collection(`users/${userId}/cards`).get();
-  const favorites = [];
-  snapshot.forEach(doc => favorites.push(doc.data().title));
-  const shareText = `My favorites on UR FAV'S: ${favorites.slice(0, 3).join(', ')} and more! Check it out at ${window.location.origin}`;
-  if (navigator.share) {
-    await navigator.share({ title: "UR FAV'S", text: shareText, url: window.location.origin });
-    logEvent(analytics, 'social_share', { platform: 'native' });
-  } else {
-    alert(shareText);
-    logEvent(analytics, 'social_share_fallback', {});
+  try {
+    const userId = auth.currentUser.uid;
+    const snapshot = await db.collection(`users/${userId}/cards`).get();
+    const favorites = [];
+    snapshot.forEach(doc => favorites.push(doc.data().title));
+    const shareText = `My favorites on UR FAV'S: ${favorites.slice(0, 3).join(', ')} and more! Check it out at ${window.location.origin}`;
+    if (navigator.share) {
+      await navigator.share({ title: "UR FAV'S", text: shareText, url: window.location.origin });
+      analytics.logEvent('social_share', { platform: 'native' });
+    } else {
+      alert(shareText);
+      analytics.logEvent('social_share_fallback', {});
+    }
+    addToActivityLog("Shared favorites");
+    console.log("Favorites shared.");
+  } catch (error) {
+    console.error("Share button error:", error);
   }
-  addToActivityLog("Shared favorites");
 };
 
 randomPickBtn.onclick = async (e) => {
   e.preventDefault();
-  const userId = auth.currentUser.uid;
-  const snapshot = await db.collection(`users/${userId}/cards`).get();
-  const items = [];
-  snapshot.forEach(doc => items.push(doc.data()));
-  if (items.length) {
-    const randomItem = items[Math.floor(Math.random() * items.length)];
-    alert(`Random Pick: "${randomItem.title}" (${randomItem.watchLater ? 'Watch Later' : 'Favorite'})`);
-    logEvent(analytics, 'random_pick', { title: randomItem.title });
-    addToActivityLog(`Randomly picked "${randomItem.title}"`);
+  try {
+    const userId = auth.currentUser.uid;
+    const snapshot = await db.collection(`users/${userId}/cards`).get();
+    const items = [];
+    snapshot.forEach(doc => items.push(doc.data()));
+    if (items.length) {
+      const randomItem = items[Math.floor(Math.random() * items.length)];
+      alert(`Random Pick: "${randomItem.title}" (${randomItem.watchLater ? 'Watch Later' : 'Favorite'})`);
+      analytics.logEvent('random_pick', { title: randomItem.title });
+      addToActivityLog(`Randomly picked "${randomItem.title}"`);
+      console.log(`Random pick: ${randomItem.title}`);
+    }
+  } catch (error) {
+    console.error("Random pick button error:", error);
   }
 };
 
