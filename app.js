@@ -71,13 +71,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const watchlistTagFilter = document.getElementById('watchlistTagFilter');
     const sortFavorites = document.getElementById('sortFavorites');
 
-    // Firebase Utilities from firebase.js
+    // Fallback to global firebase if firebaseUtils isn't available (due to CDN module issue)
     const { 
         loginWithGoogle, logout, monitorAuthState, updateUserProfile,
         addDocument, getDocuments, getWatchlistDocuments, deleteDocument, 
         updateDocument, setDocument, uploadFile, getFileURL, trackEvent,
         auth, db, storage, analytics 
-    } = window.firebaseUtils || {};
+    } = window.firebaseUtils || (window.firebase ? {
+        loginWithGoogle: () => new firebase.auth.GoogleAuthProvider().signInWithPopup(firebase.auth()),
+        logout: () => firebase.auth().signOut(),
+        monitorAuthState: callback => firebase.auth().onAuthStateChanged(callback),
+        updateUserProfile: (user, profileData) => user.updateProfile(profileData),
+        addDocument: (collectionPath, data) => firebase.firestore().collection(collectionPath).add({
+            ...data,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }),
+        getDocuments: collectionPath => firebase.firestore().collection(collectionPath).get(),
+        getWatchlistDocuments: collectionPath => firebase.firestore().collection(collectionPath).where("watchLater", "==", true).get(),
+        deleteDocument: (collectionPath, docId) => firebase.firestore().collection(collectionPath).doc(docId).delete(),
+        updateDocument: (collectionPath, docId, data) => firebase.firestore().collection(collectionPath).doc(docId).update(data),
+        setDocument: (collectionPath, docId, data) => firebase.firestore().collection(collectionPath).doc(docId).set(data),
+        uploadFile: (file, path) => firebase.storage().ref(path).put(file).then(() => firebase.storage().ref(path).getDownloadURL()),
+        getFileURL: path => firebase.storage().ref(path).getDownloadURL(),
+        trackEvent: (eventName, params) => {
+            if (firebase.analytics) {
+                firebase.analytics().logEvent(eventName, params);
+            } else {
+                console.warn("Analytics not available, event not tracked:", eventName, params);
+            }
+        },
+        auth: firebase.auth(),
+        db: firebase.firestore(),
+        storage: firebase.storage(),
+        analytics: firebase.analytics
+    } : {});
 
     let selectedTMDBData = null;
     let scene, camera, renderer, starField;
@@ -570,7 +597,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert(`Random Pick: "${randomItem.title}" (${randomItem.watchLater ? 'Watch Later' : 'Favorite'})`);
                 trackEvent('random_pick', { title: randomItem.title });
                 addToActivityLog(`Randomly picked "${randomItem.title}"`);
-                console.log("Random Pick button clicked -picked:", randomItem.title);
+                console.log("Random Pick button clicked - Picked:", randomItem.title);
             }
         } catch (error) {
             console.error("Random Pick button error:", error);
