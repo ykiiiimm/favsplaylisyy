@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const watchlistTagFilter = document.getElementById('watchlistTagFilter');
     const sortFavorites = document.getElementById('sortFavorites');
 
-    // Fallback to global firebase if firebaseUtils isn't available (due to CDN module issue)
+    // Fallback to global firebase if firebaseUtils isn't available
     const { 
         loginWithGoogle, logout, monitorAuthState, updateUserProfile,
         addDocument, getDocuments, getWatchlistDocuments, deleteDocument, 
@@ -134,6 +134,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     checkDOMElements();
 
+    // Helper function to get current user safely
+    function getCurrentUser() {
+        if (!auth) {
+            console.error("Firebase Auth not initialized.");
+            return null;
+        }
+        return auth.currentUser;
+    }
+
     // Galaxy View
     function initGalaxy() {
         try {
@@ -142,9 +151,15 @@ document.addEventListener('DOMContentLoaded', () => {
             renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxyCanvas'), alpha: true });
             renderer.setSize(250, 250);
 
+            const user = getCurrentUser();
+            if (!user) {
+                console.warn("User not logged in, cannot load galaxy view.");
+                return;
+            }
+
             const stars = [];
             const loader = new THREE.TextureLoader();
-            getDocuments(`users/${auth.currentUser.uid}/cards`).then(snapshot => {
+            getDocuments(`users/${user.uid}/cards`).then(snapshot => {
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     if (!data.watchLater) {
@@ -286,11 +301,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Event Listeners for Buttons
+    // Event Listeners for Buttons with User Check
     openModalBtn.onclick = (e) => {
         try {
             e.preventDefault();
-            if (auth.currentUser) {
+            const user = getCurrentUser();
+            if (user) {
                 modal.classList.add('open');
                 console.log("Open Modal button clicked - Modal opened.");
             } else {
@@ -317,6 +333,12 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             if (!selectedTMDBData) {
                 alert("Please fetch and select a TMDB result.");
+                return;
+            }
+            const user = getCurrentUser();
+            if (!user) {
+                loginModal.classList.add('open');
+                console.error("User not logged in, cannot submit card.");
                 return;
             }
             await saveCard(selectedTMDBData);
@@ -390,7 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     profileBtn.onclick = () => {
         try {
-            const user = auth.currentUser;
+            const user = getCurrentUser();
             if (user) {
                 profilePhoto.src = user.photoURL || 'https://via.placeholder.com/100';
                 getDocuments(`users/${user.uid}/profile`).then(snapshot => {
@@ -403,6 +425,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     trackEvent('profile_view', { user_id: user.uid });
                     console.log("Profile button clicked - Modal opened.");
                 }).catch(err => console.error("Profile fetch error:", err));
+            } else {
+                loginModal.classList.add('open');
+                console.log("Profile button clicked - Login required.");
             }
         } catch (error) {
             console.error("Profile button error:", error);
@@ -421,8 +446,12 @@ document.addEventListener('DOMContentLoaded', () => {
     saveProfileBtn.onclick = async (e) => {
         try {
             e.preventDefault();
-            const user = auth.currentUser;
-            if (!user) return;
+            const user = getCurrentUser();
+            if (!user) {
+                loginModal.classList.add('open');
+                console.error("User not logged in, cannot save profile.");
+                return;
+            }
             const profileData = {
                 nickname: profileNickname.value || user.displayName || "Anonymous",
                 tagline: profileTagline.value || "Movie & TV Fan",
@@ -444,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     dashboardBtn.onclick = () => {
         try {
-            const user = auth.currentUser;
+            const user = getCurrentUser();
             if (user) {
                 dashboardPhoto.src = user.photoURL || 'https://via.placeholder.com/100';
                 getDocuments(`users/${user.uid}/profile`).then(snapshot => {
@@ -456,6 +485,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     trackEvent('dashboard_view', { user_id: user.uid });
                     console.log("Dashboard button clicked - Modal opened.");
                 }).catch(err => console.error("Dashboard fetch error:", err));
+            } else {
+                loginModal.classList.add('open');
+                console.log("Dashboard button clicked - Login required.");
             }
         } catch (error) {
             console.error("Dashboard button error:", error);
@@ -475,7 +507,8 @@ document.addEventListener('DOMContentLoaded', () => {
     galaxyToggle.onclick = (e) => {
         try {
             e.preventDefault();
-            if (!auth.currentUser) {
+            const user = getCurrentUser();
+            if (!user) {
                 loginModal.classList.add('open');
                 console.log("Galaxy Toggle button clicked - Login required.");
                 return;
@@ -503,10 +536,15 @@ document.addEventListener('DOMContentLoaded', () => {
     logoutBtn.onclick = (e) => {
         try {
             e.preventDefault();
+            const user = getCurrentUser();
+            if (!user) {
+                console.warn("No user logged in, cannot logout.");
+                return;
+            }
             logout().then(() => {
                 document.body.classList.remove('logged-in');
                 loginModal.classList.add('open');
-                trackEvent('logout', { user_id: auth.currentUser?.uid });
+                trackEvent('logout', { user_id: user.uid });
                 console.log("Logout button clicked - Logged out.");
             }).catch(error => console.error("Logout error:", error));
         } catch (error) {
@@ -517,6 +555,12 @@ document.addEventListener('DOMContentLoaded', () => {
     homeBtn.onclick = (e) => {
         try {
             e.preventDefault();
+            const user = getCurrentUser();
+            if (!user) {
+                loginModal.classList.add('open');
+                console.log("Home button clicked - Login required.");
+                return;
+            }
             loadCards();
             loadWatchlist();
             loadTrending();
@@ -530,8 +574,13 @@ document.addEventListener('DOMContentLoaded', () => {
     exportBtn.onclick = async (e) => {
         try {
             e.preventDefault();
-            const userId = auth.currentUser.uid;
-            const snapshot = await getDocuments(`users/${userId}/cards`);
+            const user = getCurrentUser();
+            if (!user) {
+                loginModal.classList.add('open');
+                console.log("Export button clicked - Login required.");
+                return;
+            }
+            const snapshot = await getDocuments(`users/${user.uid}/cards`);
             const favorites = [];
             snapshot.forEach(doc => favorites.push(doc.data()));
             
@@ -566,8 +615,13 @@ document.addEventListener('DOMContentLoaded', () => {
     shareBtn.onclick = async (e) => {
         try {
             e.preventDefault();
-            const userId = auth.currentUser.uid;
-            const snapshot = await getDocuments(`users/${userId}/cards`);
+            const user = getCurrentUser();
+            if (!user) {
+                loginModal.classList.add('open');
+                console.log("Share button clicked - Login required.");
+                return;
+            }
+            const snapshot = await getDocuments(`users/${user.uid}/cards`);
             const favorites = [];
             snapshot.forEach(doc => favorites.push(doc.data().title));
             const shareText = `My favorites on UR FAV'S: ${favorites.slice(0, 3).join(', ')} and more! Check it out at ${window.location.origin}`;
@@ -588,8 +642,13 @@ document.addEventListener('DOMContentLoaded', () => {
     randomPickBtn.onclick = async (e) => {
         try {
             e.preventDefault();
-            const userId = auth.currentUser.uid;
-            const snapshot = await getDocuments(`users/${userId}/cards`);
+            const user = getCurrentUser();
+            if (!user) {
+                loginModal.classList.add('open');
+                console.log("Random Pick button clicked - Login required.");
+                return;
+            }
+            const snapshot = await getDocuments(`users/${user.uid}/cards`);
             const items = [];
             snapshot.forEach(doc => items.push(doc.data()));
             if (items.length) {
@@ -614,7 +673,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Other Event Listeners
+    // Other Event Listeners with User Check
     contentTypeSelect.onchange = () => {
         seasonInput.style.display = contentTypeSelect.value === 'tv' ? 'block' : 'none';
         watchlistTagSelect.style.display = watchLaterCheckbox.checked && contentTypeSelect.value === 'tv' ? 'block' : 'none';
@@ -630,13 +689,18 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const file = profilePicInput.files[0];
             if (file) {
-                const userId = auth.currentUser.uid;
-                const url = await uploadFile(file, `users/${userId}/profile-pic`);
+                const user = getCurrentUser();
+                if (!user) {
+                    loginModal.classList.add('open');
+                    console.error("User not logged in, cannot update profile picture.");
+                    return;
+                }
+                const url = await uploadFile(file, `users/${user.uid}/profile-pic`);
                 profilePhoto.src = url;
                 dashboardPhoto.src = url;
-                await updateUserProfile(auth.currentUser, { photoURL: url });
+                await updateUserProfile(user, { photoURL: url });
                 addToActivityLog("Updated profile picture");
-                trackEvent('profile_pic_updated', { user_id: userId });
+                trackEvent('profile_pic_updated', { user_id: user.uid });
                 console.log("Profile Pic Input changed - Picture updated.");
             }
         } catch (error) {
@@ -645,12 +709,34 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     categoryFilter.onchange = () => {
+        const user = getCurrentUser();
+        if (!user) {
+            loginModal.classList.add('open');
+            console.log("Category filter changed - Login required.");
+            return;
+        }
         loadCards();
         loadWatchlist();
     };
 
-    sortFavorites.onchange = () => loadCards();
-    watchlistTagFilter.onchange = () => loadWatchlist();
+    sortFavorites.onchange = () => {
+        const user = getCurrentUser();
+        if (!user) {
+            console.log("Sort favorites changed - Login required.");
+            return;
+        }
+        loadCards();
+    };
+
+    watchlistTagFilter.onchange = () => {
+        const user = getCurrentUser();
+        if (!user) {
+            loginModal.classList.add('open');
+            console.log("Watchlist tag filter changed - Login required.");
+            return;
+        }
+        loadWatchlist();
+    };
 
     // Additional Functions
     async function fetchTMDBResults(title, type) {
@@ -723,16 +809,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function saveCard(cardData) {
-        const userId = auth.currentUser.uid;
-        const docRef = await addDocument(`users/${userId}/cards`, cardData);
+        const user = getCurrentUser();
+        if (!user) {
+            console.error("User not logged in, cannot save card.");
+            return;
+        }
+        const docRef = await addDocument(`users/${user.uid}/cards`, cardData);
         addToActivityLog(`Added "${cardData.title}" to ${cardData.watchLater ? 'Watch Later' : 'Favorites'}`);
         trackEvent(cardData.watchLater ? 'watchlist_added' : 'card_added', { title: cardData.title, doc_id: docRef.id });
     }
 
     async function loadCards() {
         try {
-            const userId = auth.currentUser.uid;
-            const snapshot = await getDocuments(`users/${userId}/cards`);
+            const user = getCurrentUser();
+            if (!user) {
+                console.log("User not logged in, cannot load cards.");
+                return;
+            }
+            const snapshot = await getDocuments(`users/${user.uid}/cards`);
             let cards = [];
             snapshot.forEach(doc => {
                 const data = doc.data();
@@ -762,8 +856,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadWatchlist() {
         try {
-            const userId = auth.currentUser.uid;
-            const snapshot = await getWatchlistDocuments(`users/${userId}/cards`);
+            const user = getCurrentUser();
+            if (!user) {
+                console.log("User not logged in, cannot load watchlist.");
+                return;
+            }
+            const snapshot = await getWatchlistDocuments(`users/${user.uid}/cards`);
             let watchlist = [];
             snapshot.forEach(doc => {
                 const data = doc.data();
@@ -806,11 +904,15 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const card = button.closest('.card');
             const docId = card.dataset.id;
-            const userId = auth.currentUser.uid;
-            const docRef = db.collection(`users/${userId}/cards`).doc(docId);
+            const user = getCurrentUser();
+            if (!user) {
+                console.error("User not logged in, cannot delete card.");
+                return;
+            }
+            const docRef = db.collection(`users/${user.uid}/cards`).doc(docId);
             const doc = await docRef.get();
             const title = doc.data().title;
-            await deleteDocument(`users/${userId}/cards`, docId);
+            await deleteDocument(`users/${user.uid}/cards`, docId);
             card.remove();
             addToActivityLog(`Deleted "${title}"`);
             loadCards();
@@ -827,6 +929,12 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const card = button.closest('.card');
             const docId = card.dataset.id;
+            const user = getCurrentUser();
+            if (!user) {
+                loginModal.classList.add('open');
+                console.log("Edit button clicked - Login required.");
+                return;
+            }
             titleInput.value = card.querySelector('.title').textContent;
             modal.classList.add('open');
             submitBtn.onclick = async (e) => {
@@ -862,8 +970,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         data.overview = seasonData.overview || data.overview;
                         data.releaseDate = seasonData.air_date || data.releaseDate;
                     }
-                    const userId = auth.currentUser.uid;
-                    await updateDocument(`users/${userId}/cards`, docId, data);
+                    await updateDocument(`users/${user.uid}/cards`, docId, data);
                     card.querySelector('img').src = data.posterUrl;
                     card.querySelector('.title').textContent = data.title;
                     addToActivityLog(`Edited "${data.title}"`);
@@ -883,8 +990,12 @@ document.addEventListener('DOMContentLoaded', () => {
     window.openDetailModalHandler = async (e, docId) => {
         try {
             e.preventDefault();
-            const userId = auth.currentUser.uid;
-            const snapshot = await getDocuments(`users/${userId}/cards`);
+            const user = getCurrentUser();
+            if (!user) {
+                console.log("Open Detail Modal clicked - Login required.");
+                return;
+            }
+            const snapshot = await getDocuments(`users/${user.uid}/cards`);
             let cardData;
             snapshot.forEach(doc => {
                 if (doc.id === docId) cardData = doc.data();
@@ -960,8 +1071,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadRecommendations() {
         try {
-            const userId = auth.currentUser.uid;
-            const snapshot = await getDocuments(`users/${userId}/cards`);
+            const user = getCurrentUser();
+            if (!user) {
+                console.log("User not logged in, cannot load recommendations.");
+                return;
+            }
+            const snapshot = await getDocuments(`users/${user.uid}/cards`);
             const genres = new Set();
             snapshot.forEach(doc => {
                 const data = doc.data();
@@ -997,8 +1112,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function updateDashboardStats() {
         try {
-            const userId = auth.currentUser.uid;
-            const snapshot = await getDocuments(`users/${userId}/cards`);
+            const user = getCurrentUser();
+            if (!user) {
+                console.log("User not logged in, cannot update dashboard stats.");
+                return;
+            }
+            const snapshot = await getDocuments(`users/${user.uid}/cards`);
             let total = 0, ratedCount = 0, totalRating = 0;
             snapshot.forEach(doc => {
                 const data = doc.data();
@@ -1020,8 +1139,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function updateRatingsHistogram() {
         try {
-            const userId = auth.currentUser.uid;
-            const snapshot = await getDocuments(`users/${userId}/cards`);
+            const user = getCurrentUser();
+            if (!user) {
+                console.log("User not logged in, cannot update ratings histogram.");
+                return;
+            }
+            const snapshot = await getDocuments(`users/${user.uid}/cards`);
             const ratings = Array(11).fill(0); // 0-10 scale
             snapshot.forEach(doc => {
                 const data = doc.data();
@@ -1057,8 +1180,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function updateActivityLog() {
         try {
-            const userId = auth.currentUser.uid;
-            const snapshot = await db.collection(`users/${userId}/activity`)
+            const user = getCurrentUser();
+            if (!user) {
+                console.log("User not logged in, cannot update activity log.");
+                return;
+            }
+            const snapshot = await db.collection(`users/${user.uid}/activity`)
                 .orderBy('timestamp', 'desc')
                 .limit(5)
                 .get();
@@ -1077,8 +1204,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function addToActivityLog(action) {
         try {
-            const userId = auth.currentUser.uid;
-            await addDocument(`users/${userId}/activity`, { action });
+            const user = getCurrentUser();
+            if (!user) {
+                console.error("User not logged in, cannot add to activity log.");
+                return;
+            }
+            await addDocument(`users/${user.uid}/activity`, { action });
             updateActivityLog();
         } catch (error) {
             console.error("Add to activity log error:", error);
