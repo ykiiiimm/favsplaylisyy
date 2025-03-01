@@ -49,7 +49,7 @@ const zoomIn = document.getElementById('zoomIn');
 const zoomOut = document.getElementById('zoomOut');
 const voiceSearchBtn = document.getElementById('voiceSearchBtn');
 const themeToggle = document.getElementById('themeToggle');
-const trendingContainer = document.getElementOrDefault('trendingContainer');
+const trendingContainer = document.getElementById('trendingContainer');
 const recommendationsContainer = document.getElementById('recommendationsContainer');
 const loginModal = document.getElementById('loginModal');
 const closeLoginModal = document.getElementById('closeLoginModal');
@@ -66,7 +66,7 @@ const categoryFilter = document.getElementById('categoryFilter');
 let selectedTMDBData = null;
 let scene, camera, renderer, starField;
 
-// Galaxy View (Fixed and Enhanced)
+// Galaxy View
 function initGalaxy() {
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(75, 250 / 250, 0.1, 1000);
@@ -82,7 +82,7 @@ function initGalaxy() {
         const geometry = new THREE.SphereGeometry(2.5, 32, 32);
         const material = new THREE.MeshBasicMaterial({
           map: loader.load(data.posterUrl, undefined, undefined, () => {
-            material.map = loader.load('https://via.placeholder.com/50'); // Fallback on error
+            material.map = loader.load('https://via.placeholder.com/50');
           }),
           transparent: true
         });
@@ -196,13 +196,13 @@ contentTypeSelect.onchange = () => {
 profileBtn.onclick = async () => {
   const user = auth.currentUser;
   if (user) {
-    profilePhoto.src = user.photoURL || 'https://via.placeholder.com/150';
+    profilePhoto.src = user.photoURL || 'https://via.placeholder.com/100';
     const profileSnap = await getDocuments(`users/${user.uid}/profile`);
     let profileData = {};
     profileSnap.forEach(doc => profileData = doc.data());
     profileNicknameDisplay.textContent = profileData.nickname || user.displayName || "Anonymous";
-    profileTaglineDisplay.textContent = profileData.tagline || "Cosmic Explorer";
-    profileBioDisplay.textContent = profileData.bio || "Exploring the universe, one star at a time...";
+    profileTaglineDisplay.textContent = profileData.tagline || "Movie & TV Fan";
+    profileBioDisplay.textContent = profileData.bio || "Tell us about yourself...";
     profileModal.classList.add('open');
     trackEvent('profile_view', { user_id: user.uid });
   }
@@ -219,7 +219,7 @@ monitorAuthState(user => {
     loadRecommendations();
     initVoiceSearch();
     updateUserStats();
-    sidebarPhoto.src = user.photoURL || 'https://via.placeholder.com/80';
+    sidebarPhoto.src = user.photoURL || 'https://via.placeholder.com/60';
     sidebarNickname.textContent = user.displayName || "Anonymous";
     getDocuments(`users/${user.uid}/profile`).then(snap => {
       snap.forEach(doc => {
@@ -249,7 +249,7 @@ async function fetchTMDBResults(title, type) {
 function displayTMDBOptions(results) {
   tmdbPreview.innerHTML = "";
   if (!results.length) {
-    tmdbPreview.textContent = "No stars found in this nebula.";
+    tmdbPreview.textContent = "No results found.";
     return;
   }
   results.forEach(result => {
@@ -257,7 +257,7 @@ function displayTMDBOptions(results) {
     option.classList.add('tmdb-option');
     const name = result.title || result.name;
     const year = (result.release_date || result.first_air_date || '').substring(0, 4);
-    const posterPath = result.poster_path ? TMDB_IMG_BASE + result.poster_path : 'https://via.placeholder.com/70';
+    const posterPath = result.poster_path ? TMDB_IMG_BASE + result.poster_path : 'https://via.placeholder.com/50';
     option.innerHTML = `<img src="${posterPath}" alt="${name}"><p>${name} (${year})</p>`;
     option.onclick = async () => {
       const data = {
@@ -480,8 +480,8 @@ saveProfileBtn.onclick = async (e) => {
   if (!user) return;
   const profileData = {
     nickname: profileNickname.value || user.displayName || "Anonymous",
-    tagline: profileTagline.value || "Cosmic Explorer",
-    bio: profileBio.value || "Exploring the universe, one star at a time..."
+    tagline: profileTagline.value || "Movie & TV Fan",
+    bio: profileBio.value || "Tell us about yourself..."
   };
   await setDocument(`users/${user.uid}/profile`, "profile", profileData);
   profileNicknameDisplay.textContent = profileData.nickname;
@@ -501,7 +501,7 @@ async function loadTrending() {
     data.results.slice(0, 8).forEach(item => {
       const card = document.createElement('div');
       card.classList.add('card');
-      const posterUrl = item.poster_path ? `${TMDB_IMG_BASE}${item.poster_path}` : 'https://via.placeholder.com/240';
+      const posterUrl = item.poster_path ? `${TMDB_IMG_BASE}${item.poster_path}` : 'https://via.placeholder.com/180';
       card.innerHTML = `
         <img src="${posterUrl}" alt="${item.title || item.name}">
         <div class="overlay">
@@ -516,7 +516,7 @@ async function loadTrending() {
     trackEvent('trending_loaded', { items: data.results.length });
   } catch (error) {
     console.error("Trending error:", error);
-    trendingContainer.innerHTML = '<p>Failed to scan the trending nebula.</p>';
+    trendingContainer.innerHTML = '<p>Failed to load trending items.</p>';
   }
 }
 
@@ -526,7 +526,7 @@ async function fetchTrendingDetails(id, mediaType) {
     const res = await fetch(url);
     if (!res.ok) throw new Error("Failed to fetch details");
     const data = await res.json();
-    detailPoster.src = data.poster_path ? `${TMDB_IMG_BASE}${data.poster_path}` : 'https://via.placeholder.com/300';
+    detailPoster.src = data.poster_path ? `${TMDB_IMG_BASE}${data.poster_path}` : 'https://via.placeholder.com/200';
     detailTitle.textContent = data.title || data.name;
     detailOverview.textContent = data.overview;
     detailRating.textContent = `TMDB Rating: ${data.vote_average}/10`;
@@ -556,7 +556,7 @@ async function loadRecommendations() {
     data.results.slice(0, 6).forEach(item => {
       const card = document.createElement('div');
       card.classList.add('card');
-      const posterUrl = item.poster_path ? `${TMDB_IMG_BASE}${item.poster_path}` : 'https://via.placeholder.com/240';
+      const posterUrl = item.poster_path ? `${TMDB_IMG_BASE}${item.poster_path}` : 'https://via.placeholder.com/180';
       card.innerHTML = `
         <img src="${posterUrl}" alt="${item.title}">
         <div class="overlay">
@@ -571,7 +571,7 @@ async function loadRecommendations() {
     trackEvent('recommendations_loaded', { items: data.results.length });
   } catch (error) {
     console.error("Recommendations error:", error);
-    recommendationsContainer.innerHTML = '<p>Failed to explore cosmic recommendations.</p>';
+    recommendationsContainer.innerHTML = '<p>Failed to load recommendations.</p>';
   }
 }
 
@@ -650,12 +650,12 @@ shareBtn.onclick = async (e) => {
   const snapshot = await getDocuments(`users/${userId}/cards`);
   const favorites = [];
   snapshot.forEach(doc => favorites.push(doc.data().title));
-  const shareText = `Check out my cosmic favorites on UR FAV'S: ${favorites.slice(0, 3).join(', ')} and more! Visit ${window.location.origin}`;
+  const shareText = `My favorites on UR FAV'S: ${favorites.slice(0, 3).join(', ')} and more! Check it out at ${window.location.origin}`;
   if (navigator.share) {
     await navigator.share({ title: "UR FAV'S", text: shareText, url: window.location.origin });
     trackEvent('social_share', { platform: 'native' });
   } else {
-    alert(shareText); // Fallback
+    alert(shareText);
     trackEvent('social_share_fallback', {});
   }
 };
