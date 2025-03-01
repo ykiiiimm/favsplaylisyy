@@ -8,16 +8,17 @@ const TMDB_API_KEY = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500";
 
-// DOM References
 const openModalBtn = document.getElementById('openModalBtn');
 const modal = document.getElementById('modal');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const submitBtn = document.getElementById('submitBtn');
 const cardContainer = document.getElementById('card-container');
+const watchlistContainer = document.getElementById('watchlistContainer');
 const titleInput = document.getElementById('title');
 const contentTypeSelect = document.getElementById('content-type');
 const seasonInput = document.getElementById('season');
 const userRatingInput = document.getElementById('userRating');
+const watchLaterCheckbox = document.getElementById('watchLater');
 const fetchTmdbBtn = document.getElementById('fetchTmdbBtn');
 const tmdbPreview = document.getElementById('tmdbPreview');
 const clearPreviewBtn = document.getElementById('clearPreviewBtn');
@@ -44,6 +45,8 @@ const profileBio = document.getElementById('profileBio');
 const saveProfileBtn = document.getElementById('saveProfileBtn');
 const galaxyToggle = document.getElementById('galaxyToggle');
 const galaxyView = document.getElementById('galaxyView');
+const zoomIn = document.getElementById('zoomIn');
+const zoomOut = document.getElementById('zoomOut');
 const voiceSearchBtn = document.getElementById('voiceSearchBtn');
 const themeToggle = document.getElementById('themeToggle');
 const trendingContainer = document.getElementById('trendingContainer');
@@ -53,14 +56,17 @@ const closeLoginModal = document.getElementById('closeLoginModal');
 const googleLoginBtn = document.getElementById('googleLoginBtn');
 const sidebarPhoto = document.getElementById('sidebarPhoto');
 const sidebarNickname = document.getElementById('sidebarNickname');
+const totalFavorites = document.getElementById('totalFavorites');
+const avgRating = document.getElementById('avgRating');
 const homeBtn = document.getElementById('homeBtn');
 const exportBtn = document.getElementById('exportBtn');
+const shareBtn = document.getElementById('shareBtn');
 const categoryFilter = document.getElementById('categoryFilter');
 
 let selectedTMDBData = null;
-
-// Galaxy View (Optimized)
 let scene, camera, renderer, starField;
+
+// Galaxy View (Fixed and Enhanced)
 function initGalaxy() {
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(75, 250 / 250, 0.1, 1000);
@@ -68,23 +74,28 @@ function initGalaxy() {
   renderer.setSize(250, 250);
 
   const stars = [];
+  const loader = new THREE.TextureLoader();
   getDocuments(`users/${auth.currentUser.uid}/cards`).then(snapshot => {
     snapshot.forEach(doc => {
       const data = doc.data();
-      const geometry = new THREE.SphereGeometry(2.5, 32, 32);
-      const material = new THREE.MeshBasicMaterial({ 
-        map: new THREE.TextureLoader().load(data.posterUrl, undefined, undefined, (err) => console.error("Texture load error:", err)),
-        transparent: true
-      });
-      const star = new THREE.Mesh(geometry, material);
-      star.position.set(
-        (Math.random() - 0.5) * 150,
-        (Math.random() - 0.5) * 150,
-        (Math.random() - 0.5) * 150
-      );
-      star.userData = { id: doc.id, title: data.title, rating: data.userRating };
-      stars.push(star);
-      scene.add(star);
+      if (!data.watchLater) {
+        const geometry = new THREE.SphereGeometry(2.5, 32, 32);
+        const material = new THREE.MeshBasicMaterial({
+          map: loader.load(data.posterUrl, undefined, undefined, () => {
+            material.map = loader.load('https://via.placeholder.com/50'); // Fallback on error
+          }),
+          transparent: true
+        });
+        const star = new THREE.Mesh(geometry, material);
+        star.position.set(
+          (Math.random() - 0.5) * 150,
+          (Math.random() - 0.5) * 150,
+          (Math.random() - 0.5) * 150
+        );
+        star.userData = { id: doc.id, title: data.title, rating: data.userRating };
+        stars.push(star);
+        scene.add(star);
+      }
     });
 
     starField = new THREE.Group();
@@ -103,7 +114,7 @@ function initGalaxy() {
       if (intersects.length) {
         const star = intersects[0].object;
         star.scale.set(2.5, 2.5, 2.5);
-        galaxyView.title = `${star.userData.title} (Your Rating: ${star.userData.rating || 'N/A'})`;
+        galaxyView.title = `${star.userData.title} (Rating: ${star.userData.rating || 'N/A'})`;
       } else {
         galaxyView.title = "";
       }
@@ -114,6 +125,15 @@ function initGalaxy() {
       const intersects = raycaster.intersectObjects(stars);
       if (intersects.length) openDetailModalHandler(e, intersects[0].object.userData.id);
     });
+
+    zoomIn.onclick = () => {
+      camera.position.z = Math.max(50, camera.position.z - 20);
+      trackEvent('galaxy_zoom_in', { zoom: camera.position.z });
+    };
+    zoomOut.onclick = () => {
+      camera.position.z = Math.min(300, camera.position.z + 20);
+      trackEvent('galaxy_zoom_out', { zoom: camera.position.z });
+    };
   }).catch(err => console.error("Galaxy load error:", err));
 
   camera.position.z = 200;
@@ -149,7 +169,7 @@ function initVoiceSearch() {
 
 function searchCards(query) {
   const lowerQuery = query.toLowerCase();
-  document.querySelectorAll('#card-container .card').forEach(card => {
+  document.querySelectorAll('#card-container .card, #watchlistContainer .card').forEach(card => {
     const title = card.querySelector('.title').textContent.toLowerCase();
     card.style.display = title.includes(lowerQuery) ? 'block' : 'none';
   });
@@ -176,13 +196,13 @@ contentTypeSelect.onchange = () => {
 profileBtn.onclick = async () => {
   const user = auth.currentUser;
   if (user) {
-    profilePhoto.src = user.photoURL || 'https://via.placeholder.com/120';
+    profilePhoto.src = user.photoURL || 'https://via.placeholder.com/150';
     const profileSnap = await getDocuments(`users/${user.uid}/profile`);
     let profileData = {};
     profileSnap.forEach(doc => profileData = doc.data());
     profileNicknameDisplay.textContent = profileData.nickname || user.displayName || "Anonymous";
-    profileTaglineDisplay.textContent = profileData.tagline || "Movie Enthusiast";
-    profileBioDisplay.textContent = profileData.bio || "Tell us about yourself...";
+    profileTaglineDisplay.textContent = profileData.tagline || "Cosmic Explorer";
+    profileBioDisplay.textContent = profileData.bio || "Exploring the universe, one star at a time...";
     profileModal.classList.add('open');
     trackEvent('profile_view', { user_id: user.uid });
   }
@@ -194,10 +214,12 @@ monitorAuthState(user => {
   if (user) {
     document.body.classList.add('logged-in');
     loadCards();
+    loadWatchlist();
     loadTrending();
     loadRecommendations();
     initVoiceSearch();
-    sidebarPhoto.src = user.photoURL || 'https://via.placeholder.com/60';
+    updateUserStats();
+    sidebarPhoto.src = user.photoURL || 'https://via.placeholder.com/80';
     sidebarNickname.textContent = user.displayName || "Anonymous";
     getDocuments(`users/${user.uid}/profile`).then(snap => {
       snap.forEach(doc => {
@@ -227,7 +249,7 @@ async function fetchTMDBResults(title, type) {
 function displayTMDBOptions(results) {
   tmdbPreview.innerHTML = "";
   if (!results.length) {
-    tmdbPreview.textContent = "No results found.";
+    tmdbPreview.textContent = "No stars found in this nebula.";
     return;
   }
   results.forEach(result => {
@@ -235,7 +257,7 @@ function displayTMDBOptions(results) {
     option.classList.add('tmdb-option');
     const name = result.title || result.name;
     const year = (result.release_date || result.first_air_date || '').substring(0, 4);
-    const posterPath = result.poster_path ? TMDB_IMG_BASE + result.poster_path : 'https://via.placeholder.com/60';
+    const posterPath = result.poster_path ? TMDB_IMG_BASE + result.poster_path : 'https://via.placeholder.com/70';
     option.innerHTML = `<img src="${posterPath}" alt="${name}"><p>${name} (${year})</p>`;
     option.onclick = async () => {
       const data = {
@@ -245,7 +267,8 @@ function displayTMDBOptions(results) {
         releaseDate: contentTypeSelect.value === 'movie' ? result.release_date : result.first_air_date,
         posterUrl: posterPath,
         type: contentTypeSelect.value,
-        userRating: userRatingInput.value || null
+        userRating: userRatingInput.value || null,
+        watchLater: watchLaterCheckbox.checked
       };
       if (contentTypeSelect.value === 'tv' && seasonInput.value) {
         const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${seasonInput.value}?api_key=${TMDB_API_KEY}`);
@@ -265,7 +288,7 @@ function displayTMDBOptions(results) {
 async function saveCard(cardData) {
   const userId = auth.currentUser.uid;
   await addDocument(`users/${userId}/cards`, cardData);
-  trackEvent('card_added', { title: cardData.title });
+  trackEvent(cardData.watchLater ? 'watchlist_added' : 'card_added', { title: cardData.title });
 }
 
 async function loadCards() {
@@ -274,13 +297,26 @@ async function loadCards() {
   cardContainer.innerHTML = "";
   snapshot.forEach(doc => {
     const data = doc.data();
-    if (categoryFilter.value === 'all' || data.type === categoryFilter.value) {
-      createCardElement(data, doc.id);
+    if (!data.watchLater && (categoryFilter.value === 'all' || data.type === categoryFilter.value)) {
+      createCardElement(data, doc.id, cardContainer);
+    }
+  });
+  updateUserStats();
+}
+
+async function loadWatchlist() {
+  const userId = auth.currentUser.uid;
+  const snapshot = await getDocuments(`users/${userId}/cards`);
+  watchlistContainer.innerHTML = "";
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    if (data.watchLater && (categoryFilter.value === 'all' || data.type === categoryFilter.value)) {
+      createCardElement(data, doc.id, watchlistContainer);
     }
   });
 }
 
-function createCardElement(cardData, docId) {
+function createCardElement(cardData, docId, container) {
   const card = document.createElement('div');
   card.classList.add('card');
   card.dataset.id = docId;
@@ -295,7 +331,7 @@ function createCardElement(cardData, docId) {
       </div>
     </div>
   `;
-  cardContainer.appendChild(card);
+  container.appendChild(card);
 }
 
 window.deleteCard = async (e, button) => {
@@ -305,6 +341,8 @@ window.deleteCard = async (e, button) => {
   const userId = auth.currentUser.uid;
   await deleteDocument(`users/${userId}/cards`, docId);
   card.remove();
+  loadCards();
+  loadWatchlist();
   trackEvent('card_deleted', { doc_id: docId });
 };
 
@@ -319,6 +357,7 @@ window.editCard = (e, button) => {
     const type = contentTypeSelect.value;
     const season = type === 'tv' ? seasonInput.value : null;
     const userRating = userRatingInput.value || null;
+    const watchLater = watchLaterCheckbox.checked;
     const results = await fetchTMDBResults(titleInput.value, type);
     if (results.length) {
       const result = results[0];
@@ -329,7 +368,8 @@ window.editCard = (e, button) => {
         releaseDate: type === 'movie' ? result.release_date : result.first_air_date,
         posterUrl: result.poster_path ? TMDB_IMG_BASE + result.poster_path : "",
         type: type,
-        userRating: userRating
+        userRating: userRating,
+        watchLater: watchLater
       };
       if (type === 'tv' && season) {
         const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${season}?api_key=${TMDB_API_KEY}`);
@@ -344,6 +384,7 @@ window.editCard = (e, button) => {
       card.querySelector('.title').textContent = data.title;
       modal.classList.remove('open');
       loadCards();
+      loadWatchlist();
       trackEvent('card_edited', { title: data.title });
     }
   };
@@ -373,10 +414,12 @@ submitBtn.onclick = async (e) => {
   }
   await saveCard(selectedTMDBData);
   await loadCards();
+  await loadWatchlist();
   modal.classList.remove('open');
   titleInput.value = '';
   seasonInput.value = '';
   userRatingInput.value = '';
+  watchLaterCheckbox.checked = false;
   tmdbPreview.innerHTML = "";
   selectedTMDBData = null;
 };
@@ -438,8 +481,8 @@ saveProfileBtn.onclick = async (e) => {
   if (!user) return;
   const profileData = {
     nickname: profileNickname.value || user.displayName || "Anonymous",
-    tagline: profileTagline.value || "Movie Enthusiast",
-    bio: profileBio.value || "Tell us about yourself..."
+    tagline: profileTagline.value || "Cosmic Explorer",
+    bio: profileBio.value || "Exploring the universe, one star at a time..."
   };
   await setDocument(`users/${user.uid}/profile`, "profile", profileData);
   profileNicknameDisplay.textContent = profileData.nickname;
@@ -459,7 +502,7 @@ async function loadTrending() {
     data.results.slice(0, 8).forEach(item => {
       const card = document.createElement('div');
       card.classList.add('card');
-      const posterUrl = item.poster_path ? `${TMDB_IMG_BASE}${item.poster_path}` : 'https://via.placeholder.com/220';
+      const posterUrl = item.poster_path ? `${TMDB_IMG_BASE}${item.poster_path}` : 'https://via.placeholder.com/240';
       card.innerHTML = `
         <img src="${posterUrl}" alt="${item.title || item.name}">
         <div class="overlay">
@@ -474,7 +517,7 @@ async function loadTrending() {
     trackEvent('trending_loaded', { items: data.results.length });
   } catch (error) {
     console.error("Trending error:", error);
-    trendingContainer.innerHTML = '<p>Failed to load trending items.</p>';
+    trendingContainer.innerHTML = '<p>Failed to scan the trending nebula.</p>';
   }
 }
 
@@ -484,7 +527,7 @@ async function fetchTrendingDetails(id, mediaType) {
     const res = await fetch(url);
     if (!res.ok) throw new Error("Failed to fetch details");
     const data = await res.json();
-    detailPoster.src = data.poster_path ? `${TMDB_IMG_BASE}${data.poster_path}` : 'https://via.placeholder.com/250';
+    detailPoster.src = data.poster_path ? `${TMDB_IMG_BASE}${data.poster_path}` : 'https://via.placeholder.com/300';
     detailTitle.textContent = data.title || data.name;
     detailOverview.textContent = data.overview;
     detailRating.textContent = `TMDB Rating: ${data.vote_average}/10`;
@@ -514,7 +557,7 @@ async function loadRecommendations() {
     data.results.slice(0, 6).forEach(item => {
       const card = document.createElement('div');
       card.classList.add('card');
-      const posterUrl = item.poster_path ? `${TMDB_IMG_BASE}${item.poster_path}` : 'https://via.placeholder.com/220';
+      const posterUrl = item.poster_path ? `${TMDB_IMG_BASE}${item.poster_path}` : 'https://via.placeholder.com/240';
       card.innerHTML = `
         <img src="${posterUrl}" alt="${item.title}">
         <div class="overlay">
@@ -529,8 +572,26 @@ async function loadRecommendations() {
     trackEvent('recommendations_loaded', { items: data.results.length });
   } catch (error) {
     console.error("Recommendations error:", error);
-    recommendationsContainer.innerHTML = '<p>Failed to load recommendations.</p>';
+    recommendationsContainer.innerHTML = '<p>Failed to explore cosmic recommendations.</p>';
   }
+}
+
+async function updateUserStats() {
+  const userId = auth.currentUser.uid;
+  const snapshot = await getDocuments(`users/${userId}/cards`);
+  let total = 0, ratedCount = 0, totalRating = 0;
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    if (!data.watchLater) {
+      total++;
+      if (data.userRating) {
+        ratedCount++;
+        totalRating += parseInt(data.userRating);
+      }
+    }
+  });
+  totalFavorites.textContent = total;
+  avgRating.textContent = ratedCount ? (totalRating / ratedCount).toFixed(1) : 'N/A';
 }
 
 galaxyToggle.onclick = (e) => {
@@ -562,6 +623,7 @@ logoutBtn.onclick = (e) => {
 homeBtn.onclick = (e) => {
   e.preventDefault();
   loadCards();
+  loadWatchlist();
   loadTrending();
   loadRecommendations();
 };
@@ -583,4 +645,23 @@ exportBtn.onclick = async (e) => {
   trackEvent('favorites_exported', { count: favorites.length });
 };
 
-categoryFilter.onchange = () => loadCards();
+shareBtn.onclick = async (e) => {
+  e.preventDefault();
+  const userId = auth.currentUser.uid;
+  const snapshot = await getDocuments(`users/${userId}/cards`);
+  const favorites = [];
+  snapshot.forEach(doc => favorites.push(doc.data().title));
+  const shareText = `Check out my cosmic favorites on UR FAV'S: ${favorites.slice(0, 3).join(', ')} and more! Visit ${window.location.origin}`;
+  if (navigator.share) {
+    await navigator.share({ title: "UR FAV'S", text: shareText, url: window.location.origin });
+    trackEvent('social_share', { platform: 'native' });
+  } else {
+    alert(shareText); // Fallback
+    trackEvent('social_share_fallback', {});
+  }
+};
+
+categoryFilter.onchange = () => {
+  loadCards();
+  loadWatchlist();
+};
