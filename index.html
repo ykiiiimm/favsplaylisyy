@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UR FAV'S - Your Movie & TV Hub</title>
-    <meta name="description" content="Discover, rate, and share your favorite movies and TV shows." />
-    <link rel="stylesheet" href="styles.css?v=11" />
+    <meta name="description" content="Discover, rate, and manage your favorite movies and TV shows." />
+    <link rel="stylesheet" href="styles.css?v=12" />
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 </head>
@@ -16,69 +16,73 @@
                 <div class="logo">UR FAV'S</div>
                 <div class="search-container">
                     <input type="text" id="searchInput" placeholder="Search movies, TV shows..." />
-                    <button id="voiceSearchBtn" class="search-btn"><i class="fas fa-search"></i></button>
+                    <button id="voiceSearchBtn" class="search-btn"><i class="fas fa-microphone"></i></button>
                 </div>
                 <ul class="nav-links">
                     <li><button id="homeBtn" class="nav-btn">Home</button></li>
+                    <li><button id="dashboardBtn" class="nav-btn">Dashboard</button></li>
                     <li><button id="profileBtn" class="nav-btn">Profile</button></li>
                     <li><button id="exportBtn" class="nav-btn">Export</button></li>
                     <li><button id="shareBtn" class="nav-btn"><i class="fas fa-share-alt"></i></button></li>
+                    <li><button id="randomPickBtn" class="nav-btn">Random Pick</button></li>
                     <li><button id="themeToggle" class="nav-btn"><i class="fas fa-moon"></i></button></li>
                     <li><button id="logoutBtn" class="nav-btn">Logout</button></li>
                 </ul>
             </nav>
         </header>
 
-        <div class="container">
-            <main>
-                <div class="action-bar">
-                    <button id="openModalBtn" class="btn btn-primary">Add Title</button>
-                </div>
+        <main>
+            <div class="action-bar">
+                <button id="openModalBtn" class="btn btn-primary">Add Title</button>
+                <select id="sortFavorites">
+                    <option value="title">Sort by Title</option>
+                    <option value="rating">Sort by Rating</option>
+                    <option value="date">Sort by Date Added</option>
+                </select>
+            </div>
 
-                <section class="trending-section">
-                    <h2>Trending Now</h2>
-                    <div class="card-grid" id="trendingContainer"></div>
-                </section>
+            <section class="trending-section">
+                <h2>Trending Now</h2>
+                <div class="card-grid" id="trendingContainer"></div>
+            </section>
 
-                <section class="favorites-section">
-                    <h2>Your Favorites</h2>
-                    <select id="categoryFilter">
-                        <option value="all">All</option>
-                        <option value="movie">Movies</option>
-                        <option value="tv">TV Shows</option>
-                    </select>
-                    <div class="card-grid" id="card-container"></div>
-                </section>
+            <section class="favorites-section">
+                <h2>Your Favorites</h2>
+                <select id="categoryFilter">
+                    <option value="all">All</option>
+                    <option value="movie">Movies</option>
+                    <option value="tv">TV Shows</option>
+                </select>
+                <div class="card-grid" id="card-container"></div>
+            </section>
 
-                <section class="watchlist-section">
-                    <h2>Watch Later</h2>
-                    <div class="card-grid" id="watchlistContainer"></div>
-                </section>
+            <section class="watchlist-section">
+                <h2>Watch Later</h2>
+                <select id="watchlistTagFilter">
+                    <option value="all">All</option>
+                    <option value="Action">Action</option>
+                    <option value="Drama">Drama</option>
+                    <option value="Comedy">Comedy</option>
+                    <option value="Sci-Fi">Sci-Fi</option>
+                </select>
+                <div class="card-grid" id="watchlistContainer"></div>
+            </section>
 
-                <section class="recommendations-section">
-                    <h2>Recommended for You</h2>
-                    <div class="card-grid" id="recommendationsContainer"></div>
-                </section>
-            </main>
+            <section class="recommendations-section">
+                <h2>Recommended for You</h2>
+                <div class="card-grid" id="recommendationsContainer"></div>
+            </section>
 
-            <aside class="sidebar">
-                <h3>Your Dashboard</h3>
-                <div id="userInfo">
-                    <img id="sidebarPhoto" src="" alt="Profile Photo" />
-                    <p id="sidebarNickname">Loading...</p>
-                    <div id="userStats">
-                        <p>Total Favorites: <span id="totalFavorites">0</span></p>
-                        <p>Avg Rating: <span id="avgRating">0</span></p>
-                    </div>
-                </div>
-                <button id="galaxyToggle" class="btn btn-primary">Galaxy View</button>
-                <div class="galaxy-view hidden" id="galaxyView">
-                    <canvas id="galaxyCanvas"></canvas>
-                    <button id="zoomIn" class="zoom-btn">+</button>
-                    <button id="zoomOut" class="zoom-btn">-</button>
-                </div>
-            </aside>
-        </div>
+            <section class="stats-section">
+                <h2>Your Ratings</h2>
+                <canvas id="ratingsHistogram" width="800" height="300"></canvas>
+            </section>
+
+            <section class="activity-section">
+                <h2>Recent Activity</h2>
+                <ul id="activityLog"></ul>
+            </section>
+        </main>
 
         <footer>
             <p>© 2025 UR FAV'S by ITSHAKIMOUUUUUUUUUUU | <a href="privacy-policy.html">Privacy Policy</a> | <a href="terms-of-service.html">Terms of Service</a> | <a href="https://discord.com/invite/6SfgHHJQUD">Discord</a> | <a href="https://www.instagram.com/itshakimouuuuu">Instagram</a></p>
@@ -108,6 +112,13 @@
             <input type="number" id="season" placeholder="Season (if TV Show)" min="1" style="display: none;" />
             <input type="number" id="userRating" min="1" max="10" placeholder="Your Rating (1-10)" />
             <label><input type="checkbox" id="watchLater"> Add to Watch Later</label>
+            <select id="watchlistTag" style="display: none;">
+                <option value="">Select Tag (Optional)</option>
+                <option value="Action">Action</option>
+                <option value="Drama">Drama</option>
+                <option value="Comedy">Comedy</option>
+                <option value="Sci-Fi">Sci-Fi</option>
+            </select>
             <button id="fetchTmdbBtn" class="btn btn-secondary">Fetch from TMDB</button>
             <div id="tmdbPreview" class="tmdb-preview"></div>
             <button id="clearPreviewBtn" class="btn btn-secondary">Clear</button>
@@ -126,6 +137,9 @@
                 <p id="detailRating"></p>
                 <p id="detailUserRating"></p>
                 <p id="detailRelease"></p>
+                <p id="detailCast"></p>
+                <p id="detailGenres"></p>
+                <p id="detailRuntime"></p>
             </div>
         </div>
     </div>
@@ -150,7 +164,30 @@
         </div>
     </div>
 
+    <!-- Dashboard Modal -->
+    <div class="modal hidden" id="dashboardModal">
+        <div class="modal-content dashboard-modal">
+            <span class="close-btn" id="closeDashboardModal">×</span>
+            <h2>Your Dashboard</h2>
+            <div id="dashboardInfo">
+                <img id="dashboardPhoto" src="" alt="Profile Photo" />
+                <p id="dashboardNickname">Loading...</p>
+                <div id="dashboardStats">
+                    <p>Total Favorites: <span id="dashboardTotalFavorites">0</span></p>
+                    <p>Avg Rating: <span id="dashboardAvgRating">0</span></p>
+                </div>
+            </div>
+            <button id="galaxyToggle" class="btn btn-primary">Galaxy View</button>
+            <div class="galaxy-view hidden" id="galaxyView">
+                <canvas id="galaxyCanvas"></canvas>
+                <button id="zoomIn" class="zoom-btn">+</button>
+                <button id="zoomOut" class="zoom-btn">-</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="firebase.js"></script>
     <script type="module" src="app.js"></script>
 </body>
