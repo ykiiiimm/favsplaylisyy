@@ -81,3 +81,25 @@ function getFileURL(path) {
 function trackEvent(eventName, params) {
     analytics.logEvent(eventName, params);
 }
+
+// Export functions (for reference, not used directly in GitHub Pages due to CDN)
+window.firebaseUtils = {
+    loginWithGoogle,
+    logout,
+    monitorAuthState,
+    updateUserProfile,
+    addDocument,
+    getDocuments,
+    getWatchlistDocuments,
+    deleteDocument,
+    updateDocument,
+    setDocument,
+    uploadFile,
+    deleteFile,
+    getFileURL,
+    trackEvent,
+    auth,
+    db,
+    storage,
+    analytics
+};
