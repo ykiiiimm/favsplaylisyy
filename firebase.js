@@ -9,8 +9,11 @@ const firebaseConfig = {
     measurementId: "G-KNVLQ0TMB0"
 };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+// Initialize Firebase only if not already initialized
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
 const auth = firebase.auth();
 const db = firebase.firestore();
 const storage = firebase.storage();
@@ -68,11 +71,6 @@ function uploadFile(file, path) {
     return storageRef.put(file).then(() => storageRef.getDownloadURL());
 }
 
-function deleteFile(path) {
-    const storageRef = storage.ref(path);
-    return storageRef.delete();
-}
-
 function getFileURL(path) {
     return storage.ref(path).getDownloadURL();
 }
@@ -82,7 +80,7 @@ function trackEvent(eventName, params) {
     analytics.logEvent(eventName, params);
 }
 
-// Export functions (for reference, not used directly in GitHub Pages due to CDN)
+// Export functions globally
 window.firebaseUtils = {
     loginWithGoogle,
     logout,
@@ -95,7 +93,6 @@ window.firebaseUtils = {
     updateDocument,
     setDocument,
     uploadFile,
-    deleteFile,
     getFileURL,
     trackEvent,
     auth,
