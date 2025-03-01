@@ -1,9 +1,24 @@
-import { auth, db, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc, signOut, signInWithPopup, GoogleAuthProvider } from './firebase.js';
+import { 
+  auth, 
+  db, 
+  storage, 
+  loginWithGoogle, 
+  logout, 
+  monitorAuthState, 
+  updateUserProfile, 
+  addDocument, 
+  getDocuments, 
+  deleteDocument, 
+  updateDocument, 
+  setDocument, 
+  uploadFile, 
+  getFileURL, 
+  trackEvent 
+} from './firebase.js';
 
 const TMDB_API_KEY = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500";
-const provider = new GoogleAuthProvider();
 
 // DOM References
 const openModalBtn = document.getElementById('openModalBtn');
@@ -47,38 +62,78 @@ const closeLoginModal = document.getElementById('closeLoginModal');
 const googleLoginBtn = document.getElementById('googleLoginBtn');
 const sidebarPhoto = document.getElementById('sidebarPhoto');
 const sidebarNickname = document.getElementById('sidebarNickname');
+const homeBtn = document.getElementById('homeBtn');
 
 let selectedTMDBData = null;
 
-// Galaxy View (3D)
-let scene, camera, renderer, stars;
+// Galaxy View (Enhanced)
+let scene, camera, renderer, starField;
 function initGalaxy() {
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxyCanvas') });
-  renderer.setSize(250, 250); // Smaller for sidebar
-  const geometry = new THREE.BufferGeometry();
-  const vertices = [];
-  getDocs(collection(db, "users", auth.currentUser.uid, "cards")).then(snapshot => {
+  camera = new THREE.PerspectiveCamera(75, 250 / 250, 0.1, 1000);
+  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxyCanvas'), alpha: true });
+  renderer.setSize(250, 250);
+
+  const stars = [];
+  getDocuments(`users/${auth.currentUser.uid}/cards`).then(snapshot => {
     snapshot.forEach(doc => {
-      const x = (Math.random() - 0.5) * 500;
-      const y = (Math.random() - 0.5) * 500;
-      const z = (Math.random() - 0.5) * 500;
-      vertices.push(x, y, z);
+      const data = doc.data();
+      const geometry = new THREE.SphereGeometry(2, 32, 32);
+      const material = new THREE.MeshBasicMaterial({ 
+        map: new THREE.TextureLoader().load(data.posterUrl),
+        transparent: true
+      });
+      const star = new THREE.Mesh(geometry, material);
+      star.position.set(
+        (Math.random() - 0.5) * 200,
+        (Math.random() - 0.5) * 200,
+        (Math.random() - 0.5) * 200
+      );
+      star.userData = { id: doc.id, title: data.title };
+      stars.push(star);
+      scene.add(star);
     });
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-    const material = new THREE.PointsMaterial({ color: 0xf5c518, size: 3 });
-    stars = new THREE.Points(geometry, material);
-    scene.add(stars);
+
+    starField = new THREE.Group();
+    stars.forEach(star => starField.add(star));
+    scene.add(starField);
+
+    // Add interactivity
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    galaxyView.addEventListener('mousemove', (e) => {
+      const rect = galaxyCanvas.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / 250) * 2 - 1;
+      mouse.y = -((e.clientY - rect.top) / 250) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(stars);
+      if (intersects.length) {
+        const star = intersects[0].object;
+        star.scale.set(3, 3, 3);
+        galaxyView.title = star.userData.title; // Tooltip
+      } else {
+        stars.forEach(s => s.scale.set(1, 1, 1));
+        galaxyView.title = "";
+      }
+    });
+
+    galaxyView.addEventListener('click', (e) => {
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(stars);
+      if (intersects.length) openDetailModalHandler(e, intersects[0].object.userData.id);
+    });
   });
+
   camera.position.z = 300;
   animateGalaxy();
 }
 
 function animateGalaxy() {
   requestAnimationFrame(animateGalaxy);
-  stars.rotation.x += 0.002;
-  stars.rotation.y += 0.002;
+  if (starField) {
+    starField.rotation.x += 0.002;
+    starField.rotation.y += 0.002;
+  }
   renderer.render(scene, camera);
 }
 
@@ -92,6 +147,7 @@ function initVoiceSearch() {
       const transcript = event.results[0][0].transcript;
       searchInput.value = transcript;
       searchCards(transcript);
+      trackEvent('voice_search', { query: transcript });
     };
     voiceSearchBtn.addEventListener('click', () => recognition.start());
   } else {
@@ -109,10 +165,11 @@ function searchCards(query) {
 
 // Login Handling
 googleLoginBtn.addEventListener('click', () => {
-  signInWithPopup(auth, provider)
+  loginWithGoogle()
     .then(() => {
       loginModal.classList.remove('open');
       document.body.classList.add('logged-in');
+      trackEvent('login', { method: 'google' });
     })
     .catch(error => console.error("Login error:", error));
 });
@@ -128,19 +185,20 @@ profileBtn.addEventListener('click', async () => {
   const user = auth.currentUser;
   if (user) {
     profilePhoto.src = user.photoURL || 'https://via.placeholder.com/100';
-    const profileSnap = await getDocs(collection(db, "users", user.uid, "profile"));
+    const profileSnap = await getDocuments(`users/${user.uid}/profile`);
     let profileData = {};
     profileSnap.forEach(doc => profileData = doc.data());
     profileNicknameDisplay.textContent = profileData.nickname || user.displayName || "Anonymous";
     profileTaglineDisplay.textContent = profileData.tagline || "Your tagline";
     profileBioDisplay.textContent = profileData.bio || "Write a bio...";
     profileModal.classList.add('open');
+    trackEvent('profile_view', { user_id: user.uid });
   }
 });
 
 closeProfileModal.addEventListener('click', () => profileModal.classList.remove('open'));
 
-auth.onAuthStateChanged(user => {
+monitorAuthState(user => {
   if (user) {
     document.body.classList.add('logged-in');
     loadCards();
@@ -148,7 +206,7 @@ auth.onAuthStateChanged(user => {
     initVoiceSearch();
     sidebarPhoto.src = user.photoURL || 'https://via.placeholder.com/50';
     sidebarNickname.textContent = user.displayName || "Anonymous";
-    getDocs(collection(db, "users", user.uid, "profile")).then(snap => {
+    getDocuments(`users/${user.uid}/profile`).then(snap => {
       snap.forEach(doc => {
         const data = doc.data();
         sidebarNickname.textContent = data.nickname || user.displayName;
@@ -164,14 +222,9 @@ async function fetchTMDBResults(title, type) {
   const searchUrl = type === 'movie' 
     ? `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`
     : `${TMDB_BASE_URL}/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
-  try {
-    const res = await fetch(searchUrl);
-    const data = await res.json();
-    return data.results || [];
-  } catch (error) {
-    console.error("Error fetching TMDB:", error);
-    return [];
-  }
+  const res = await fetch(searchUrl);
+  const data = await res.json();
+  return data.results || [];
 }
 
 function displayTMDBOptions(results) {
@@ -196,18 +249,15 @@ function displayTMDBOptions(results) {
         posterUrl: posterPath
       };
       if (contentTypeSelect.value === 'tv' && seasonInput.value) {
-        try {
-          const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${seasonInput.value}?api_key=${TMDB_API_KEY}`);
-          const seasonData = await seasonRes.json();
-          if (seasonData.poster_path) data.posterUrl = TMDB_IMG_BASE + seasonData.poster_path;
-          data.overview = seasonData.overview || data.overview;
-          data.releaseDate = seasonData.air_date || data.releaseDate;
-        } catch (err) {
-          console.error("Error fetching season:", err);
-        }
+        const seasonRes = await fetch(`${TMDB_BASE_URL}/tv/${result.id}/season/${seasonInput.value}?api_key=${TMDB_API_KEY}`);
+        const seasonData = await seasonRes.json();
+        if (seasonData.poster_path) data.posterUrl = TMDB_IMG_BASE + seasonData.poster_path;
+        data.overview = seasonData.overview || data.overview;
+        data.releaseDate = seasonData.air_date || data.releaseDate;
       }
       selectedTMDBData = data;
       tmdbPreview.innerHTML = `<img src="${data.posterUrl}" alt="${data.title}"><h3>${data.title}</h3><p>${data.overview.substring(0, 100)}...</p>`;
+      trackEvent('tmdb_select', { title: data.title });
     });
     tmdbPreview.appendChild(option);
   });
@@ -215,12 +265,13 @@ function displayTMDBOptions(results) {
 
 async function saveCard(cardData) {
   const userId = auth.currentUser.uid;
-  await addDoc(collection(db, "users", userId, "cards"), cardData);
+  await addDocument(`users/${userId}/cards`, cardData);
+  trackEvent('card_added', { title: cardData.title });
 }
 
 async function loadCards() {
   const userId = auth.currentUser.uid;
-  const snapshot = await getDocs(collection(db, "users", userId, "cards"));
+  const snapshot = await getDocuments(`users/${userId}/cards`);
   cardContainer.innerHTML = "";
   snapshot.forEach(doc => createCardElement(doc.data(), doc.id));
 }
@@ -248,8 +299,9 @@ window.deleteCard = async (e, button) => {
   const card = button.closest('.card');
   const docId = card.dataset.id;
   const userId = auth.currentUser.uid;
-  await deleteDoc(doc(db, "users", userId, "cards", docId));
+  await deleteDocument(`users/${userId}/cards`, docId);
   card.remove();
+  trackEvent('card_deleted', { doc_id: docId });
 };
 
 window.editCard = (e, button) => {
@@ -280,10 +332,11 @@ window.editCard = (e, button) => {
         data.releaseDate = seasonData.air_date || data.releaseDate;
       }
       const userId = auth.currentUser.uid;
-      await updateDoc(doc(db, "users", userId, "cards", docId), data);
+      await updateDocument(`users/${userId}/cards`, docId, data);
       card.querySelector('img').src = data.posterUrl;
       card.querySelector('.title').textContent = data.title;
       modal.classList.remove('open');
+      trackEvent('card_edited', { title: data.title });
     }
   };
 };
@@ -333,7 +386,7 @@ closeModalBtn.addEventListener('click', (e) => {
 window.openDetailModalHandler = async (e, docId) => {
   e.preventDefault();
   const userId = auth.currentUser.uid;
-  const snapshot = await getDocs(collection(db, "users", userId, "cards"));
+  const snapshot = await getDocuments(`users/${userId}/cards`);
   let cardData;
   snapshot.forEach(doc => {
     if (doc.id === docId) cardData = doc.data();
@@ -345,6 +398,7 @@ window.openDetailModalHandler = async (e, docId) => {
     detailRating.textContent = `Rating: ${cardData.rating}/10`;
     detailRelease.textContent = `Released: ${cardData.releaseDate}`;
     detailModal.classList.add('open');
+    trackEvent('card_details_viewed', { title: cardData.title });
   }
 };
 
@@ -355,15 +409,16 @@ closeDetailModal.addEventListener('click', (e) => {
 
 searchInput.addEventListener('input', () => searchCards(searchInput.value));
 
-profilePicInput.addEventListener('change', () => {
+profilePicInput.addEventListener('change', async () => {
   const file = profilePicInput.files[0];
   if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      profilePhoto.src = e.target.result;
-      sidebarPhoto.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
+    const userId = auth.currentUser.uid;
+    const path = `users/${userId}/profile-pic`;
+    const url = await uploadFile(file, path);
+    profilePhoto.src = url;
+    sidebarPhoto.src = url;
+    await updateUserProfile(auth.currentUser, { photoURL: url });
+    trackEvent('profile_pic_updated', { user_id: userId });
   }
 });
 
@@ -376,29 +431,55 @@ saveProfileBtn.addEventListener('click', async (e) => {
     tagline: profileTagline.value || "Your tagline",
     bio: profileBio.value || "Write a bio..."
   };
-  await setDoc(doc(db, "users", user.uid, "profile", "profile"), profileData);
+  await setDocument(`users/${user.uid}/profile`, "profile", profileData);
   profileNicknameDisplay.textContent = profileData.nickname;
   profileTaglineDisplay.textContent = profileData.tagline;
   profileBioDisplay.textContent = profileData.bio;
   sidebarNickname.textContent = profileData.nickname;
   profileModal.classList.remove('open');
+  trackEvent('profile_updated', { user_id: user.uid });
 });
 
+// Fixed and Enhanced Trending
 async function loadTrending() {
-  const res = await fetch(`${TMDB_BASE_URL}/trending/all/week?api_key=${TMDB_API_KEY}`);
+  try {
+    const res = await fetch(`${TMDB_BASE_URL}/trending/all/day?api_key=${TMDB_API_KEY}`); // Changed to /day for fresher data
+    if (!res.ok) throw new Error("Failed to fetch trending data");
+    const data = await res.json();
+    trendingContainer.innerHTML = '';
+    data.results.slice(0, 8).forEach(item => { // Reduced to 8 for cleaner layout
+      const card = document.createElement('div');
+      card.classList.add('card');
+      const posterUrl = item.poster_path ? `${TMDB_IMG_BASE}${item.poster_path}` : 'https://via.placeholder.com/200';
+      card.innerHTML = `
+        <img src="${posterUrl}" alt="${item.title || item.name}">
+        <div class="overlay">
+          <div class="title">${item.title || item.name}</div>
+          <div class="action-buttons">
+            <button class="btn btn-info" onclick="fetchTrendingDetails('${item.id}', '${item.media_type}')">Info</button>
+          </div>
+        </div>
+      `;
+      trendingContainer.appendChild(card);
+    });
+    trackEvent('trending_loaded', { items: data.results.length });
+  } catch (error) {
+    console.error("Error loading trending:", error);
+    trendingContainer.innerHTML = '<p>Unable to load trending items.</p>';
+  }
+}
+
+async function fetchTrendingDetails(id, mediaType) {
+  const url = `${TMDB_BASE_URL}/${mediaType}/${id}?api_key=${TMDB_API_KEY}`;
+  const res = await fetch(url);
   const data = await res.json();
-  trendingContainer.innerHTML = '';
-  data.results.slice(0, 10).forEach(item => {
-    const card = document.createElement('div');
-    card.classList.add('card');
-    card.innerHTML = `
-      <img src="${TMDB_IMG_BASE}${item.poster_path}" alt="${item.title || item.name}">
-      <div class="overlay">
-        <div class="title">${item.title || item.name}</div>
-      </div>
-    `;
-    trendingContainer.appendChild(card);
-  });
+  detailPoster.src = data.poster_path ? `${TMDB_IMG_BASE}${data.poster_path}` : 'https://via.placeholder.com/200';
+  detailTitle.textContent = data.title || data.name;
+  detailOverview.textContent = data.overview;
+  detailRating.textContent = `Rating: ${data.vote_average}/10`;
+  detailRelease.textContent = `Released: ${data.release_date || data.first_air_date}`;
+  detailModal.classList.add('open');
+  trackEvent('trending_details_viewed', { title: data.title || data.name });
 }
 
 galaxyToggle.addEventListener('click', (e) => {
@@ -408,7 +489,7 @@ galaxyToggle.addEventListener('click', (e) => {
     return;
   }
   galaxyView.classList.toggle('hidden');
-  if (!galaxyView.classList.contains('hidden') && !stars) initGalaxy();
+  if (!galaxyView.classList.contains('hidden') && !starField) initGalaxy();
 });
 
 themeToggle.addEventListener('click', (e) => {
@@ -417,13 +498,15 @@ themeToggle.addEventListener('click', (e) => {
   themeToggle.innerHTML = document.documentElement.classList.contains('light-mode') 
     ? '<i class="fas fa-sun"></i>' 
     : '<i class="fas fa-moon"></i>';
+  trackEvent('theme_toggled', { mode: document.documentElement.classList.contains('light-mode') ? 'light' : 'dark' });
 });
 
 logoutBtn.addEventListener('click', (e) => {
   e.preventDefault();
-  signOut(auth).then(() => {
+  logout().then(() => {
     document.body.classList.remove('logged-in');
     loginModal.classList.add('open');
+    trackEvent('logout', { user_id: auth.currentUser?.uid });
   }).catch(error => console.error("Logout error:", error));
 });
 
