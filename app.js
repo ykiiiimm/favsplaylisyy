@@ -1,21 +1,3 @@
-// Firebase Configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
-    authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
-    projectId: "ykiiiiiiiiiiiiiiim",
-    storageBucket: "ykiiiiiiiiiiiiiiim.appspot.com",
-    messagingSenderId: "1042062383289",
-    appId: "1:1042062383289:web:a4f43aa710b06a0f38a368",
-    measurementId: "G-KNVLQ0TMB0"
-};
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
-const analytics = firebase.analytics();
-
 const TMDB_API_KEY = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500";
@@ -88,6 +70,14 @@ const categoryFilter = document.getElementById('categoryFilter');
 const watchlistTagFilter = document.getElementById('watchlistTagFilter');
 const sortFavorites = document.getElementById('sortFavorites');
 
+// Firebase Utilities from firebase.js (loaded via script tag)
+const { 
+    loginWithGoogle, logout, monitorAuthState, updateUserProfile,
+    addDocument, getDocuments, getWatchlistDocuments, deleteDocument, 
+    updateDocument, setDocument, uploadFile, getFileURL, trackEvent,
+    auth, db, storage, analytics 
+} = window.firebaseUtils;
+
 let selectedTMDBData = null;
 let scene, camera, renderer, starField;
 let histogramChart;
@@ -126,7 +116,7 @@ function initGalaxy() {
 
     const stars = [];
     const loader = new THREE.TextureLoader();
-    db.collection(`users/${auth.currentUser.uid}/cards`).get().then(snapshot => {
+    getDocuments(`users/${auth.currentUser.uid}/cards`).then(snapshot => {
       snapshot.forEach(doc => {
         const data = doc.data();
         if (!data.watchLater) {
@@ -179,11 +169,11 @@ function initGalaxy() {
 
       zoomIn.onclick = () => {
         camera.position.z = Math.max(50, camera.position.z - 20);
-        analytics.logEvent('galaxy_zoom_in', { zoom: camera.position.z });
+        trackEvent('galaxy_zoom_in', { zoom: camera.position.z });
       };
       zoomOut.onclick = () => {
         camera.position.z = Math.min(300, camera.position.z + 20);
-        analytics.logEvent('galaxy_zoom_out', { zoom: camera.position.z });
+        trackEvent('galaxy_zoom_out', { zoom: camera.position.z });
       };
     }).catch(err => console.error("Galaxy load error:", err));
 
@@ -226,7 +216,7 @@ function initVoiceSearch() {
     const transcript = event.results[0][0].transcript.trim();
     searchInput.value = transcript;
     searchCards(transcript);
-    analytics.logEvent('voice_search', { query: transcript });
+    trackEvent('voice_search', { query: transcript });
     voiceSearchBtn.classList.remove('active');
   };
 
@@ -261,12 +251,11 @@ function searchCards(query) {
 // Login Handling
 googleLoginBtn.onclick = () => {
   try {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
+    loginWithGoogle()
       .then(() => {
         loginModal.classList.remove('open');
         document.body.classList.add('logged-in');
-        analytics.logEvent('login', { method: 'google' });
+        trackEvent('login', { method: 'google' });
         console.log("Google login successful.");
       })
       .catch(error => console.error("Login error:", error));
@@ -295,14 +284,14 @@ profileBtn.onclick = () => {
     const user = auth.currentUser;
     if (user) {
       profilePhoto.src = user.photoURL || 'https://via.placeholder.com/100';
-      db.collection(`users/${user.uid}/profile`).get().then(snapshot => {
+      getDocuments(`users/${user.uid}/profile`).then(snapshot => {
         let profileData = {};
         snapshot.forEach(doc => profileData = doc.data());
         profileNicknameDisplay.textContent = profileData.nickname || user.displayName || "Anonymous";
         profileTaglineDisplay.textContent = profileData.tagline || "Movie & TV Fan";
         profileBioDisplay.textContent = profileData.bio || "Tell us about yourself...";
         profileModal.classList.add('open');
-        analytics.logEvent('profile_view', { user_id: user.uid });
+        trackEvent('profile_view', { user_id: user.uid });
         console.log("Profile modal opened.");
       }).catch(err => console.error("Profile fetch error:", err));
     }
@@ -321,13 +310,13 @@ dashboardBtn.onclick = () => {
     const user = auth.currentUser;
     if (user) {
       dashboardPhoto.src = user.photoURL || 'https://via.placeholder.com/100';
-      db.collection(`users/${user.uid}/profile`).get().then(snapshot => {
+      getDocuments(`users/${user.uid}/profile`).then(snapshot => {
         let profileData = {};
         snapshot.forEach(doc => profileData = doc.data());
         dashboardNickname.textContent = profileData.nickname || user.displayName || "Anonymous";
         updateDashboardStats();
         dashboardModal.classList.add('open');
-        analytics.logEvent('dashboard_view', { user_id: user.uid });
+        trackEvent('dashboard_view', { user_id: user.uid });
         console.log("Dashboard modal opened.");
       }).catch(err => console.error("Dashboard fetch error:", err));
     }
@@ -342,7 +331,7 @@ closeDashboardModal.onclick = () => {
   console.log("Dashboard modal closed.");
 };
 
-auth.onAuthStateChanged(user => {
+monitorAuthState(user => {
   if (user) {
     document.body.classList.add('logged-in');
     loadCards();
@@ -424,26 +413,28 @@ function displayTMDBOptions(results) {
       }
       selectedTMDBData = data;
       tmdbPreview.innerHTML = `<img src="${data.posterUrl}" alt="${data.title}"><h3>${data.title}</h3><p>${data.overview.substring(0, 100)}...</p>`;
-      analytics.logEvent('tmdb_select', { title: data.title });
+      trackEvent('tmdb_select', { title: data.title });
     };
     tmdbPreview.appendChild(option);
   });
 }
 
 async function saveCard(cardData) {
-  const userId = auth.currentUser.uid;
-  const docRef = await db.collection(`users/${userId}/cards`).add({
-    ...cardData,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  });
-  addToActivityLog(`Added "${cardData.title}" to ${cardData.watchLater ? 'Watch Later' : 'Favorites'}`);
-  analytics.logEvent(cardData.watchLater ? 'watchlist_added' : 'card_added', { title: cardData.title, doc_id: docRef.id });
+  try {
+    const userId = auth.currentUser.uid;
+    const docRef = await addDocument(`users/${userId}/cards`, cardData);
+    addToActivityLog(`Added "${cardData.title}" to ${cardData.watchLater ? 'Watch Later' : 'Favorites'}`);
+    trackEvent(cardData.watchLater ? 'watchlist_added' : 'card_added', { title: cardData.title, doc_id: docRef.id });
+    console.log("Card saved:", cardData.title);
+  } catch (error) {
+    console.error("Save card error:", error);
+  }
 }
 
 async function loadCards() {
   try {
     const userId = auth.currentUser.uid;
-    const snapshot = await db.collection(`users/${userId}/cards`).get();
+    const snapshot = await getDocuments(`users/${userId}/cards`);
     let cards = [];
     snapshot.forEach(doc => {
       const data = doc.data();
@@ -474,7 +465,7 @@ async function loadCards() {
 async function loadWatchlist() {
   try {
     const userId = auth.currentUser.uid;
-    const snapshot = await db.collection(`users/${userId}/cards`).where("watchLater", "==", true).get();
+    const snapshot = await getWatchlistDocuments(`users/${userId}/cards`);
     let watchlist = [];
     snapshot.forEach(doc => {
       const data = doc.data();
@@ -521,12 +512,12 @@ window.deleteCard = async (e, button) => {
     const docRef = db.collection(`users/${userId}/cards`).doc(docId);
     const doc = await docRef.get();
     const title = doc.data().title;
-    await docRef.delete();
+    await deleteDocument(`users/${userId}/cards`, docId);
     card.remove();
     addToActivityLog(`Deleted "${title}"`);
     loadCards();
     loadWatchlist();
-    analytics.logEvent('card_deleted', { doc_id: docId });
+    trackEvent('card_deleted', { doc_id: docId });
     console.log(`Deleted card: ${title}`);
   } catch (error) {
     console.error("Delete card error:", error);
@@ -574,14 +565,14 @@ window.editCard = (e, button) => {
           data.releaseDate = seasonData.air_date || data.releaseDate;
         }
         const userId = auth.currentUser.uid;
-        await db.collection(`users/${userId}/cards`).doc(docId).update(data);
+        await updateDocument(`users/${userId}/cards`, docId, data);
         card.querySelector('img').src = data.posterUrl;
         card.querySelector('.title').textContent = data.title;
         addToActivityLog(`Edited "${data.title}"`);
         modal.classList.remove('open');
         loadCards();
         loadWatchlist();
-        analytics.logEvent('card_edited', { title: data.title });
+        trackEvent('card_edited', { title: data.title });
         console.log(`Edited card: ${data.title}`);
       }
     };
@@ -663,7 +654,7 @@ window.openDetailModalHandler = async (e, docId) => {
   e.preventDefault();
   try {
     const userId = auth.currentUser.uid;
-    const snapshot = await db.collection(`users/${userId}/cards`).get();
+    const snapshot = await getDocuments(`users/${userId}/cards`);
     let cardData;
     snapshot.forEach(doc => {
       if (doc.id === docId) cardData = doc.data();
@@ -679,7 +670,7 @@ window.openDetailModalHandler = async (e, docId) => {
       detailGenres.textContent = `Genres: ${cardData.genres || 'N/A'}`;
       detailRuntime.textContent = `Runtime: ${cardData.runtime || 'N/A'} min`;
       detailModal.classList.add('open');
-      analytics.logEvent('card_details_viewed', { title: cardData.title });
+      trackEvent('card_details_viewed', { title: cardData.title });
       console.log(`Detail modal opened for: ${cardData.title}`);
     }
   } catch (error) {
@@ -700,14 +691,12 @@ profilePicInput.onchange = async () => {
     const file = profilePicInput.files[0];
     if (file) {
       const userId = auth.currentUser.uid;
-      const storageRef = storage.ref(`users/${userId}/profile-pic`);
-      await storageRef.put(file);
-      const url = await storageRef.getDownloadURL();
+      const url = await uploadFile(file, `users/${userId}/profile-pic`);
       profilePhoto.src = url;
       dashboardPhoto.src = url;
-      await auth.currentUser.updateProfile({ photoURL: url });
+      await updateUserProfile(auth.currentUser, { photoURL: url });
       addToActivityLog("Updated profile picture");
-      analytics.logEvent('profile_pic_updated', { user_id: userId });
+      trackEvent('profile_pic_updated', { user_id: userId });
       console.log("Profile picture updated.");
     }
   } catch (error) {
@@ -725,14 +714,14 @@ saveProfileBtn.onclick = async (e) => {
       tagline: profileTagline.value || "Movie & TV Fan",
       bio: profileBio.value || "Tell us about yourself..."
     };
-    await db.collection(`users/${user.uid}/profile`).doc('profile').set(profileData);
+    await setDocument(`users/${user.uid}/profile`, 'profile', profileData);
     profileNicknameDisplay.textContent = profileData.nickname;
     profileTaglineDisplay.textContent = profileData.tagline;
     profileBioDisplay.textContent = profileData.bio;
     dashboardNickname.textContent = profileData.nickname;
     addToActivityLog("Updated profile");
     profileModal.classList.remove('open');
-    analytics.logEvent('profile_updated', { user_id: user.uid });
+    trackEvent('profile_updated', { user_id: user.uid });
     console.log("Profile saved.");
   } catch (error) {
     console.error("Save profile button error:", error);
@@ -760,7 +749,7 @@ async function loadTrending() {
       `;
       trendingContainer.appendChild(card);
     });
-    analytics.logEvent('trending_loaded', { items: data.results.length });
+    trackEvent('trending_loaded', { items: data.results.length });
     console.log("Trending loaded successfully.");
   } catch (error) {
     console.error("Trending error:", error);
@@ -782,7 +771,7 @@ async function fetchTrendingDetails(id, mediaType) {
     detailGenres.textContent = `Genres: ${data.genres.map(g => g.name).join(', ') || 'N/A'}`;
     detailRuntime.textContent = `Runtime: ${data.runtime || (data.episode_run_time && data.episode_run_time[0]) || 'N/A'} min`;
     detailModal.classList.add('open');
-    analytics.logEvent('trending_details_viewed', { title: data.title || data.name });
+    trackEvent('trending_details_viewed', { title: data.title || data.name });
     console.log(`Trending details opened for: ${data.title || data.name}`);
   } catch (error) {
     console.error("Fetch trending details error:", error);
@@ -792,7 +781,7 @@ async function fetchTrendingDetails(id, mediaType) {
 async function loadRecommendations() {
   try {
     const userId = auth.currentUser.uid;
-    const snapshot = await db.collection(`users/${userId}/cards`).get();
+    const snapshot = await getDocuments(`users/${userId}/cards`);
     const genres = new Set();
     snapshot.forEach(doc => {
       const data = doc.data();
@@ -818,7 +807,7 @@ async function loadRecommendations() {
       `;
       recommendationsContainer.appendChild(card);
     });
-    analytics.logEvent('recommendations_loaded', { items: data.results.length });
+    trackEvent('recommendations_loaded', { items: data.results.length });
     console.log("Recommendations loaded successfully.");
   } catch (error) {
     console.error("Recommendations error:", error);
@@ -829,7 +818,7 @@ async function loadRecommendations() {
 async function updateDashboardStats() {
   try {
     const userId = auth.currentUser.uid;
-    const snapshot = await db.collection(`users/${userId}/cards`).get();
+    const snapshot = await getDocuments(`users/${userId}/cards`);
     let total = 0, ratedCount = 0, totalRating = 0;
     snapshot.forEach(doc => {
       const data = doc.data();
@@ -852,7 +841,7 @@ async function updateDashboardStats() {
 async function updateRatingsHistogram() {
   try {
     const userId = auth.currentUser.uid;
-    const snapshot = await db.collection(`users/${userId}/cards`).get();
+    const snapshot = await getDocuments(`users/${userId}/cards`);
     const ratings = Array(11).fill(0); // 0-10 scale
     snapshot.forEach(doc => {
       const data = doc.data();
@@ -889,10 +878,13 @@ async function updateRatingsHistogram() {
 async function updateActivityLog() {
   try {
     const userId = auth.currentUser.uid;
-    const snapshot = await db.collection(`users/${userId}/activity`).orderBy('timestamp', 'desc').limit(5).get();
+    const snapshot = await getDocuments(`users/${userId}/activity`).then(snap => {
+      let activities = [];
+      snap.forEach(doc => activities.push(doc.data()));
+      return activities.sort((a, b) => b.timestamp?.toMillis() - a.timestamp?.toMillis()).slice(0, 5);
+    });
     activityLog.innerHTML = '';
-    snapshot.forEach(doc => {
-      const activity = doc.data();
+    snapshot.forEach(activity => {
       const li = document.createElement('li');
       li.textContent = `${activity.action} - ${activity.timestamp ? new Date(activity.timestamp.toMillis()).toLocaleString() : 'N/A'}`;
       activityLog.appendChild(li);
@@ -906,10 +898,7 @@ async function updateActivityLog() {
 async function addToActivityLog(action) {
   try {
     const userId = auth.currentUser.uid;
-    await db.collection(`users/${userId}/activity`).add({
-      action,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    await addDocument(`users/${userId}/activity`, { action });
     updateActivityLog();
   } catch (error) {
     console.error("Add to activity log error:", error);
@@ -937,7 +926,7 @@ themeToggle.onclick = (e) => {
   try {
     document.documentElement.classList.toggle('light-mode');
     themeToggle.innerHTML = document.documentElement.classList.contains('light-mode') ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-    analytics.logEvent('theme_toggled', { mode: document.documentElement.classList.contains('light-mode') ? 'light' : 'dark' });
+    trackEvent('theme_toggled', { mode: document.documentElement.classList.contains('light-mode') ? 'light' : 'dark' });
     console.log("Theme toggled.");
   } catch (error) {
     console.error("Theme toggle error:", error);
@@ -947,10 +936,10 @@ themeToggle.onclick = (e) => {
 logoutBtn.onclick = (e) => {
   e.preventDefault();
   try {
-    auth.signOut().then(() => {
+    logout().then(() => {
       document.body.classList.remove('logged-in');
       loginModal.classList.add('open');
-      analytics.logEvent('logout', { user_id: auth.currentUser?.uid });
+      trackEvent('logout', { user_id: auth.currentUser?.uid });
       console.log("Logged out.");
     }).catch(error => console.error("Logout error:", error));
   } catch (error) {
@@ -975,7 +964,7 @@ exportBtn.onclick = async (e) => {
   e.preventDefault();
   try {
     const userId = auth.currentUser.uid;
-    const snapshot = await db.collection(`users/${userId}/cards`).get();
+    const snapshot = await getDocuments(`users/${userId}/cards`);
     const favorites = [];
     snapshot.forEach(doc => favorites.push(doc.data()));
     
@@ -1000,7 +989,7 @@ exportBtn.onclick = async (e) => {
     URL.revokeObjectURL(csvUrl);
 
     addToActivityLog("Exported favorites");
-    analytics.logEvent('favorites_exported', { count: favorites.length });
+    trackEvent('favorites_exported', { count: favorites.length });
     console.log("Favorites exported.");
   } catch (error) {
     console.error("Export button error:", error);
@@ -1011,16 +1000,16 @@ shareBtn.onclick = async (e) => {
   e.preventDefault();
   try {
     const userId = auth.currentUser.uid;
-    const snapshot = await db.collection(`users/${userId}/cards`).get();
+    const snapshot = await getDocuments(`users/${userId}/cards`);
     const favorites = [];
     snapshot.forEach(doc => favorites.push(doc.data().title));
     const shareText = `My favorites on UR FAV'S: ${favorites.slice(0, 3).join(', ')} and more! Check it out at ${window.location.origin}`;
     if (navigator.share) {
       await navigator.share({ title: "UR FAV'S", text: shareText, url: window.location.origin });
-      analytics.logEvent('social_share', { platform: 'native' });
+      trackEvent('social_share', { platform: 'native' });
     } else {
       alert(shareText);
-      analytics.logEvent('social_share_fallback', {});
+      trackEvent('social_share_fallback', {});
     }
     addToActivityLog("Shared favorites");
     console.log("Favorites shared.");
@@ -1033,13 +1022,13 @@ randomPickBtn.onclick = async (e) => {
   e.preventDefault();
   try {
     const userId = auth.currentUser.uid;
-    const snapshot = await db.collection(`users/${userId}/cards`).get();
+    const snapshot = await getDocuments(`users/${userId}/cards`);
     const items = [];
     snapshot.forEach(doc => items.push(doc.data()));
     if (items.length) {
       const randomItem = items[Math.floor(Math.random() * items.length)];
       alert(`Random Pick: "${randomItem.title}" (${randomItem.watchLater ? 'Watch Later' : 'Favorite'})`);
-      analytics.logEvent('random_pick', { title: randomItem.title });
+      trackEvent('random_pick', { title: randomItem.title });
       addToActivityLog(`Randomly picked "${randomItem.title}"`);
       console.log(`Random pick: ${randomItem.title}`);
     }
