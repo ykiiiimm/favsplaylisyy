@@ -1,20 +1,7 @@
-// Firebase Configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
-    authDomain: "ykiiiiiiiiiiiiiiim.firebaseapp.com",
-    projectId: "ykiiiiiiiiiiiiiiim",
-    storageBucket: "ykiiiiiiiiiiiiiiim.appspot.com",
-    messagingSenderId: "1042062383289",
-    appId: "1:1042062383289:web:a4f43aa710b06a0f38a368",
-    measurementId: "G-KNVLQ0TMB0"
-};
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
-const analytics = firebase.analytics();
+// Note: This uses Firebase from CDN in index.html, not firebase.js, for GitHub Pages compatibility
+const TMDB_API_KEY = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
+const TMDB_BASE_URL = "https://api.themoviedb.org/3";
+const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500";
 
 // DOM Elements
 const openModalBtn = document.getElementById('openModalBtn');
@@ -83,10 +70,6 @@ const randomPickBtn = document.getElementById('randomPickBtn');
 const categoryFilter = document.getElementById('categoryFilter');
 const watchlistTagFilter = document.getElementById('watchlistTagFilter');
 const sortFavorites = document.getElementById('sortFavorites');
-
-const TMDB_API_KEY = "0b1121a7a8eda7a6ecc7fdfa631ad27a";
-const TMDB_BASE_URL = "https://api.themoviedb.org/3";
-const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500";
 
 let selectedTMDBData = null;
 let scene, camera, renderer, starField;
