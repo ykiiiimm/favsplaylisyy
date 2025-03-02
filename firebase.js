@@ -1,8 +1,8 @@
-// Check if Firebase is loaded from CDN before proceeding
+// Check if Firebase is loaded
 if (typeof firebase === 'undefined') {
-    console.error("Firebase SDK failed to load. Check your internet connection or Firebase CDN.");
+    console.error("Firebase SDK not loaded. Please check your internet connection or CDN.");
     window.firebase = {};
-} else if (!firebase.apps.length) {
+} else {
     // Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyA9L53Yd_EsE4A-KyXifyq4EIuYEvKNZk8",
@@ -14,44 +14,69 @@ if (typeof firebase === 'undefined') {
         measurementId: "G-KNVLQ0TMB0"
     };
 
-    // Initialize Firebase
+    // Initialize Firebase with error handling
     try {
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+            console.log("Firebase initialized successfully");
+        }
     } catch (error) {
-        console.error("Firebase initialization failed:", error);
+        console.error("Firebase initialization error:", error);
     }
 }
 
+// Get Firebase services
 const auth = firebase.auth ? firebase.auth() : null;
 const db = firebase.firestore ? firebase.firestore() : null;
 const storage = firebase.storage ? firebase.storage() : null;
 const analytics = firebase.analytics ? firebase.analytics() : null;
 
-// Authentication Functions
-const loginWithGoogle = () => auth ? auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()) : Promise.reject(new Error("Auth not available"));
-const logout = () => auth ? auth.signOut() : Promise.reject(new Error("Auth not available"));
-const monitorAuthState = (callback) => auth ? auth.onAuthStateChanged(callback) : callback(null);
-const updateUserProfile = (user, profileData) => user && auth ? user.updateProfile(profileData) : Promise.reject(new Error("User or Auth not available"));
+// Authentication Functions with better error handling
+const loginWithGoogle = () => {
+    if (!auth) {
+        return Promise.reject(new Error("Firebase Auth not available"));
+    }
+    const provider = new firebase.auth.GoogleAuthProvider();
+    return auth.signInWithPopup(provider)
+        .catch(error => {
+            console.error("Google login error:", error);
+            throw error;
+        });
+};
 
-// Firestore Functions
-const addDocument = (collectionPath, data) => db ? db.collection(collectionPath).add({ ...data, timestamp: firebase.firestore.FieldValue.serverTimestamp() }) : Promise.reject(new Error("Firestore not available"));
-const getDocuments = (collectionPath) => db ? db.collection(collectionPath).get() : Promise.reject(new Error("Firestore not available"));
-const getWatchlistDocuments = (collectionPath) => db ? db.collection(collectionPath).where("watchLater", "==", true).get() : Promise.reject(new Error("Firestore not available"));
-const deleteDocument = (collectionPath, docId) => db ? db.collection(collectionPath).doc(docId).delete() : Promise.reject(new Error("Firestore not available"));
-const updateDocument = (collectionPath, docId, data) => db ? db.collection(collectionPath).doc(docId).update(data) : Promise.reject(new Error("Firestore not available"));
-const setDocument = (collectionPath, docId, data) => db ? db.collection(collectionPath).doc(docId).set(data) : Promise.reject(new Error("Firestore not available"));
+const logout = () => {
+    if (!auth) {
+        return Promise.reject(new Error("Firebase Auth not available"));
+    }
+    return auth.signOut()
+        .catch(error => {
+            console.error("Logout error:", error);
+            throw error;
+        });
+};
 
-// Storage Functions
-const uploadFile = (file, path) => storage ? storage.ref(path).put(file).then(() => storage.ref(path).getDownloadURL()) : Promise.reject(new Error("Storage not available"));
-const getFileURL = (path) => storage ? storage.ref(path).getDownloadURL() : Promise.reject(new Error("Storage not available"));
-
-// Analytics Function
-const trackEvent = (eventName, params) => analytics ? analytics.logEvent(eventName, params) : console.warn("Analytics not available:", eventName, params);
+const monitorAuthState = (callback) => {
+    if (!auth) {
+        console.error("Firebase Auth not available");
+        callback(null);
+        return;
+    }
+    return auth.onAuthStateChanged(
+        user => callback(user),
+        error => console.error("Auth state error:", error)
+    );
+};
 
 // Export functions
 window.firebaseUtils = {
-    loginWithGoogle, logout, monitorAuthState, updateUserProfile,
-    addDocument, getDocuments, getWatchlistDocuments, deleteDocument,
-    updateDocument, setDocument, uploadFile, getFileURL, trackEvent,
-    auth, db, storage, analytics
+    loginWithGoogle,
+    logout,
+    monitorAuthState,
+    auth,
+    db,
+    storage,
+    analytics,
+    // Keep other functions if needed, but simplified for login focus
+    addDocument: (path, data) => db ? db.collection(path).add({ ...data, timestamp: firebase.firestore.FieldValue.serverTimestamp() }) : Promise.reject(new Error("Firestore not available")),
+    getDocuments: (path) => db ? db.collection(path).get() : Promise.reject(new Error("Firestore not available"))
 };
