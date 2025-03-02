@@ -1,1 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UR FAV'S</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">UR FAV'S</div>
+            <ul class="nav-links">
+                <li><button id="logoutBtn" class="nav-btn">Logout</button></li>
+            </ul>
+        </nav>
+    </header>
 
+    <main>
+        <div class="action-bar">
+            <button id="openModalBtn" class="btn btn-primary">Add Title</button>
+        </div>
+
+        <section>
+            <h2>Trending Now</h2>
+            <div class="card-grid" id="trendingContainer"></div>
+        </section>
+
+        <section>
+            <h2>Your Favorites</h2>
+            <div class="card-grid" id="card-container"></div>
+        </section>
+
+        <section>
+            <h2>Watch Later</h2>
+            <div class="card-grid" id="watchlistContainer"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 UR FAV'S | <a href="privacy-policy.html">Privacy</a> | <a href="terms-of-service.html">Terms</a></p>
+    </footer>
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content login-modal">
+            <span class="close-btn" id="closeLoginModal">×</span>
+            <h2>UR FAV'S</h2>
+            <p>Sign in to continue</p>
+            <button id="googleLoginBtn" class="btn btn-login"><i class="fab fa-google"></i> Sign in with Google</button>
+        </div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModalBtn">×</span>
+            <h2>Add Title</h2>
+            <input type="text" id="title" placeholder="Title">
+            <select id="content-type">
+                <option value="movie">Movie</option>
+                <option value="tv">TV Show</option>
+            </select>
+            <input type="number" id="userRating" min="1" max="10" placeholder="Your Rating (1-10)">
+            <label><input type="checkbox" id="watchLater"> Add to Watch Later</label>
+            <button id="fetchTmdbBtn" class="btn btn-primary">Search TMDB</button>
+            <div id="tmdbPreview" class="tmdb-preview"></div>
+            <button id="submitBtn" class="btn btn-primary">Add</button>
+        </div>
+    </div>
+
+    <div class="modal" id="detailModal">
+        <div class="modal-content detail-modal">
+            <span class="close-btn" id="closeDetailModal">×</span>
+            <img id="detailPoster" src="" alt="Poster">
+            <div class="detail-info">
+                <h2 id="detailTitle"></h2>
+                <p id="detailOverview"></p>
+                <p id="detailRating"></p>
+                <p id="detailUserRating"></p>
+                <p id="detailRelease"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage.js"></script>
+    <script src="firebase.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
