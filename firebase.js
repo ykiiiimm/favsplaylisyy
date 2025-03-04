@@ -10,11 +10,13 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase with error handling
+let firebaseApp;
 try {
-    firebase.initializeApp(firebaseConfig);
+    firebaseApp = firebase.initializeApp(firebaseConfig);
     console.log("Firebase initialized successfully");
 } catch (error) {
     console.error("Failed to initialize Firebase:", error);
+    throw error;
 }
 
 // Firebase Services
@@ -23,75 +25,115 @@ const db = firebase.firestore();
 const storage = firebase.storage();
 
 // Authentication Functions
-function loginWithGoogle() {
+async function loginWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
-    return auth.signInWithPopup(provider)
-        .then(result => {
-            console.log("Logged in as:", result.user.displayName);
-            return result.user;
-        })
-        .catch(error => {
-            console.error("Login error:", error.message);
-            throw error;
-        });
+    try {
+        const result = await auth.signInWithPopup(provider);
+        console.log("Logged in as:", result.user.displayName);
+        return result.user;
+    } catch (error) {
+        console.error("Login error:", error.message);
+        throw error;
+    }
 }
 
-function logout() {
-    return auth.signOut()
-        .then(() => console.log("Logged out successfully"))
-        .catch(error => {
-            console.error("Logout error:", error.message);
-            throw error;
-        });
+async function logout() {
+    try {
+        await auth.signOut();
+        console.log("Logged out successfully");
+    } catch (error) {
+        console.error("Logout error:", error.message);
+        throw error;
+    }
 }
 
 function monitorAuthState(callback) {
-    auth.onAuthStateChanged(
+    return auth.onAuthStateChanged(
         user => callback(user),
         error => console.error("Auth state error:", error)
     );
 }
 
-function updateUserProfile(user, profileData) {
-    return user.updateProfile(profileData)
-        .catch(error => console.error("Profile update error:", error));
+async function updateUserProfile(user, profileData) {
+    try {
+        await user.updateProfile(profileData);
+    } catch (error) {
+        console.error("Profile update error:", error);
+        throw error;
+    }
 }
 
 // Firestore Functions
-function addDocument(collectionPath, data) {
-    return db.collection(collectionPath).add({
-        ...data,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
+async function addDocument(collectionPath, data) {
+    try {
+        return await db.collection(collectionPath).add({
+            ...data,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    } catch (error) {
+        console.error("Add document error:", error);
+        throw error;
+    }
 }
 
-function getDocuments(collectionPath) {
-    return db.collection(collectionPath).get();
+async function getDocuments(collectionPath) {
+    try {
+        return await db.collection(collectionPath).get();
+    } catch (error) {
+        console.error("Get documents error:", error);
+        throw error;
+    }
 }
 
-function getWatchlistDocuments(collectionPath) {
-    return db.collection(collectionPath).where("watchLater", "==", true).get();
+async function getWatchlistDocuments(collectionPath) {
+    try {
+        return await db.collection(collectionPath).where("watchLater", "==", true).get();
+    } catch (error) {
+        console.error("Get watchlist error:", error);
+        throw error;
+    }
 }
 
-function deleteDocument(collectionPath, docId) {
-    return db.collection(collectionPath).doc(docId).delete();
+async function deleteDocument(collectionPath, docId) {
+    try {
+        return await db.collection(collectionPath).doc(docId).delete();
+    } catch (error) {
+        console.error("Delete document error:", error);
+        throw error;
+    }
 }
 
-function updateDocument(collectionPath, docId, data) {
-    return db.collection(collectionPath).doc(docId).update(data);
+async function updateDocument(collectionPath, docId, data) {
+    try {
+        return await db.collection(collectionPath).doc(docId).update(data);
+    } catch (error) {
+        console.error("Update document error:", error);
+        throw error;
+    }
 }
 
-function setDocument(collectionPath, docId, data) {
-    return db.collection(collectionPath).doc(docId).set(data);
+async function setDocument(collectionPath, docId, data) {
+    try {
+        return await db.collection(collectionPath).doc(docId).set(data);
+    } catch (error) {
+        console.error("Set document error:", error);
+        throw error;
+    }
 }
 
 // Storage Functions
-function uploadFile(file, path) {
-    const storageRef = storage.ref(path);
-    return storageRef.put(file).then(() => storageRef.getDownloadURL());
+async function uploadFile(file, path) {
+    try {
+        const storageRef = storage.ref(path);
+        await storageRef.put(file);
+        return await storageRef.getDownloadURL();
+    } catch (error) {
+        console.error("Upload file error:", error);
+        throw error;
+    }
 }
 
-// Export functions globally
+// Export functions
 window.firebaseUtils = {
     loginWithGoogle,
     logout,
