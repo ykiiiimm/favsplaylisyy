@@ -8,12 +8,17 @@
     --font-family: 'Roboto', sans-serif;
 }
 
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: var(--font-family);
     background: var(--bg-color);
     color: var(--text-color);
-    margin: 0;
-    padding: 0;
+    line-height: 1.6;
 }
 
 header {
@@ -28,6 +33,8 @@ header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .logo {
@@ -47,10 +54,13 @@ header {
     border: none;
     color: var(--text-color);
     cursor: pointer;
+    padding: 5px 10px;
 }
 
 main {
     padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .action-bar {
@@ -66,6 +76,11 @@ main {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
 }
 
 .card-grid {
@@ -78,6 +93,12 @@ main {
     background: var(--card-bg);
     border-radius: 5px;
     overflow: hidden;
+    position: relative;
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: scale(1.05);
 }
 
 .card img {
@@ -93,6 +114,7 @@ main {
 
 .title {
     font-size: 1rem;
+    margin-bottom: 5px;
 }
 
 .action-buttons .btn {
@@ -103,6 +125,7 @@ main {
     border-radius: 3px;
     margin: 5px;
     cursor: pointer;
+    transition: background 0.3s;
 }
 
 .btn-info {
@@ -111,6 +134,14 @@ main {
 
 .btn-delete {
     background: #ff4444;
+}
+
+.btn-info:hover {
+    background: #e0b415;
+}
+
+.btn-delete:hover {
+    background: #e03e3e;
 }
 
 .modal {
@@ -132,12 +163,16 @@ main {
     border-radius: 5px;
     max-width: 400px;
     width: 90%;
+    position: relative;
 }
 
 .close-btn {
-    float: right;
+    position: absolute;
+    top: 10px;
+    right: 10px;
     font-size: 1.5rem;
     cursor: pointer;
+    color: var(--text-color);
 }
 
 .login-modal {
@@ -154,6 +189,7 @@ main {
     align-items: center;
     gap: 10px;
     margin: 20px auto;
+    cursor: pointer;
 }
 
 .modal-content input,
@@ -163,11 +199,13 @@ main {
     margin: 10px 0;
     border: none;
     border-radius: 5px;
+    background: #fff;
 }
 
 .tmdb-preview {
     max-height: 200px;
     overflow-y: auto;
+    margin: 10px 0;
 }
 
 .tmdb-option {
@@ -175,6 +213,13 @@ main {
     align-items: center;
     padding: 10px;
     cursor: pointer;
+    background: var(--btn-secondary);
+    margin: 5px 0;
+    border-radius: 3px;
+}
+
+.tmdb-option:hover {
+    background: #5a6a6a;
 }
 
 .tmdb-option img {
@@ -184,20 +229,25 @@ main {
 
 .detail-modal {
     max-width: 500px;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .detail-modal img {
     width: 150px;
+    margin-right: 20px;
 }
 
 .detail-info {
     padding: 10px;
+    flex: 1;
 }
 
 footer {
     text-align: center;
     padding: 20px;
     background: var(--card-bg);
+    margin-top: 20px;
 }
 
 footer a {
@@ -206,7 +256,30 @@ footer a {
     text-decoration: none;
 }
 
+footer a:hover {
+    text-decoration: underline;
+}
+
 h2 {
     color: var(--accent-color);
     margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .card-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+    
+    .detail-modal {
+        flex-direction: column;
+    }
+    
+    .detail-modal img {
+        margin: 0 auto 20px;
+    }
 }
